@@ -199,7 +199,7 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
   <h2>这个工具查不了什么</h2>
   <ul>
     <li><b>查不了对错。</b>它不懂你的业务，公式是否合理、指标是否有意义，一概不懂，也不装懂。</li>
-    <li><b>查不了跨章节的口径冲突。</b>同一个指标在第 2 章和第 5 章用了两套权重，目前检测不出来——这需要真正理解语义，是已知缺口。</li>
+    <li><b>口径冲突只查得到数值层面的。</b>同名参数不同值、符号复用、权重不配平、单位/粒度不一致，这四类查得到。用文字描述出来的定义分歧——比如两章对「活跃用户」的口径说法不同但没给数——查不到，这需要真正理解语义，仍是缺口。</li>
     <li><b>查不出「写得对但做不到」。</b>资源、排期、人力、授权，文档里不写，工具就看不见。</li>
     <li><b>AI 痕迹是概率不是证据。</b>写得工整的人也会被标上。它只说「这段值得多看一眼」，不说「这段是机器写的」。</li>
     <li><b>命中不等于有罪。</b>每一条都只是「这里需要一个活人回答」。回答得上来就划掉。</li>
@@ -611,6 +611,236 @@ function analyzeDoc(text){
       who:"需求提出方 + 最终要签收的人",
       fix:"在末尾加一节「怎么算做完了」：验收条件、谁来验、拿哪份数据验。这一节是在保护你自己——没有它，改到什么时候算完，全由对方心情决定。",
       ask:"这份文档做出来之后，用什么条件判定它是对的？谁来验、拿什么数据验、不通过怎么办？这个建议在开工前白纸黑字定下来。" });
+  }
+
+  // ============ R10 口径冲突 ============
+  function normName(x){
+    return String(x).replace(/\*\*/g, "").replace(/[（(][^）)]*[）)]/g, "")
+      .replace(/[\s·、,，:：「」"']/g, "").replace(/的$/, "").trim();
+  }
+  function numOf(x){
+    var str = String(x).replace(/[，,]/g, "");
+    var m = str.match(/-?\d+(?:\.\d+)?/);
+    if (!m) return null;
+    var n = parseFloat(m[0]);
+    if (/%|％/.test(str)) n = n / 100;
+    return n;
+  }
+  function multiVal(raw){
+    var r = String(raw);
+    if (/[–—~～至]/.test(r)) return true;
+    if ((r.match(/\//g) || []).length >= 2) return true;
+    if ((r.match(/\d+(?:\.\d+)?/g) || []).length >= 3) return true;
+    return false;
+  }
+
+  function isMeta(t){ return RE_PATCH.test(t) || /冲突|应为|重算|原稿|本版(统一|采用|修正)|附录\s*B/.test(t); }
+
+  var defs = {}, tups = {};
+  function pushDef(name, raw, ln){
+    name = normName(name);
+    if (name.length < 2 || name.length > 16) return;
+    if (/^[\d\-–—]/.test(name)) return;
+    if (isMeta(lines[ln - 1] || "")) return;
+    var clean = String(raw).replace(/\*\*/g, "").trim();
+    if (multiVal(raw)){
+      var ns = (clean.match(/\d+(?:\.\d+)?/g) || []);
+      if (ns.length < 2 || ns.length > 8) return;
+      (tups[name] = tups[name] || []).push({ key:ns.join("/"), raw:clean, line:ln });
+      return;
+    }
+    var n = numOf(raw);
+    if (n === null) return;
+    (defs[name] = defs[name] || []).push({ v:n, raw:clean, line:ln });
+  }
+
+  i = 0;
+  while (i < lines.length){
+    if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
+      var hd = cells(lines[i]), ni = -1, vi = -1;
+      for (var x = 0; x < hd.length; x++){
+        if (ni < 0 && /参数|指标|字段|名称|项目|维度/.test(hd[x])) ni = x;
+        if (vi < 0 && /默认值|取值|阈值|权重|系数|设定值|建议值|^值$/.test(hd[x])) vi = x;
+      }
+      var jj = i + 2;
+      while (jj < lines.length && isTableRow(lines[jj])){
+        if (ni >= 0 && vi >= 0){
+          var cr = cells(lines[jj]);
+          if (ni < cr.length && vi < cr.length) pushDef(cr[ni], cr[vi], jj + 1);
+        }
+        jj++;
+      }
+      i = jj; continue;
+    }
+    i++;
+  }
+  for (i = 0; i < lines.length; i++){
+    if (isTableRow(lines[i])) continue;
+    var mm, rp = /([一-龥][一-龥A-Za-z0-9]{1,13})\s*(?:取|设为|默认为|默认|定为|为|=|＝)\s*(\d+(?:\.\d+)?\s*%?)/g;
+    while ((mm = rp.exec(lines[i])) !== null) pushDef(mm[1], mm[2], i + 1);
+  }
+
+  var clash = [];
+  Object.keys(defs).forEach(function(nm){
+    var seen = {}, uniq = [];
+    defs[nm].forEach(function(d){
+      var key = d.v.toFixed(6);
+      if (!seen[key]){ seen[key] = 1; uniq.push(d); }
+    });
+    if (uniq.length >= 2) clash.push({ name:nm, items:uniq });
+  });
+  Object.keys(tups).forEach(function(nm){
+    var seen = {}, uniq = [];
+    tups[nm].forEach(function(d){ if (!seen[d.key]){ seen[d.key] = 1; uniq.push(d); } });
+    if (uniq.length >= 2) clash.push({ name:nm, items:uniq });
+  });
+  if (clash.length){
+    add({ rule:"口径冲突", sev:"hi", line:clash[0].items[0].line,
+      title:"有 " + clash.length + " 个同名参数，在不同地方给了不一样的值",
+      ex: clash.slice(0, 6).map(function(c){
+        return c.name + "：" + c.items.map(function(d){ return d.raw + "（L" + d.line + "）"; }).join("　vs　");
+      }).join("\n"),
+      why:"同一个名字对应两个数，说明这两处是分别生成的、互相不知道对方存在。一次性生成的长文档必然有这种裂缝，手写的人反而不容易犯——因为写第二遍时会想起第一遍。",
+      impact:"实现的人按哪个值写都可能是错的，而且错了很难发现：两段代码各自都「按文档做了」，对不上账要到联调或者出数阶段才炸。到那时已经分不清是谁理解错了。",
+      who:"文档作者 + 要用这些值出数的人（当面对一遍，别在文档里改来改去）",
+      ask:"这几个参数在文档里出现了两个不同的值（见行号），以哪个为准？定下来之后能不能只留一处定义，其他地方引用它，别各写各的。",
+      refs: clash.slice(0, 20).map(function(c){ return c.items[0].line; }) });
+  }
+
+  var SYM = ["α", "β", "γ", "δ", "ε", "ρ", "σ", "θ", "λ", "μ", "τ", "ω", "φ"];
+  function share2(x, y){
+    for (var q = 0; q + 2 <= x.length; q++){ if (y.indexOf(x.substr(q, 2)) >= 0) return true; }
+    return false;
+  }
+  var symDefs = {};
+  function bindSym(sy, desc, ln){
+    desc = normName(desc).replace(/[α-ωΑ-Ω]/g, "").replace(/[^一-龥A-Za-z]/g, "");
+    if (desc.length < 2 || desc.length > 16) return;
+    if (/^(示例值|初始示例值|初始值|默认值|经验值|参考值|配置值|固定值|该值|此值|上述值|同上|待定)$/.test(desc)) return;
+    (symDefs[sy] = symDefs[sy] || []).push({ desc:desc, line:ln });
+  }
+  i = 0;
+  while (i < lines.length){
+    if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
+      var hd2 = cells(lines[i]), n2 = -1, s2 = -1;
+      for (var y = 0; y < hd2.length; y++){
+        if (n2 < 0 && /参数|指标|名称|变量名|项目|维度/.test(hd2[y])) n2 = y;
+        if (s2 < 0 && /^符号$|记号|^变量$|数学符号/.test(hd2[y])) s2 = y;
+      }
+      var j2 = i + 2;
+      while (j2 < lines.length && isTableRow(lines[j2])){
+        if (!isMeta(lines[j2])){
+          var cr2 = cells(lines[j2]);
+          if (n2 >= 0 && s2 >= 0 && s2 < cr2.length && n2 < cr2.length){
+            (function(row, ln){ SYM.forEach(function(sy){ if (row[s2].indexOf(sy) >= 0) bindSym(sy, row[n2], ln); }); })(cr2, j2 + 1);
+          } else if (n2 >= 0 && n2 < cr2.length){
+            (function(row, ln){ SYM.forEach(function(sy){ if (row[n2].indexOf(sy) >= 0) bindSym(sy, row[n2], ln); }); })(cr2, j2 + 1);
+          }
+        }
+        j2++;
+      }
+      i = j2; continue;
+    }
+    i++;
+  }
+  for (i = 0; i < lines.length; i++){
+    if (isMeta(lines[i])) continue;
+    var ms, rs = /([αβγδερσθλμτωφ])\s*(?:为|表示|指|即|是)\s*([一-龥]{2,14})/g;
+    while ((ms = rs.exec(lines[i])) !== null) bindSym(ms[1], ms[2], i + 1);
+  }
+  var symClash = [];
+  SYM.forEach(function(sy){
+    var us = symDefs[sy] || [];
+    if (us.length < 2) return;
+    var groups = [];
+    us.forEach(function(u){
+      for (var g = 0; g < groups.length; g++){
+        var same = groups[g].some(function(x){
+          return x.desc.indexOf(u.desc) >= 0 || u.desc.indexOf(x.desc) >= 0 || share2(u.desc, x.desc);
+        });
+        if (same){ groups[g].push(u); return; }
+      }
+      groups.push([u]);
+    });
+    if (groups.length >= 2) symClash.push({ sym:sy, groups:groups });
+  });
+  if (symClash.length){
+    add({ rule:"口径冲突", sev:"md", line:symClash[0].groups[0][0].line,
+      title:"有 " + symClash.length + " 个符号在不同章节被定义成了不同的量",
+      ex: symClash.slice(0, 5).map(function(c){
+        return c.sym + "：" + c.groups.slice(0, 4).map(function(g){ return g[0].desc + "（L" + g[0].line + "）"; }).join("　vs　");
+      }).join("\n"),
+      why:"同一个符号在前后章节指不同的量。模型写每一章时都会挑看起来专业的希腊字母，不会去查前面用过没有。",
+      impact:"看文档的人会默认同一个符号是同一个量，于是把两章的公式串起来理解，得到一个根本不存在的关系。这种误解不会报错，只会算出一个看着合理的错数。",
+      who:"写公式的人（让他加下标，或者直接改成英文变量名）",
+      ask:"这几个符号在不同章节指的是不同的量，能不能加下标区分开（比如 β_斜率 / β_LDA）？现在串着看一定会理解错。",
+      refs: symClash.slice(0, 20).map(function(c){ return c.groups[0][0].line; }) });
+  }
+
+  var wsum = [];
+  for (i = 0; i < lines.length; i++){
+    if (!/权重|占比|配比/.test(lines[i])) continue;
+    if (isMeta(lines[i])) continue;
+    if (near(i, /相对权重|动态归一|归一化后|非归一|仅供参考/, 2)) continue;
+    var ps = lines[i].match(/\d+(?:\.\d+)?\s*%/g) || [];
+    if (ps.length >= 3){
+      var sp = ps.reduce(function(a, b){ return a + parseFloat(b); }, 0);
+      if (Math.abs(sp - 100) > 1) wsum.push({ line:i + 1, sum:sp, n:ps.length, kind:"%" });
+      continue;
+    }
+    var ds2 = (lines[i].match(/0\.\d+/g) || []);
+    if (ds2.length >= 3){
+      var sd = ds2.reduce(function(a, b){ return a + parseFloat(b); }, 0);
+      if (Math.abs(sd - 1) > 0.02) wsum.push({ line:i + 1, sum:sd, n:ds2.length, kind:"小数" });
+    }
+  }
+  if (wsum.length){
+    add({ rule:"口径冲突", sev:"hi", line:wsum[0].line,
+      title:"有 " + wsum.length + " 组权重加起来不等于 1（或 100%）",
+      ex: wsum.slice(0, 5).map(function(w){
+        return "L" + w.line + "  " + w.n + " 项" + w.kind + "权重，合计 " + (w.kind === "%" ? w.sum.toFixed(1) + "%" : w.sum.toFixed(4));
+      }).join("\n"),
+      why:"权重不配平是纯算术问题，不涉及业务判断。它之所以能留下来，说明这组数是凑出来显得专业的，没人真的加过一遍。",
+      impact:"按这组权重算出来的综合得分没有可比性，排序会失真。更麻烦的是它一定能跑出结果、不会报错，所以会一路带到报告里。",
+      who:"算法/数据同事（让他当场加一遍）",
+      ask:"这几组权重加起来不是 1，是漏了一项还是本来就不打算归一化？如果是后者，建议在文档里写明白，不然下游会默认归一。",
+      refs: wsum.slice(0, 20).map(function(w){ return w.line; }) });
+  }
+
+  var UNIT = [
+    { k:"时间粒度", re:/(日|周|月|季度|年)(度|均|环比|同比)?(?=[增长率|数据|口径|窗口|统计])/g, vals:["日", "周", "月", "季度", "年"] },
+    { k:"币种", re:/(人民币|美元|USD|CNY|元)/g, vals:["人民币", "美元", "USD", "CNY"] }
+  ];
+  var unitClash = [];
+  Object.keys(defs).forEach(function(nm){
+    if (nm.length < 3) return;
+    UNIT.forEach(function(U){
+      var found = {}, at = {};
+      for (var q = 0; q < lines.length; q++){
+        if (lines[q].indexOf(nm) < 0) continue;
+        if (isMeta(lines[q])) continue;
+        U.vals.forEach(function(v){
+          if (lines[q].indexOf(v) >= 0 && !found[v]){ found[v] = 1; at[v] = q + 1; }
+        });
+      }
+      if (U.k === "币种" && found["USD"] && found["美元"]) delete found["USD"];
+      var ks = Object.keys(found);
+      var distinctLines = {};
+      ks.forEach(function(v){ distinctLines[at[v]] = 1; });
+      if (ks.length >= 2 && Object.keys(distinctLines).length >= 2) unitClash.push({ name:nm, kind:U.k, vals:ks, at:at });
+    });
+  });
+  if (unitClash.length){
+    add({ rule:"口径冲突", sev:"md", line:unitClash[0].at[unitClash[0].vals[0]],
+      title:"有 " + unitClash.length + " 个指标，在不同地方用了不同的" + unitClash[0].kind,
+      ex: unitClash.slice(0, 6).map(function(u){
+        return u.name + "（" + u.kind + "）：" + u.vals.map(function(v){ return v + "（L" + u.at[v] + "）"; }).join("　vs　");
+      }).join("\n"),
+      why:"同一个指标一处按月、一处按年，或者一处人民币、一处美元。单独看每一处都对，串起来就不是一个东西了。",
+      impact:"数值会差一个量级甚至更多，但依然是「合理的数字」，没有任何报错。等到有人把两章的数放在一张图上才会发现对不上。",
+      who:"出数的人（先把口径统一写死在一个地方）",
+      ask:"这几个指标在不同章节的" + unitClash[0].kind + "不一致，统一成哪个？建议在文档开头单独写一节口径定义，后面全部引用它。",
+      refs: unitClash.slice(0, 20).map(function(u){ return u.at[u.vals[0]]; }) });
   }
 
   // ============ AI 痕迹 ============
