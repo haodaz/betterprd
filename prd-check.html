@@ -1,0 +1,779 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>文档体检台</title>
+<style>
+:root{
+  --bg:#F7F6FC; --card:#FFFFFF; --ink:#191833; --muted:#6E6C8A; --line:rgba(25,24,51,.10); --soft:#EFEDF8;
+  --hi:#C0562F; --hi-tint:#FBEDE7; --hi-ink:#8A3A1C;
+  --md:#B9791C; --md-tint:#FBF3E4; --md-ink:#7A4F0E;
+  --lo:#6E6C8A; --lo-tint:#EFEDF8; --lo-ink:#4A4866;
+  --ai:#3B78FF;  --ai-tint:#E8F0FF; --ai-ink:#1E3F86;
+  --ok:#2E8B64; --ok-tint:#E4F3EC;
+  --shadow:0 10px 34px rgba(60,52,140,.08);
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+    --hi-tint:#3B1E14; --hi-ink:#F0A183; --md-tint:#3A2B12; --md-ink:#F0C070;
+    --lo-tint:#23223A; --lo-ink:#C9C7E0; --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+    --shadow:0 10px 34px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+  --hi-tint:#3B1E14; --hi-ink:#F0A183; --md-tint:#3A2B12; --md-ink:#F0C070;
+  --lo-tint:#23223A; --lo-ink:#C9C7E0; --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+  --shadow:0 10px 34px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+p,li,td,small,em,b,span{text-wrap:balance}
+h1,h2,h3{font-family:var(--sans);margin:0;text-wrap:balance;line-height:1.3}
+h1{font-size:clamp(22px,3vw,30px);font-weight:700}
+h2{font-size:18px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+p{margin:0}
+a{color:inherit}
+button{font-family:inherit;font-size:14px;cursor:pointer}
+.wrap{max-width:1520px;margin:0 auto;padding-inline:clamp(14px,3vw,32px)}
+
+.bar{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:baseline;gap:10px;font-weight:600}
+.brand .sub{font-size:12px;color:var(--muted);font-weight:400}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:7px 14px;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.ghost{box-shadow:none;background:transparent}
+
+.intake{padding-block:clamp(20px,4vw,40px)}
+.intake .lede{color:var(--muted);max-width:70ch;margin-top:10px;font-size:14.5px}
+.drop{margin-top:18px;background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.drop.over{border-color:var(--ai);background:var(--ai-tint)}
+textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:12.5px;line-height:1.6}
+.hint{font-size:12.5px;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-top:20px}
+.stat{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
+.stat.hi{border-top-color:var(--hi)} .stat.md{border-top-color:var(--md)} .stat.lo{border-top-color:var(--lo)} .stat.ai{border-top-color:var(--ai)}
+.stat b{display:block;font-size:26px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+.verdict{margin-top:14px;background:var(--card);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--hi)}
+.verdict.clean{border-left-color:var(--ok)}
+.verdict b{display:block;margin-bottom:4px}
+.verdict p{font-size:14px;color:var(--muted)}
+
+.split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;padding-bottom:50px;align-items:start}
+@media (max-width:1060px){.split{grid-template-columns:1fr}}
+.pane{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.pane-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pane-head h2{font-size:15px}
+.pane-head .meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.doc{max-height:74vh;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.65}
+.ln{display:grid;grid-template-columns:50px 6px 1fr;gap:8px;padding:0 14px;white-space:pre-wrap;word-break:break-word}
+.ln > i{color:var(--muted);font-style:normal;text-align:right;opacity:.5;user-select:none}
+.ln > u{text-decoration:none;border-radius:2px}
+.ln.ai > u{background:var(--ai)}
+.ln.flag{background:var(--lo-tint)}
+.ln.flag.hi{background:var(--hi-tint)}
+.ln.flag.md{background:var(--md-tint)}
+.ln.pulse{outline:2px solid var(--ai);outline-offset:-2px}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 11px;font-size:12.5px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cards{max-height:74vh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cc{border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--bg);border-left:4px solid var(--lo)}
+.cc.hi{border-left-color:var(--hi)} .cc.md{border-left-color:var(--md)} .cc.ai{border-left-color:var(--ai)}
+.cc .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--lo-tint);color:var(--lo-ink)}
+.cc.hi .tag{background:var(--hi-tint);color:var(--hi-ink)}
+.cc.md .tag{background:var(--md-tint);color:var(--md-ink)}
+.cc.ai .tag{background:var(--ai-tint);color:var(--ai-ink)}
+.cc .jump{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);background:none;border:none;padding:0;text-decoration:underline}
+.cc h3{font-size:14.5px;margin-bottom:5px}
+.cc .ex{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--soft);border-radius:8px;padding:7px 9px;margin:7px 0;white-space:pre-wrap;word-break:break-word;max-height:7.6em;overflow:auto}
+.cc .why{font-size:13px;color:var(--muted)}
+.blk{margin-top:9px;font-size:13.5px;border-radius:10px;padding:9px 11px;background:var(--soft)}
+.blk b{display:block;font-size:11px;letter-spacing:.06em;color:var(--muted);font-weight:500;margin-bottom:3px}
+.blk.impact{background:var(--hi-tint);color:var(--hi-ink)}
+.cc.md .blk.impact{background:var(--md-tint);color:var(--md-ink)}
+.cc.ai .blk.impact,.cc.lo .blk.impact{background:var(--soft);color:var(--ink)}
+.cc .copy{margin-top:8px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 10px;font-size:12px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px}
+
+.explain{border-top:1px solid var(--line);padding-block:30px}
+.explain .box{background:var(--ai-tint);border-radius:16px;padding:18px 20px;max-width:none}
+.explain h2{margin-bottom:8px}
+.explain p{font-size:14px;color:var(--ai-ink);max-width:76ch}
+.explain p+p{margin-top:8px}
+.limits{border-top:1px solid var(--line);padding-block:28px 60px}
+.limits h2{margin-bottom:10px}
+.limits ul{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+.limits li{margin-bottom:5px}
+.limits .note{margin-top:14px;font-size:13px;color:var(--muted);max-width:74ch}
+.hidden{display:none !important}
+</style></head><body>
+
+<div class="bar"><div class="wrap">
+  <div class="brand"><span>文档体检台</span><span class="sub">问题点 · 业务影响 · 该找谁确认</span></div>
+  <div class="acts">
+    <button class="btn ghost" id="btn-sample">载入示例</button>
+    <button class="btn ghost" id="btn-reset">重来</button>
+    <button class="btn primary" id="btn-run">体检</button>
+  </div>
+</div></div>
+
+<div class="wrap intake" id="intake">
+  <h1>这份文档，能不能照着干？</h1>
+  <p class="lede">市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。</p>
+  <div class="drop" id="drop">
+    <textarea id="input" placeholder="粘贴 Markdown / 纯文本全文，或把 .md / .txt 文件拖进来"></textarea>
+    <div class="row">
+      <input type="file" id="file" accept=".md,.txt,.markdown,text/*" class="hidden">
+      <button class="btn" id="btn-file">选择文件</button>
+      <span class="hint" id="filehint"></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap hidden" id="report">
+  <div class="summary" id="summary"></div>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<div class="wrap split hidden" id="panes">
+  <section class="pane">
+    <div class="pane-head"><h2>原文</h2><span class="meta" id="docmeta"></span></div>
+    <div class="doc" id="doc"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head">
+      <h2>卡片</h2>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="pane-head" style="border-top:1px solid var(--line);border-bottom:none">
+      <button class="btn" id="btn-copyall">复制成一条可以直接发群的消息</button>
+      <button class="btn" id="btn-dl-md">下载报告 .md</button>
+      <button class="btn ghost" id="btn-dl-json">下载结果 .json</button>
+      <span class="meta" id="copystate"></span>
+    </div>
+  </section>
+</div>
+
+<div class="wrap explain"><div class="box">
+  <h2>为什么要把「疑似 AI 生成」标出来</h2>
+  <p>不是为了抓人。现在没有谁的文档是全手写的，也不该要求谁全手写。标出来是为了两件事。</p>
+  <p><b>一、给读的人一个提醒。</b>知道哪几段是一次性生成的，看的时候就会多留个心眼，不会把排版的完整当成内容的可靠。</p>
+  <p><b>二、给写的人一个台阶。</b>「这段是我的 AI 自己加的，删掉就行」比「我写错了」容易说出口一百倍。指出问题如果等于指控对方能力有问题，对方只能硬撑，事情就谈不下去了。把锅留给模型，人才有退路，沟通才能发生。</p>
+  <p>所以这一档单独算，<b>不计入「必须回答的问题」</b>。它不是罪状，是一张备注。</p>
+</div></div>
+
+<div class="wrap limits">
+  <h2>这个工具查不了什么</h2>
+  <ul>
+    <li><b>查不了对错。</b>它不懂你的业务，公式是否合理、指标是否有意义，一概不懂，也不装懂。</li>
+    <li><b>查不了跨章节的口径冲突。</b>同一个指标在第 2 章和第 5 章用了两套权重，目前检测不出来——这需要真正理解语义，是已知缺口。</li>
+    <li><b>查不出「写得对但做不到」。</b>资源、排期、人力、授权，文档里不写，工具就看不见。</li>
+    <li><b>AI 痕迹是概率不是证据。</b>写得工整的人也会被标上。它只说「这段值得多看一眼」，不说「这段是机器写的」。</li>
+    <li><b>命中不等于有罪。</b>每一条都只是「这里需要一个活人回答」。回答得上来就划掉。</li>
+    <li><b>它自己是规则堆出来的。</b>全部是确定性正则，没有模型参与，所以不会幻觉，但也绝不聪明。</li>
+  </ul>
+  <p class="note">写明边界是这个工具存在的理由本身。一份不肯说自己做不到什么的文档，正是它要查的东西。</p>
+</div>
+
+<script>
+/*RULES_START*/
+function analyzeDoc(text){
+  var lines = text.split(/\r?\n/);
+  var findings = [];
+  var seq = 0;
+  function add(o){ seq++; o.id = "f" + seq; findings.push(o); return o; }
+  function excerpt(s, n){ s = String(s).trim(); n = n || 150; return s.length > n ? s.slice(0, n) + "…" : s; }
+  function isTableRow(s){ return /^\s*\|/.test(s) && (s.match(/\|/g) || []).length >= 2; }
+  function cells(s){ return s.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(function(c){ return c.replace(/\*\*/g, "").trim(); }); }
+  function isSep(s){ return /^\s*\|[\s:\-|]+\|\s*$/.test(s); }
+  function near(i, r, span){ span = span || 3; var a = Math.max(0, i - span), b = Math.min(lines.length - 1, i + span); for (var k = a; k <= b; k++){ if (r.test(lines[k])) return true; } return false; }
+  function sampleLines(arr, n){ return arr.slice(0, n).map(function(x){ return "L" + (x + 1) + "  " + excerpt(lines[x], 88); }).join("\n"); }
+
+  var RE_PENDING = /待定|待确认|待校准|待补充|待评估|待梳理|暂定|另行(确定|约定)|后续(补充|确认|完善)|视情况|有待|TBD|TODO/;
+  var RE_PATCH   = /修正说明|原稿.{0,6}(修正|有误|错误)|原文.{0,12}应为|勘误|错字|笔误|与原文不一致|本版(修正|更正)/;
+  var RE_GAP     = /待定|不可得|数据缺失|暂无|未接入|空白|无法获取|尚未(打通|接入|采购|授权)/;
+  var RE_DOWN    = /公式|计算|指标|权重|得分|评分|阈值|图表|绘制|输出表|归一化|回归|聚类/;
+  var RE_SRC     = /来源|依据|参考|引自|根据.{0,8}(调研|报告|论文|实测|基线)|见附录|出处|实测|基线|经验值|业界(常用|通行)/;
+  var RE_NUMRULE = /(阈值|权重|系数|并发|上限|下限|占比|倍数|窗口|迭代次数|超参)/;
+  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调/;
+  var RE_ACTOR   = /(系统|平台|AI|模型|程序|引擎)\s*(将|会|可|需)?\s*(自动|智能|实时)?\s*(识别|分析|判断|生成|计算|提取|调用|清洗|打标|归类|推荐|预测)/;
+  var RE_COND    = /当|若|如果|一旦|触发|输入为|入参|前置条件|依赖于/;
+  var HOLLOW = ["赋能","抓手","闭环","打通","深度挖掘","智能分析","全面覆盖","有效提升","显著增强","一体化","全链路","精准画像","高效协同","数字化转型","重塑","助力","夯实","持续优化","先进的大模型","业界领先","降本增效","端到端"];
+  var CODE_STOP = {"json":1,"csv":1,"yaml":1,"yml":1,"pdf":1,"html":1,"xml":1,"utf-8":1,"api":1,"url":1,"id":1,"http":1,"https":1,"md":1,"txt":1,"sql":1,"png":1,"jpg":1,"plaintext":1,"bash":1,"shell":1,"python":1,"javascript":1,"n/a":1};
+
+  // ============ R1 表格自曝 ============
+  var i = 0;
+  while (i < lines.length){
+    if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
+      var head = cells(lines[i]);
+      var ci = -1;
+      for (var h = 0; h < head.length; h++){ if (/确认|待定|是否需|需业务|需确定/.test(head[h])) ci = h; }
+      var start = i, j = i + 2, rows = 0, yes = 0, firstYes = -1;
+      while (j < lines.length && isTableRow(lines[j])){
+        var c = cells(lines[j]); rows++;
+        if (ci >= 0 && ci < c.length && /^(是|Y|YES|待定|需要)$/i.test(c[ci].replace(/\*/g, "").trim())){ yes++; if (firstYes < 0) firstYes = j; }
+        j++;
+      }
+      if (ci >= 0 && yes > 0){
+        add({ rule:"未决伪装", sev:"hi", line:start + 1,
+          title:"这张表 " + rows + " 行参数，" + yes + " 行自己标着「需确认」",
+          ex: excerpt(lines[firstYes]),
+          why:"同一张表在说两件相反的事：左边给了精确默认值，右边承认这个值没人定过。读的人只会记住左边。",
+          impact:"下游会拿这 " + yes + " 个没定的数当定了的数直接开工。等到有人真去确认、数值一改，所有基于它的计算、图表和结论要重跑一遍，返工量按整条链路算。",
+          who:"需求提出方 + 真正能拍板这些业务阈值的人（通常不是写文档的人）",
+          ask:"这张表里标「需确认」的 " + yes + " 项，谁来定、什么时候定？在定下来之前，下游是先停还是按默认值跑？如果按默认值跑出来的结论后面被推翻，返工算在谁的工时里？" });
+      }
+      i = j; continue;
+    }
+    i++;
+  }
+
+  // ============ R2 悬空依赖 ============
+  var gapSeen = {};
+  for (i = 0; i < lines.length; i++){
+    if (!isTableRow(lines[i]) || !RE_GAP.test(lines[i])) continue;
+    if (/[≈]|×|\d{3,}\s*×/.test(lines[i])) continue;
+    var c2 = cells(lines[i]);
+    if (!c2.length) continue;
+    var ent = c2[0].replace(/[【】\[\]（）()*`·]/g, "").trim();
+    ent = ent.replace(/(数据源|数据|来源|清单|列表|模块|指标|接口|口径)$/, "");
+    if (ent.length < 2 || ent.length > 10 || /^\d/.test(ent)) continue;
+    if (gapSeen[ent]) continue;
+    gapSeen[ent] = 1;
+    var hits = [];
+    for (var k = 0; k < lines.length; k++){
+      if (k === i) continue;
+      if (lines[k].indexOf(ent) >= 0 && RE_DOWN.test(lines[k])) hits.push(k + 1);
+      if (hits.length > 60) break;
+    }
+    if (hits.length >= 2){
+      add({ rule:"悬空依赖", sev:"hi", line:i + 1,
+        title:"「" + ent + "」这一环还是空的，下游已经有 " + hits.length + " 处在用它算",
+        ex: excerpt(lines[i]),
+        why:"第一环没落地，后面的公式、指标、图表却全写完了。这是最典型的因果链折叠：假装输入已经存在，中间状态就都能一气呵成写出来。",
+        impact:"真开工时第一天就会卡在这里。要么整条链路停摆等数据，要么先拿假数跑通再全部重做——这 " + hits.length + " 处计算以及它们产出的结论都要重来。",
+        who:"能回答「这个数据到底拿不拿得到」的人：数据负责人、采购/商务（如果要买）、或对方接口人",
+        ask:"「" + ent + "」现在到底能不能拿到？谁在推、卡在哪一步、预计什么时候有？拿不到的话，第 " + hits.slice(0, 6).join("、") + " 行这些依赖它的部分，是先砍掉还是整体暂停？",
+        refs: hits.slice(0, 20) });
+    }
+  }
+
+  // ============ R2b 缺失却照算：同一行标了缺失，还是算出了一个数 ============
+  var ghost = [];
+  for (i = 0; i < lines.length; i++){
+    if (!isTableRow(lines[i])) continue;
+    if (!/数据缺失|不可得|无数据|暂无数据|未获取/.test(lines[i])) continue;
+    if (!/[≈=＝]|×|\*|[0-9]{3,}|%/.test(lines[i].replace(/数据缺失|不可得/g, ""))) continue;
+    var cg = cells(lines[i]);
+    var hasNum = cg.filter(function(x){ return /^[^A-Za-z\u4e00-\u9fa5]*[0-9][0-9.,%×*^≈ ()（）→]*$/.test(x) && /[0-9]/.test(x); }).length;
+    if (hasNum >= 2) ghost.push(i);
+  }
+  if (ghost.length){
+    add({ rule:"缺失却照算", sev:"hi", line:ghost[0] + 1,
+      title:"有 " + ghost.length + " 行一边标着「数据缺失」，一边照样算出了结果",
+      ex: sampleLines(ghost, 3),
+      why:"这是整类问题里最要命的一种：缺失被如实标注了，但它没有阻断计算。缺失声明和结果数字并排躺在同一行里，而读报告的人只会看到那个数字。",
+      impact:"这个数会被当成测算结果引用出去——进汇报、进对外材料、进决策。等有人回头问「这个数怎么来的」，追到源头是一行缺失数据，那时候信用是整份报告一起塌，不是这一行塌。",
+      who:"出数的人 + 要拿这个数去汇报的人（两边都得知道）",
+      ask:"这几行标了「数据缺失」但还是出了数，这个数是怎么算的？缺失的那一项是按 0 处理、按均值补的，还是直接跳过了？建议缺失的行干脆不出数——出了就一定会被人引用，而且不会有人回头看旁边那句缺失说明。",
+      refs: ghost.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R3 未决项散落正文 ============
+  var pend = [];
+  for (i = 0; i < lines.length; i++){ if (RE_PENDING.test(lines[i]) && lines[i].trim().length > 4) pend.push(i); }
+  if (pend.length){
+    add({ rule:"未决伪装", sev:"md", line:pend[0] + 1,
+      title:"全文 " + pend.length + " 处「待定 / 待校准 / 暂定 / TBD」",
+      ex: sampleLines(pend, 4),
+      why:"未决项本身不是问题。问题是它们和已决内容用同一种字号、同一张表、同一个章节号排在一起，读的人分不出哪些是规格、哪些是愿望。",
+      impact:"接手的人会把整份文档当成已定稿来排期和拆任务，实际进度被高估。等做到第 N 个模块才发现前提没定，排期已经报出去了。",
+      who:"文档作者（请他把未决项单独拉一张表）",
+      ask:"这 " + pend.length + " 处未决项，能不能单独列一张表放在文档最前面？在它们定下来之前，哪些章节是不能开工的？",
+      refs: pend.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R4 补丁痕迹 ============
+  var patch = [];
+  for (i = 0; i < lines.length; i++){ if (RE_PATCH.test(lines[i])) patch.push(i); }
+  if (patch.length){
+    add({ rule:"补丁痕迹", sev:"md", line:patch[0] + 1,
+      title:"有 " + patch.length + " 处「修正说明 / 原文应为」式的补丁",
+      ex: sampleLines(patch, 3),
+      why:"需要成段打补丁，说明上一版是一次性整体生成、没人逐句校验就发出去了。补丁盖住的是被发现的那些，没被发现的还在原地。",
+      impact:"同类错误大概率还有残留，而且散落在没人逐行读过的章节里。按这份文档做出来的东西，错在哪要到联调甚至上线才暴露。",
+      who:"文档作者（问清楚错是怎么发现的）",
+      ask:"上一版这些错是怎么发现的——是有人逐行看出来的，还是又交给 AI 查的？同一类问题有没有做过一次全文复查？",
+      refs: patch.slice(0, 20).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R5 未验证的具体物 ============
+  var toks = {}, order = [];
+  for (i = 0; i < lines.length; i++){
+    var m, re = /`([^`\n]{3,60})`/g;
+    while ((m = re.exec(lines[i])) !== null){
+      var t = m[1].trim();
+      if (!/^[A-Za-z][A-Za-z0-9_.\/\-]{2,}$/.test(t)) continue;
+      if (!/[-_\/.]/.test(t)) continue;
+      if (CODE_STOP[t.toLowerCase()]) continue;
+      if (!toks[t]){ toks[t] = i + 1; order.push(t); }
+    }
+    var mu, ru = /https?:\/\/[^\s`"'\)\]）】，。]+/g;
+    while ((mu = ru.exec(lines[i])) !== null){ var u = mu[0]; if (!toks[u]){ toks[u] = i + 1; order.push(u); } }
+  }
+  if (order.length){
+    add({ rule:"未验证具体物", sev:"hi", line:toks[order[0]],
+      title:"出现 " + order.length + " 个具体的包名 / 工具 / 接口地址，没有一个标注验证过",
+      ex: order.slice(0, 10).map(function(t){ return "L" + toks[t] + "  " + t; }).join("\n"),
+      why:"模型最擅长编的就是这类名字：仓库名、CLI 名、endpoint、带路径的 URL。它们看上去是文档里最硬的部分，实际是幻觉率最高的部分。",
+      impact:"每一个都得有人花时间去验，验的工时不计入任何人的排期。其中只要有几个是编的，照着写的人会在环境配置阶段空耗好几天，而且会先怀疑是自己弄错了。",
+      who:"真正跑过这条链路的工程/数据同事（不是文档作者）",
+      ask:"这 " + order.length + " 个工具和接口，哪些是真跑通过的？没跑过的能不能先从文档里拿掉——等验证过再加回来，省得下游照着配半天。",
+      refs: order.slice(0, 30).map(function(t){ return toks[t]; }) });
+  }
+
+  // ============ R6 无源数字 ============
+  var nums = [];
+  for (i = 0; i < lines.length; i++){
+    if (!RE_NUMRULE.test(lines[i])) continue;
+    if (!/[0-9]/.test(lines[i])) continue;
+    if (near(i, RE_SRC, 3)) continue;
+    nums.push(i);
+  }
+  if (nums.length){
+    add({ rule:"无源数字", sev:"md", line:nums[0] + 1,
+      title:nums.length + " 处阈值 / 权重 / 系数，附近找不到任何出处",
+      ex: sampleLines(nums, 4),
+      why:"精确的数字会制造「有人算过」的错觉。没写来源的阈值和权重，多半是生成时为了让段落显得完整填上去的占位值。",
+      impact:"这些数直接决定最终结论长什么样。拿占位值跑出来的报告一旦发出去，后面再改参数，等于推翻已经对外说过的结论——这个代价比重跑代码大得多。",
+      who:"算法/数据同事（问这些数能不能从真实数据反推）",
+      ask:"这些阈值和权重是跑过数据反推的，还是先填上等以后校准？如果是后者，建议统一写成「待定」，不要给默认值——给了就会有人直接用。",
+      refs: nums.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R7 空心自动化 ============
+  var auto = [];
+  for (i = 0; i < lines.length; i++){
+    if (!RE_ACTOR.test(lines[i])) continue;
+    if (RE_COND.test(lines[i])) continue;
+    if (lines[i].trim().length < 10) continue;
+    auto.push(i);
+  }
+  if (auto.length >= 3){
+    add({ rule:"空心自动化", sev:"md", line:auto[0] + 1,
+      title:auto.length + " 处「系统自动 / AI 智能地」做某事，没写触发条件和输入输出",
+      ex: sampleLines(auto, 4),
+      why:"「利用大模型进行智能分析」这类句子，是因果链被折叠的接缝——所有不知道怎么实现的环节，都能用它一句带过。",
+      impact:"这些句子在排期时会被当成「一个点」，实际每一句背后都是一条要自己设计的链路。工期估算会系统性偏低，偏差全部由实现的人承担。",
+      who:"要实现这段的工程同事 + 文档作者（当面把字段过一遍）",
+      ask:"这几处「自动」，具体是什么触发的、输入是哪张表的哪几个字段、输出写回哪里、失败了怎么办？",
+      refs: auto.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R8 空心词 ============
+  var hollowHits = [], hollowCount = 0;
+  for (i = 0; i < lines.length; i++){
+    for (var w = 0; w < HOLLOW.length; w++){
+      if (lines[i].indexOf(HOLLOW[w]) >= 0){ hollowCount++; if (hollowHits.length < 30) hollowHits.push(i); break; }
+    }
+  }
+  if (hollowCount >= 5){
+    add({ rule:"空心词", sev:"lo", line:hollowHits[0] + 1,
+      title:"出现 " + hollowCount + " 处「赋能 / 闭环 / 深度挖掘」一类空心词",
+      ex: sampleLines(hollowHits, 4),
+      why:"这类词删掉之后句子信息量不变。密度高通常意味着文档在用体量冒充深度。",
+      impact:"主要是浪费阅读时间，顺带抬高了文档的「看起来很专业」程度，让人不好意思提问。",
+      who:"文档作者（顺手删即可，不值得开会）",
+      ask:"这几句话删掉之后，有谁会少知道一件事吗？",
+      refs: hollowHits.map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R9 无验收标准 ============
+  var acc = 0;
+  for (i = 0; i < lines.length; i++){ if (RE_ACCEPT.test(lines[i])) acc++; }
+  if (acc === 0 && lines.length > 60){
+    add({ rule:"无验收", sev:"hi", line:1,
+      title:"全文没有一处说明「怎么判断做对了」",
+      ex:"（全文未检索到：验收 / 验收标准 / 正确性校验 / 回归 / 核对口径 / 联调）",
+      why:"没有验收标准的方案，交付方无法证明自己做完了，提出方也不必为结果负责。",
+      impact:"做完之后算不算数，只能靠人情和嗓门决定。最常见的结局是反复返工，而且每一轮都显得像是实现方没做好。",
+      who:"需求提出方 + 最终要签收的人",
+      ask:"这份文档做出来之后，用什么条件判定它是对的？谁来验、拿什么数据验、不通过怎么办？这个建议在开工前白纸黑字定下来。" });
+  }
+
+  // ============ AI 痕迹 ============
+  var S = [
+    /值得注意的是|综上所述|需要强调的是|总的来说|总而言之|换言之|与此同时|在此基础上|进一步地|具体而言/,
+    /本(文|章|节|方案|文档|部分)(旨在|将从|主要|重点|说明|定义)|以下(将)?从.{0,20}(几个)?(方面|维度|角度)|接下来(将|我们)/,
+    /[\u4e00-\u9fa5]{2,8}（[A-Za-z][A-Za-z0-9\s\-\/]{2,40}）/,
+    /^\s*[-*]\s*\*\*[^*]{2,24}\*\*\s*[：:]/,
+    /①|②|③|第一，|第二，|第三，|其一|其二/,
+    /★|✅|⭐|🔹|📌|✔|🚀|💡/,
+    /不仅.{0,30}而且|一方面.{0,60}另一方面|既.{0,25}又/
+  ];
+  function sigHit(s){ for (var q = 0; q < S.length; q++){ if (S[q].test(s)) return true; } return false; }
+
+  var heads = [];
+  for (i = 0; i < lines.length; i++){ if (/^#{1,6}\s/.test(lines[i])) heads.push({ ln:i, t:lines[i] }); }
+  var normCount = {}, normFirst = {};
+  heads.forEach(function(hd){
+    var n = hd.t.replace(/^#+\s*/, "").replace(/[0-9０-９.·、\s]/g, "").trim();
+    if (n.length < 2) return;
+    normCount[n] = (normCount[n] || 0) + 1;
+    if (normFirst[n] === undefined) normFirst[n] = hd.ln;
+  });
+  var repeated = Object.keys(normCount).filter(function(n){ return normCount[n] >= 4; });
+
+  var aiSections = [], aiLines = [];
+  for (var s = 0; s < heads.length; s++){
+    var a = heads[s].ln, b = (s + 1 < heads.length ? heads[s + 1].ln : lines.length);
+    var n = 0, hit = 0, hitAt = [];
+    for (var p = a; p < b; p++){
+      if (!lines[p].trim()) continue;
+      n++;
+      if (sigHit(lines[p])){ hit++; hitAt.push(p); }
+    }
+    if (n >= 4 && (hit >= 6 || (hit >= 3 && hit / n >= 0.12))){
+      aiSections.push({ ln:a, title:lines[a].replace(/^#+\s*/, "").trim(), hit:hit, n:n });
+      hitAt.forEach(function(x){ aiLines.push(x + 1); });
+      aiLines.push(a + 1);
+    }
+  }
+
+  if (repeated.length >= 3){
+    add({ rule:"AI 痕迹", sev:"ai", line:normFirst[repeated[0]] + 1,
+      title:"有 " + repeated.length + " 个章节标题在全文重复出现 4 次以上，是模板套出来的",
+      ex: repeated.slice(0, 8).map(function(n){ return "×" + normCount[n] + "  " + n; }).join("\n"),
+      why:"每一章都严格套同一套子章节骨架，包括本来没内容可写的那几节。手写几乎不会这么齐整——这是「填模板」留下的痕迹。",
+      impact:"骨架齐整会让人误以为内容也齐整。实际上为了把每一格填满，空的那几格多半是编出来凑数的，而这些格子和有料的格子长得一模一样。",
+      who:"文档作者（可以直接把空的那几节删掉，不丢人）",
+      ask:"这套骨架里有几节其实没内容，是为了对齐格式才填的吧？那几节直接删掉或者标成「本章不适用」就行，不用硬填——留着反而让人分不清哪些是真的。",
+      refs: repeated.slice(0, 10).map(function(n){ return normFirst[n] + 1; }) });
+  }
+  if (aiSections.length >= 1){
+    add({ rule:"AI 痕迹", sev:"ai", line:aiSections[0].ln + 1,
+      title:"有 " + aiSections.length + " 节的行文带明显的一次性生成特征",
+      ex: aiSections.slice(0, 8).map(function(x){ return "L" + (x.ln + 1) + "  " + excerpt(x.title, 40) + "  （" + x.hit + "/" + x.n + " 行命中）"; }).join("\n"),
+      why:"套话连接词、中英括注、粗体冒号列表、①②③ 这些特征集中出现。单个不说明什么，密集出现通常意味着这一段是模型一口气写出来、没人逐句过。",
+      impact:"没有坏处，前提是读的人知道。知道之后看这几节会多留个心眼，不会把排版的完整当成内容的可靠。",
+      who:"不用找谁。这是给读文档的人的备注。",
+      ask:"这几节看着像是 AI 一口气生成的，我按原文逐条挑了几个点出来。要是哪条本来就是模型自己加的，你说一声我直接划掉，不用解释。",
+      refs: aiLines.slice(0, 200) });
+  }
+
+  var chars = text.replace(/\s/g, "").length;
+  var secs = heads.length, tables = 0, inT = false;
+  for (i = 0; i < lines.length; i++){
+    if (isTableRow(lines[i])){ if (!inT){ tables++; inT = true; } } else inT = false;
+  }
+
+  var ord = { hi:0, md:1, lo:2, ai:3 };
+  findings.sort(function(a, b){ return (ord[a.sev] - ord[b.sev]) || (a.line - b.line); });
+
+  return {
+    findings: findings, lines: lines.length, chars: chars, sections: secs, tables: tables,
+    aiLines: aiLines,
+    hi: findings.filter(function(f){ return f.sev === "hi"; }).length,
+    md: findings.filter(function(f){ return f.sev === "md"; }).length,
+    lo: findings.filter(function(f){ return f.sev === "lo"; }).length,
+    ai: findings.filter(function(f){ return f.sev === "ai"; }).length
+  };
+}
+/*RULES_END*/
+
+var SAMPLE = [
+  "# 智能人才洞察平台 · 产品需求文档 v2",
+  "",
+  "本文旨在从数据、算法、产品三个方面，全面阐述平台的建设路径。",
+  "",
+  "## 0.1 全局参数配置中心",
+  "",
+  "| 参数 | 默认值 | 是否需业务确认 |",
+  "| --- | --- | --- |",
+  "| 相似度阈值 | 0.78 | **是** |",
+  "| 聚类簇数 K | 12 | 否 |",
+  "| 热度衰减系数 | 0.93 | **是** |",
+  "| 并发请求数上限 | 4 | 否 |",
+  "",
+  "## 0.2 数据源清单",
+  "",
+  "| 数据源 | 可用性 | 角色 |",
+  "| --- | --- | --- |",
+  "| 简历库 | 已就绪 | 主源 |",
+  "| 专利数据 | 待定 | 辅助信号 |",
+  "",
+  "> 修正说明：原稿将专利库误写为论文库，本版已更正（见附录 B-03）。",
+  "",
+  "## 1.3 计算公式",
+  "",
+  "专利强度指标按加权公式计算，权重系数取 0.35。专利活跃度需参与最终得分归一化。",
+  "专利数量进入图表绘制环节，作为第二坐标轴指标。",
+  "",
+  "## 1.4 实现建议",
+  "",
+  "建议使用开源工具 `talent-fetch-cli` 批量拉取，并通过 `patentview-mcp` 接入专利检索。",
+  "接口地址：https://api.example-patent.cn/v2/search",
+  "",
+  "值得注意的是，系统将自动识别候选人的能力标签（Capability Tagging），模型会实时分析岗位匹配度并生成推荐理由。",
+  "- **第一阶段**：平台自动打标，全面覆盖产业链全链路。",
+  "- **第二阶段**：AI 智能分析人才流动趋势，深度挖掘潜在人才。",
+  "- **第三阶段**：有效提升匹配效率，实现人岗匹配闭环，持续优化并赋能业务。",
+  "",
+  "综上所述，本方案一方面夯实了数据底座，另一方面助力业务降本增效。"
+].join("\n");
+
+var $ = function(s){ return document.querySelector(s); };
+var state = { res:null, filter:"all", lines:[], name:"" };
+function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function run(){
+  var text = $("#input").value;
+  if (!text.trim()){ alert("先粘一份文档进来。"); return; }
+  state.res = analyzeDoc(text);
+  state.lines = text.split(/\r?\n/);
+  renderSummary(state.res);
+  renderDoc(state.res);
+  renderCards(state.res);
+  $("#report").classList.remove("hidden");
+  $("#panes").classList.remove("hidden");
+  $("#panes").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function renderSummary(res){
+  var must = res.hi + res.md;
+  $("#summary").innerHTML =
+    '<div class="stat hi"><b>' + res.hi + '</b><span>阻断项 · 不回答没法开工</span></div>' +
+    '<div class="stat md"><b>' + res.md + '</b><span>待澄清 · 开工前要有答案</span></div>' +
+    '<div class="stat lo"><b>' + res.lo + '</b><span>修辞噪音 · 删了不影响信息</span></div>' +
+    '<div class="stat ai"><b>' + res.ai + '</b><span>AI 痕迹 · 备注，不算问题</span></div>' +
+    '<div class="stat"><b>' + res.chars.toLocaleString() + '</b><span>字 · ' + res.sections + ' 个标题 · ' + res.tables + ' 张表</span></div>';
+  var v = $("#verdict");
+  if (must === 0){
+    v.className = "verdict clean";
+    v.innerHTML = "<b>没有检出结构性问题。</b><p>这不代表内容正确，只代表它没有把未决问题伪装成已决问题。内容对不对，还得人看。</p>";
+  } else {
+    v.className = "verdict";
+    v.innerHTML = "<b>开工前需要活人回答 " + must + " 个问题。</b><p>每张卡片都指向原文的具体位置，并写明了不处理会在业务上造成什么、该找谁。它们不是「这里写错了」，是「这里需要一个人回答」。回答得上来就划掉，回答不上来的那几条，就是这份文档真正的进度。</p>";
+  }
+}
+
+function renderDoc(res){
+  var marks = {}, aim = {};
+  res.findings.forEach(function(f){
+    if (f.sev === "ai") return;
+    [f.line].concat(f.refs || []).forEach(function(ln){
+      if (!marks[ln] || (marks[ln] !== "hi" && f.sev === "hi")) marks[ln] = f.sev;
+    });
+  });
+  (res.aiLines || []).forEach(function(ln){ aim[ln] = 1; });
+  var out = [];
+  for (var i = 0; i < state.lines.length; i++){
+    var ln = i + 1;
+    var cls = (marks[ln] ? " flag " + marks[ln] : "") + (aim[ln] ? " ai" : "");
+    out.push('<div class="ln' + cls + '" id="L' + ln + '"><i>' + ln + "</i><u></u><span>" + (esc(state.lines[i]) || " ") + "</span></div>");
+  }
+  $("#doc").innerHTML = out.join("");
+  $("#docmeta").textContent = res.lines.toLocaleString() + " 行　│　蓝条＝疑似 AI 生成";
+}
+
+function renderCards(res){
+  var names = { hi:"阻断", md:"待澄清", lo:"噪音", ai:"AI 痕迹" };
+  $("#filters").innerHTML = ["all", "hi", "md", "lo", "ai"].map(function(k){
+    var n = (k === "all") ? res.findings.length : res[k];
+    var label = (k === "all") ? "全部" : names[k];
+    return '<button class="chip' + (state.filter === k ? " on" : "") + '" data-f="' + k + '">' + label + " " + n + "</button>";
+  }).join("");
+  Array.prototype.forEach.call($("#filters").children, function(b){
+    b.onclick = function(){ state.filter = b.dataset.f; renderCards(state.res); };
+  });
+
+  var fs = res.findings.filter(function(f){ return state.filter === "all" || f.sev === state.filter; });
+  if (!fs.length){ $("#cards").innerHTML = '<div class="empty">这一档没有条目。</div>'; return; }
+  $("#cards").innerHTML = fs.map(function(f){
+    return '<article class="cc ' + f.sev + '" id="C' + f.id + '">' +
+      '<div class="top"><span class="tag">' + esc(f.rule) + '</span>' +
+      '<button class="jump" data-line="' + f.line + '">L' + f.line + ' ↗</button></div>' +
+      '<h3>' + esc(f.title) + '</h3>' +
+      '<div class="ex">' + esc(f.ex) + '</div>' +
+      '<p class="why">' + esc(f.why) + '</p>' +
+      '<div class="blk impact"><b>不处理的话，业务上会怎样</b>' + esc(f.impact) + '</div>' +
+      '<div class="blk"><b>找谁 · ' + esc(f.who) + '</b>' + esc(f.ask) + '</div>' +
+      '<button class="copy" data-ask="' + esc(f.ask).replace(/"/g, "&quot;") + '">复制这句</button>' +
+      '</article>';
+  }).join("");
+
+  Array.prototype.forEach.call($("#cards").querySelectorAll(".jump"), function(b){
+    b.onclick = function(){
+      var el = document.getElementById("L" + b.dataset.line);
+      if (!el) return;
+      el.scrollIntoView({ behavior:"smooth", block:"center" });
+      el.classList.add("pulse");
+      setTimeout(function(){ el.classList.remove("pulse"); }, 1600);
+    };
+  });
+  Array.prototype.forEach.call($("#cards").querySelectorAll(".copy"), function(b){
+    b.onclick = function(){
+      navigator.clipboard.writeText(b.dataset.ask).then(function(){
+        b.textContent = "已复制";
+        setTimeout(function(){ b.textContent = "复制这句"; }, 1400);
+      });
+    };
+  });
+}
+
+$("#btn-run").onclick = run;
+$("#btn-sample").onclick = function(){ $("#input").value = SAMPLE; run(); };
+$("#btn-reset").onclick = function(){
+  $("#input").value = ""; state.res = null; state.name = "";
+  $("#report").classList.add("hidden"); $("#panes").classList.add("hidden");
+  $("#filehint").textContent = "";
+  window.scrollTo({ top:0, behavior:"smooth" });
+};
+$("#btn-file").onclick = function(){ $("#file").click(); };
+function readFile(f){
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){ $("#input").value = r.result; state.name = f.name; $("#filehint").textContent = f.name + " · " + Math.round(f.size / 1024) + " KB"; run(); };
+  r.readAsText(f, "utf-8");
+}
+$("#file").onchange = function(e){ readFile(e.target.files[0]); };
+var drop = $("#drop");
+["dragenter", "dragover"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); }); });
+["dragleave", "drop"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); }); });
+drop.addEventListener("drop", function(e){ readFile(e.dataTransfer.files[0]); });
+
+$("#btn-copyall").onclick = function(){
+  if (!state.res) return;
+  var real = state.res.findings.filter(function(f){ return f.sev === "hi" || f.sev === "md"; });
+  var ai = state.res.findings.filter(function(f){ return f.sev === "ai"; });
+  var txt = "我把文档过了一遍，整理出开工前需要确认的 " + real.length + " 个点，按原文行号列在下面。\n" +
+    "先说清楚：这些不是说文档写错了，是这些地方需要有个人拍板，不然下游没法动。\n";
+  if (ai.length) txt += "另外有几节看着像是 AI 一口气生成的——这很正常，大家现在都这么写。要是哪条本来就是模型自己加的，说一声直接划掉就行，不用解释。\n";
+  txt += "\n" + real.map(function(f, i){
+    return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　问：" + f.ask + "\n　　不处理的话：" + f.impact + "\n　　建议找：" + f.who;
+  }).join("\n\n");
+  navigator.clipboard.writeText(txt).then(function(){
+    $("#copystate").textContent = "已复制 " + real.length + " 条";
+    setTimeout(function(){ $("#copystate").textContent = ""; }, 2600);
+  });
+};
+
+function stamp(){
+  var d = new Date(), z = function(n){ return (n < 10 ? "0" : "") + n; };
+  return d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + "-" + z(d.getHours()) + z(d.getMinutes());
+}
+function docLabel(){
+  var n = state.name || "粘贴文本";
+  return n.replace(/\.(md|markdown|txt)$/i, "");
+}
+function save(filename, content, mime){
+  var blob = new Blob([content], { type: mime + ";charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+}
+function buildMarkdown(){
+  var r = state.res;
+  var real = r.findings.filter(function(f){ return f.sev === "hi" || f.sev === "md"; });
+  var ai = r.findings.filter(function(f){ return f.sev === "ai"; });
+  var lo = r.findings.filter(function(f){ return f.sev === "lo"; });
+  var d = new Date();
+  var out = [];
+  out.push("# 文档体检报告");
+  out.push("");
+  out.push("- 受检文档：" + docLabel());
+  out.push("- 体检时间：" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
+  out.push("- 体量：" + r.lines + " 行 · " + r.chars + " 字 · " + r.sections + " 个章节 · " + r.tables + " 张表");
+  out.push("- 结论：**开工前需要回答 " + real.length + " 个问题**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。");
+  out.push("");
+  out.push("> 这份报告只做一件事：找出被排版成「已决事项」的未决问题。");
+  out.push("> 它不判断内容对错，也不判断文档是不是 AI 写的——那个问题没有意义，现在答案永远是「是」。");
+  out.push("> 每一条都是「这里需要一个人回答」，不是「这里错了」。答得上来就划掉。");
+  out.push("");
+  if (real.length){
+    out.push("## 必须回答的问题");
+    out.push("");
+    real.forEach(function(f, i){
+      out.push("### " + (i + 1) + ". 【L" + f.line + " · " + f.rule + "】" + f.title);
+      out.push("");
+      out.push("```");
+      out.push(f.ex);
+      out.push("```");
+      out.push("");
+      out.push("**为什么是个问题**　" + f.why);
+      out.push("");
+      out.push("**不处理的话**　" + f.impact);
+      out.push("");
+      out.push("**去问 " + f.who + "**　" + f.ask);
+      out.push("");
+    });
+  }
+  if (ai.length){
+    out.push("## AI 痕迹（不计入必答，仅供阅读时参考）");
+    out.push("");
+    out.push("标出来不是为了抓人。文档里有 AI 很正常。标记有两个用处：读的人知道哪几段可能没经过人工核对；写的人有退路——「这段是我的 AI 自己加的」比「我写错了」容易说出口得多。");
+    out.push("");
+    ai.forEach(function(f){
+      out.push("- **【L" + f.line + "】" + f.title + "**　" + f.ask);
+    });
+    out.push("");
+  }
+  if (lo.length){
+    out.push("## 修辞噪音（可忽略）");
+    out.push("");
+    lo.forEach(function(f){ out.push("- 【L" + f.line + "】" + f.title); });
+    out.push("");
+  }
+  out.push("## 这份报告查不了什么");
+  out.push("");
+  out.push("- 查不了内容对错。它不懂业务，公式合不合理、指标有没有意义，一概不知，也不装懂。");
+  out.push("- 查不了跨章节的口径冲突（同一指标在不同章节用了两套权重），这需要真正理解语义，是已知缺口。");
+  out.push("- 查不出「写得对但做不到」——资源、排期、人力、授权，文档里不写就看不见。");
+  out.push("- 命中不等于有罪。每条只是「这里需要一个人回答」。");
+  out.push("- 它自己只是一堆确定性正则，没有模型参与，所以不会幻觉，但也绝不聪明。");
+  out.push("");
+  out.push("---");
+  out.push("");
+  out.push("由「文档体检台」生成 · 全程在本机浏览器内完成，文档未上传、未联网、未调用任何模型。");
+  return out.join("\n");
+}
+function buildJSON(){
+  var r = state.res;
+  return JSON.stringify({
+    schema: "aiverything.doccheck/v1",
+    checkedAt: new Date().toISOString(),
+    source: { name: state.name || null, lines: r.lines, chars: r.chars, sections: r.sections, tables: r.tables },
+    summary: { mustAnswer: r.hi + r.md, blocking: r.hi, clarify: r.md, aiTrace: r.ai, noise: r.lo, aiLines: r.aiLines },
+    findings: r.findings.map(function(f){
+      return { rule:f.rule, severity:f.sev, line:f.line, title:f.title,
+               excerpt:f.ex, why:f.why, impact:f.impact, who:f.who, ask:f.ask, refs:f.refs || [] };
+    })
+  }, null, 2);
+}
+$("#btn-dl-md").onclick = function(){
+  if (!state.res){ alert("先体检一份文档。"); return; }
+  save("体检报告-" + docLabel() + "-" + stamp() + ".md", buildMarkdown(), "text/markdown");
+  $("#copystate").textContent = "报告已下载";
+  setTimeout(function(){ $("#copystate").textContent = ""; }, 2600);
+};
+$("#btn-dl-json").onclick = function(){
+  if (!state.res){ alert("先体检一份文档。"); return; }
+  save("体检结果-" + docLabel() + "-" + stamp() + ".json", buildJSON(), "application/json");
+  $("#copystate").textContent = "JSON 已下载（含原文摘录，转发前留意）";
+  setTimeout(function(){ $("#copystate").textContent = ""; }, 3600);
+};
+
+</script>
+</body></html>
