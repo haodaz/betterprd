@@ -178,5 +178,69 @@ for (const f of re.findings) {
   if (!f.k || !f.p) { console.log(`\u2717 EN ${f.rule} \u7f3a key/\u53c2\u6570`); bad++; }
 }
 
+/* ---- 跨文档对照（cross-check.html）---- */
+const ccHtml = fs.readFileSync(new URL("./cross-check.html", import.meta.url), "utf8");
+const ccSrc = ccHtml.split("/*EXTRACT_START*/")[1].split("/*EXTRACT_END*/")[0];
+const cc = new Function(ccSrc + "; return {extractFacts:extractFacts, crossCheck:crossCheck};")();
+
+const CC_ZH_A = `使命型指标体系
+
+维度
+含义
+指标数
+权重
+A. 课程与需求适配性
+一致性
+7项
+30%
+C. 运行保障支撑度
+条件
+2项
+20%
+D. 产出与贡献
+结果
+3项
+20%
+合计
+17项
+100%`;
+const CC_ZH_B = `用户端五步路径
+
+• 使命型17项：分A课程与需求适配性（7项，30%）、C运行保障支撑度（2项，15%）、D产出与贡献（3项，25%）`;
+const CC_EN_A = `Mission-type indicator system
+
+Dimension
+Meaning
+Count
+Weight
+A. Course-demand fit
+consistency
+7 items
+30%
+C. Operational support
+conditions
+2 items
+20%
+D. Outcomes
+results
+3 items
+20%`;
+const CC_EN_B = `Five-step rollout
+
+Mission-type 17 items: A Course-demand fit (7 items, 30%), C Operational support (2 items, 15%), D Outcomes (3 items, 25%)`;
+
+function ccCase(label, a, b, expect) {
+  const got = cc.crossCheck([
+    { name: "a.txt", lines: a.split("\n") },
+    { name: "b.txt", lines: b.split("\n") }
+  ]);
+  const ok = got.length === expect;
+  if (!ok) bad++;
+  console.log(`${ok ? "✓" : "✗"}  ${label}：冲突 ${got.length}（期望 ${expect}）${got.length ? " — " + got.map(x => x.label).join("、") : ""}`);
+}
+console.log("");
+ccCase("对照 · 中文", CC_ZH_A, CC_ZH_B, 2);
+ccCase("对照 · 英文", CC_EN_A, CC_EN_B, 2);
+
 console.log(bad ? `\n失败 ${bad} 项` : "\n全部通过");
 process.exit(bad ? 1 : 0);

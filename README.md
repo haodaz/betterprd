@@ -79,6 +79,13 @@
 
 结果可以复制成一条能直接发群的消息，也可以下载 `.md` 报告和 `.json` 结果。
 
+## English
+
+The whole site is bilingual — it follows your browser language and remembers your choice.
+Rule names, card copy, exports and the landing page all switch; detection vocabulary covers
+both Chinese and English documents (`TBD`, `leverage`, `seamless`, `acceptance criteria`,
+`it's important to note`, and so on), so an English PRD gets the same treatment.
+
 ## 一套文档一起查
 
 一套材料里最危险的问题不在任何一份文档里面。真实例子：同一套评价体系，

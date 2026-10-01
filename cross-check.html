@@ -76,26 +76,30 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
 .note-block ul{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
 .note-block li{margin-bottom:6px}
 .note-block p{color:var(--muted);font-size:14px;margin-top:12px;max-width:72ch}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.langsw button{border:none;background:transparent;color:var(--muted);padding:5px 12px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.langsw button.on{background:var(--brand);color:var(--brand-on)}
 .hidden{display:none!important}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <div class="brand"><span>一套文档对照</span><span class="sub">每份单看都自洽，加起来才露馅</span></div>
+  <div class="brand"><span data-i18n="brandName">一套文档对照</span><span class="sub" data-i18n="brandSub">每份单看都自洽，加起来才露馅</span></div>
   <div class="acts">
-    <a class="btn ghost" href="prd-check.html">单份体检</a>
-    <button class="btn ghost" id="btn-reset">清空</button>
-    <button class="btn primary" id="btn-run">开始对照</button>
+    <div class="langsw" id="langsw"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
+    <a class="btn ghost" href="prd-check.html" data-i18n="navSingle">单份体检</a>
+    <button class="btn ghost" id="btn-reset" data-i18n="btnReset">清空</button>
+    <button class="btn primary" id="btn-run" data-i18n="btnRun">开始对照</button>
   </div>
 </div></div>
 
 <div class="wrap intake">
-  <h1>这几份文档，说的是同一件事吗？</h1>
-  <p class="lede">一套材料里最难发现的问题不在任何一份文档里面——每份单独读都自洽、加起来都是 100%，只有把两份并排放才看得出口径对不上。这里只做一件确定的事：<b>把各文档里「同一个名目下的数字」拎出来比一遍</b>，不一致的列给你。不理解语义，不判断谁对谁错。</p>
+  <h1 data-i18n="h1">这几份文档，说的是同一件事吗？</h1>
+  <p class="lede" data-i18n="lede">一套材料里最难发现的问题不在任何一份文档里面——每份单独读都自洽、加起来都是 100%，只有把两份并排放才看得出口径对不上。这里只做一件确定的事：<b>把各文档里「同一个名目下的数字」拎出来比一遍</b>，不一致的列给你。不理解语义，不判断谁对谁错。</p>
   <div class="drop" id="drop">
-    <p>把一整套文档拖进来，或者</p>
-    <div style="margin-top:12px"><button class="btn" id="btn-file">选择文件（可多选）</button></div>
+    <p data-i18n="drop1">把一整套文档拖进来，或者</p>
+    <div style="margin-top:12px"><button class="btn" id="btn-file" data-i18n="btnFile">选择文件（可多选）</button></div>
     <input type="file" id="file" accept=".md,.txt,.markdown,text/*" multiple class="hidden">
-    <p style="margin-top:12px;font-size:12.5px">至少两份才有对照的意义。全部在你本机浏览器里跑，不上传、不联网。</p>
+    <p style="margin-top:12px;font-size:12.5px" data-i18n="drop2">至少两份才有对照的意义。全部在你本机浏览器里跑，不上传、不联网。</p>
   </div>
   <div class="files" id="files"></div>
 </div>
@@ -105,13 +109,13 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
   <div class="verdict" id="verdict"></div>
   <div class="cards" id="cards"></div>
   <div class="foot">
-    <button class="btn" id="btn-copy">复制成一条可以发群的消息</button>
-    <button class="btn ghost" id="btn-dl">下载对照报告 .md</button>
+    <button class="btn" id="btn-copy" data-i18n="btnCopy">复制成一条可以发群的消息</button>
+    <button class="btn ghost" id="btn-dl" data-i18n="btnDl">下载对照报告 .md</button>
     <span id="state" style="font-size:12px;color:var(--muted)"></span>
   </div>
 </div>
 
-<div class="wrap note-block">
+<div class="wrap note-block" data-i18n="limitsBox">
   <h2>这个对照查不了什么</h2>
   <ul>
     <li><b>只比数字，不比意思。</b>两份文档对同一件事用了不同说法、但数字一样，它看不出来。</li>
@@ -125,12 +129,20 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
 <script>
 /*EXTRACT_START*/
 function extractFacts(lines){
-  var UNITS = "%|项|个|条|类|批|步|周|个月|月|天|级|层|维度";
+  var UNITS = "%|项|个|条|类|批|步|周|个月|月|天|级|层|维度|items?|points?|steps?|phases?|modules?|dimensions?|categories|types?|weeks?|months?|days?";
   var LEAD = ["其中","包括","全部","可进入","进入","分为","含","共","有","约","即"];
-  var STOP = /^(合计|总计|小计|共计|总共|总数|汇总)/;
+  var LEAD_EN = ["including","of which","approximately","approx","about","roughly","a total of","total of"];
+  var STOP = /^(合计|总计|小计|共计|总共|总数|汇总)|^(total|subtotal|sum|overall)\b/i;
   function clean(w){
-    var t = String(w).replace(/^[A-Za-z0-9一二三四五六七八九十]+[.、．·\s]*/, "").trim();
+    var t = String(w).replace(/^(?:[A-Za-z]|[0-9]{1,3}|[一二三四五六七八九十]{1,3})[.、．·\s]+/, "").trim();
     if (/^分[A-Za-z0-9]/.test(t)) t = t.slice(1).replace(/^[A-Za-z0-9]+[.、．·\s]*/, "");
+    var low0 = t.toLowerCase(), moved = true;
+    while (moved){
+      moved = false;
+      for (var li = 0; li < LEAD_EN.length; li++){
+        if (low0.indexOf(LEAD_EN[li] + " ") === 0){ t = t.slice(LEAD_EN[li].length + 1).trim(); low0 = t.toLowerCase(); moved = true; }
+      }
+    }
     var changed = true;
     while (changed){
       changed = false;
@@ -150,6 +162,11 @@ function extractFacts(lines){
       var c = clean(m[1]);
       if (c.length >= 3) return c;
     }
+    var me = pre.match(/([A-Za-z][A-Za-z0-9'\-]*(?:\s+[A-Za-z][A-Za-z0-9'\-]*){0,3})\s*[^A-Za-z0-9]{0,8}$/);
+    if (me){
+      var ce = clean(me[1]);
+      if (ce.length >= 3 && !/^\d/.test(ce)) return ce;
+    }
     var win = [];
     for (var k = i - 1; k >= 0 && k >= i - 5; k--){
       var t = ls[k].trim();
@@ -160,14 +177,18 @@ function extractFacts(lines){
       win.push(t);
     }
     for (var a = 0; a < win.length; a++){
-      var m1 = win[a].match(/^[A-Da-d0-9]{1,3}\s*[.、．·]?\s*([一-龥][一-龥A-Za-z·]{2,14})$/);
+      var m1 = win[a].match(/^(?:[A-D]|[0-9]{1,3})\s*[.、．·]?\s*([一-龥][一-龥A-Za-z·]{2,14})$/);
       if (m1){ var c1 = clean(m1[1]); if (c1.length >= 3) return c1; }
+      var m1e = win[a].match(/^(?:[A-D]|[0-9]{1,3})\s*[.、．·]\s*([A-Z][A-Za-z0-9'\- ]{2,24})$/);
+      if (m1e){ var c1e = clean(m1e[1]); if (c1e.length >= 3) return c1e; }
     }
     for (var b = 0; b < win.length; b++){
       if (/^\d/.test(win[b])) continue;
       if (/[：:]/.test(win[b])) continue;
       var m2 = win[b].match(/^([一-龥][一-龥A-Za-z·]{2,14})$/);
       if (m2){ var c2 = clean(m2[1]); if (c2.length >= 3) return c2; }
+      var m2e = win[b].match(/^([A-Z][A-Za-z0-9'\- ]{2,24})$/);
+      if (m2e){ var c2e = clean(m2e[1]); if (c2e.length >= 3) return c2e; }
     }
     return null;
   }
@@ -178,6 +199,7 @@ function extractFacts(lines){
     while ((m = re.exec(lines[i])) !== null){
       var label = labelBefore(lines, i, m.index);
       if (!label || label.length < 3) continue;
+      if (STOP.test(label)) continue;
       facts.push({ label: label, unit: m[2], value: parseFloat(m[1]), line: i + 1, text: lines[i].trim() });
     }
   }
@@ -222,13 +244,94 @@ function crossCheck(docs){
 /*EXTRACT_END*/
 
 var $ = function(s){ return document.querySelector(s); };
-var state = { docs: [], conflicts: [] };
+var state = { docs: [], conflicts: [], lang:"zh" };
+(function(){
+  var saved = null;
+  try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
+  if (saved === "en" || saved === "zh") state.lang = saved;
+  else if ((navigator.language || "").toLowerCase().indexOf("zh") !== 0) state.lang = "en";
+})();
+var L = {
+  zh: {
+    title:"一套文档对照", brandName:"一套文档对照", brandSub:"每份单看都自洽，加起来才露馅",
+    navSingle:"单份体检", btnReset:"清空", btnRun:"开始对照",
+    h1:"这几份文档，说的是同一件事吗？",
+    drop1:"把一整套文档拖进来，或者", btnFile:"选择文件（可多选）",
+    drop2:"至少两份才有对照的意义。全部在你本机浏览器里跑，不上传、不联网。",
+    btnCopy:"复制成一条可以发群的消息", btnDl:"下载对照报告 .md",
+    needTwo:"至少放两份文档进来才能对照。",
+    lines:function(n){ return n + " 行"; },
+    statConf:"处名目相同、数字不同", statDocs:"份文档参与对照", statLines:"行原文",
+    clean:"<b>没有发现同名目不同值的情况。</b><p>这不代表这套文档一致——它只说明「同一个名目后面跟的数字」没有互相打架。改了名的、换了说法的，它认不出来。</p>",
+    dirty:function(n){ return "<b>有 " + n + " 处同一个名目，在不同文档里给了不同的数。</b><p>这类问题单看任何一份都发现不了——每份自己都是自洽的。下面每条都标了各自出自哪份文档的第几行。你只需要定一个口径，然后把其余几处一起改掉。</p>"; },
+    cardTitle:function(c){ return "「" + c.label + "」的" + (c.unit === "%" ? "数值" : "数量") + "，有 " + c.values.length + " 种说法"; },
+    lblAsk:"要确认的事",
+    askBody:function(c){ return "「" + c.label + "」到底是 " + c.values.map(function(g){ return g.value + c.unit; }).join(" 还是 ") + "？定下来之后另外几处要一起改——这个数大概率已经被别的地方引用了。"; },
+    at:function(r){ return r.doc + " 第 " + r.line + " 行"; }, atLine:function(n){ return "第 " + n + " 行"; },
+    copied:"已复制", fileName:"文档对照报告.md",
+    txtHead:function(nd,nc){ return "我把这 " + nd + " 份文档里同名目的数字对了一遍，有 " + nc + " 处对不上："; },
+    txtTail:"不是说哪份写错了，是得先定一个口径，然后把其余几处一起改掉——这些数多半已经被别的地方引用了。",
+    mdTitle:"# 一套文档对照报告", mdDocs:"参与对照", mdFound:function(n){ return "- 发现 " + n + " 处同名目不同值"; },
+    mdTail:"只比数字，不比意思；不判断谁对谁错；改了名的认不出来。全程在本机浏览器内完成，文档未上传。",
+    limitsBox:document.querySelector('[data-i18n="limitsBox"]').innerHTML
+  },
+  en: {
+    title:"Compare a document set", brandName:"Compare a doc set", brandSub:"each one consistent alone; only together do they break",
+    navSingle:"Single doc check", btnReset:"Clear", btnRun:"Compare",
+    h1:"Are these documents describing the same thing?",
+    drop1:"Drop a whole set here, or", btnFile:"Choose files (multiple)",
+    drop2:"Two or more makes it meaningful. Everything runs in your browser — nothing uploaded, no network calls.",
+    btnCopy:"Copy as a message you can send", btnDl:"Download report .md",
+    needTwo:"Add at least two documents to compare.",
+    lines:function(n){ return n + " lines"; },
+    statConf:"same name, different number", statDocs:"documents compared", statLines:"lines of source",
+    clean:"<b>No same-name, different-value cases found.</b><p>That doesn't mean the set is consistent. It only means the numbers attached to the same name don't contradict each other. Renamed or reworded things it cannot see.</p>",
+    dirty:function(n){ return "<b>" + n + " names carry a different number in different documents.</b><p>No single document shows this — each one is internally consistent. Every row below names the file and line it came from. All you have to do is pick one definition and change the rest.</p>"; },
+    cardTitle:function(c){ return "\"" + c.label + "\" has " + c.values.length + " different values"; },
+    lblAsk:"What to settle",
+    askBody:function(c){ return "Is \"" + c.label + "\" " + c.values.map(function(g){ return g.value + c.unit; }).join(" or ") + "? Once it's decided, the other places have to change with it — that number has almost certainly been quoted elsewhere."; },
+    at:function(r){ return r.doc + " line " + r.line; }, atLine:function(n){ return "line " + n; },
+    copied:"Copied", fileName:"doc-set-comparison.md",
+    txtHead:function(nd,nc){ return "I compared the numbers attached to the same names across these " + nd + " documents. " + nc + " of them disagree:"; },
+    txtTail:"None of this says any one document is wrong. We just need to pick one definition and update the rest — these numbers have probably been quoted elsewhere already.",
+    mdTitle:"# Document set comparison", mdDocs:"Compared", mdFound:function(n){ return "- " + n + " names carry different values"; },
+    mdTail:"Numbers only, not meaning; it does not judge which is correct; renamed things are invisible to it. Everything ran in the browser; nothing was uploaded.",
+    limitsBox:'<h2>What this comparison cannot check</h2><ul>' +
+      '<li><b>Numbers only, not meaning.</b> If two documents describe the same thing differently but the numbers match, it sees nothing.</li>' +
+      '<li><b>It doesn\'t judge which is right.</b> It only tells you two places disagree. Which one is correct, only you know.</li>' +
+      '<li><b>Renamed things are invisible.</b> "Operational support" and "the support dimension" are two different names to it.</li>' +
+      '<li><b>Short names are skipped.</b> Names under three characters, or numbers with no name in front of them, are ignored — it would rather miss than misreport.</li>' +
+      '<li><b>Contradictions inside one document aren\'t here.</b> Those go to the <a href="prd-check.html">single-document check</a>.</li>' +
+      '</ul><p>Same as the checker: deterministic matching, no model involved, so it never hallucinates — and it is never clever.</p>'
+  }
+};
+function TT(k){ var v = L[state.lang][k]; return (v === undefined || v === null) ? L.zh[k] : v; }
+function applyLang(){
+  document.documentElement.lang = (state.lang === "en" ? "en" : "zh-CN");
+  document.title = TT("title");
+  Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function(el){
+    var v = TT(el.dataset.i18n);
+    if (typeof v === "string") el.innerHTML = v;
+  });
+  Array.prototype.forEach.call($("#langsw").children, function(b){
+    b.classList.toggle("on", b.dataset.l === state.lang);
+  });
+  renderFiles();
+  if (state.docs.length >= 2 && state.conflicts) run();
+}
+Array.prototype.forEach.call($("#langsw").children, function(b){
+  b.onclick = function(){
+    state.lang = b.dataset.l;
+    try { localStorage.setItem("bp_lang", state.lang); } catch (e) {}
+    applyLang();
+  };
+});
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function renderFiles(){
   $("#files").innerHTML = state.docs.map(function(d, i){
     return '<div class="f"><span class="n">' + esc(d.name) + "</span>" +
-           '<span class="m">' + d.lines.length + " 行</span>" +
+           '<span class="m">' + TT("lines")(d.lines.length) + "</span>" +
            '<button data-i="' + i + '" title="移除">&#10005;</button></div>';
   }).join("");
   Array.prototype.forEach.call($("#files").querySelectorAll("button"), function(b){
@@ -237,33 +340,31 @@ function renderFiles(){
 }
 
 function run(){
-  if (state.docs.length < 2){ alert("至少放两份文档进来才能对照。"); return; }
+  if (state.docs.length < 2){ alert(TT("needTwo")); return; }
   state.conflicts = crossCheck(state.docs);
   var n = state.conflicts.length;
   var totalLines = state.docs.reduce(function(a, d){ return a + d.lines.length; }, 0);
   $("#summary").innerHTML =
-    '<div class="stat hi"><b>' + n + "</b><span>处名目相同、数字不同</span></div>" +
-    '<div class="stat"><b>' + state.docs.length + "</b><span>份文档参与对照</span></div>" +
-    '<div class="stat"><b>' + totalLines + "</b><span>行原文</span></div>";
+    '<div class="stat hi"><b>' + n + "</b><span>" + TT("statConf") + "</span></div>" +
+    '<div class="stat"><b>' + state.docs.length + "</b><span>" + TT("statDocs") + "</span></div>" +
+    '<div class="stat"><b>' + totalLines + "</b><span>" + TT("statLines") + "</span></div>";
   var v = $("#verdict");
   if (!n){
     v.className = "verdict clean";
-    v.innerHTML = "<b>没有发现同名目不同值的情况。</b><p>这不代表这套文档一致——它只说明「同一个名目后面跟的数字」没有互相打架。改了名的、换了说法的，它认不出来。</p>";
+    v.innerHTML = TT("clean");
   } else {
     v.className = "verdict";
-    v.innerHTML = "<b>有 " + n + " 处同一个名目，在不同文档里给了不同的数。</b><p>这类问题单看任何一份都发现不了——每份自己都是自洽的。下面每条都标了各自出自哪份文档的第几行。你只需要定一个口径，然后把其余几处一起改掉。</p>";
+    v.innerHTML = TT("dirty")(n);
   }
   $("#cards").innerHTML = state.conflicts.map(function(c){
     return '<article class="cc">' +
-      "<h3>「" + esc(c.label) + "」的" + (c.unit === "%" ? "数值" : "数量") + "，有 " + c.values.length + " 种说法</h3>" +
+      "<h3>" + esc(TT("cardTitle")(c)) + "</h3>" +
       '<div class="vals">' + c.values.map(function(g){
         return '<div class="v"><b>' + g.value + esc(c.unit) + '</b><span class="src">' +
-          g.rows.map(function(r){ return "<i>" + esc(r.doc) + "</i> 第 " + r.line + " 行"; }).join("　/　") +
+          g.rows.map(function(r){ return "<i>" + esc(r.doc) + "</i> " + esc(TT("atLine")(r.line)); }).join("　/　") +
           '<span class="q">' + esc(g.rows[0].text.slice(0, 120)) + "</span></span></div>";
       }).join("") + "</div>" +
-      '<div class="blk"><b>要确认的事</b>「' + esc(c.label) + "」到底是 " +
-        c.values.map(function(g){ return g.value + c.unit; }).join(" 还是 ") +
-        "？定下来之后另外几处要一起改——这个数大概率已经被别的地方引用了。</div>" +
+      '<div class="blk"><b>' + TT("lblAsk") + "</b>" + esc(TT("askBody")(c)) + "</div>" +
       "</article>";
   }).join("");
   $("#report").classList.remove("hidden");
@@ -296,33 +397,34 @@ $("#btn-reset").onclick = function(){
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 function buildText(){
-  var out = ["我把这 " + state.docs.length + " 份文档里同名目的数字对了一遍，有 " + state.conflicts.length + " 处对不上：", ""];
+  var out = [TT("txtHead")(state.docs.length, state.conflicts.length), ""];
   state.conflicts.forEach(function(c, i){
     out.push((i + 1) + "、「" + c.label + "」");
     c.values.forEach(function(g){
-      out.push("　　" + g.value + c.unit + "　——　" + g.rows.map(function(r){ return r.doc + " 第 " + r.line + " 行"; }).join("、"));
+      out.push("　　" + g.value + c.unit + "　——　" + g.rows.map(function(r){ return TT("at")(r); }).join("、"));
     });
     out.push("");
   });
-  out.push("不是说哪份写错了，是得先定一个口径，然后把其余几处一起改掉——这些数多半已经被别的地方引用了。");
+  out.push(TT("txtTail"));
   return out.join("\n");
 }
 $("#btn-copy").onclick = function(){
   if (!state.conflicts.length) return;
   navigator.clipboard.writeText(buildText()).then(function(){
-    $("#state").textContent = "已复制";
+    $("#state").textContent = TT("copied");
     setTimeout(function(){ $("#state").textContent = ""; }, 2400);
   });
 };
+applyLang();
 $("#btn-dl").onclick = function(){
   if (!state.conflicts.length) return;
-  var md = "# 一套文档对照报告\n\n- 参与对照：" + state.docs.map(function(d){ return d.name; }).join("、") +
-           "\n- 发现 " + state.conflicts.length + " 处同名目不同值\n\n" + buildText() +
-           "\n\n---\n\n只比数字，不比意思；不判断谁对谁错；改了名的认不出来。全程在本机浏览器内完成，文档未上传。\n";
+  var md = TT("mdTitle") + "\n\n- " + TT("mdDocs") + ": " + state.docs.map(function(d){ return d.name; }).join(", ") +
+           "\n" + TT("mdFound")(state.conflicts.length) + "\n\n" + buildText() +
+           "\n\n---\n\n" + TT("mdTail") + "\n";
   var blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
-  a.href = url; a.download = "文档对照报告.md";
+  a.href = url; a.download = TT("fileName");
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
 };
