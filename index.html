@@ -66,6 +66,12 @@ section+section{border-top:1px solid var(--line)}
 .hero{padding-block:clamp(44px,8vw,104px) clamp(40px,6vw,80px)}
 .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(24px,4vw,56px);align-items:center}
 @media (max-width:940px){.hero-grid{grid-template-columns:1fr}}
+.l-zh,.l-en{display:contents}
+html[lang="en"] .l-zh{display:none}
+html:not([lang="en"]) .l-en{display:none}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-right:4px}
+.langsw button{border:none;background:transparent;color:var(--muted);padding:5px 12px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.langsw button.on{background:var(--brand);color:var(--brand-on)}
 .manifesto{display:flex;flex-direction:column;gap:3px;font-size:clamp(33px,5.4vw,58px);line-height:1.1;letter-spacing:.005em}
 .manifesto em{font-style:normal;background:linear-gradient(transparent 58%,var(--brand-tint) 58%);padding-inline:4px}
 .thesis{margin-top:24px;font-size:clamp(18px,2.1vw,23px);font-weight:600;line-height:1.5;color:var(--brand-ink)}
@@ -155,11 +161,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <div class="brand"><span>文档体检台</span><span class="sub">问题点 · 业务影响 · 该找谁确认</span></div>
-  <div class="acts"><a class="btn ghost" href="cross-check.html">一套文档对照</a><a class="btn primary" href="prd-check.html">打开体检台</a></div>
+  <div class="brand">
+    <span class="l-zh">文档体检台</span><span class="l-en">Doc Health Check</span>
+    <span class="sub l-zh">问题点 · 业务影响 · 该找谁确认</span><span class="sub l-en">the problem · the cost · who to ask</span>
+  </div>
+  <div class="acts">
+    <div class="langsw" id="langsw"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
+    <span class="l-zh"><a class="btn ghost" href="cross-check.html">一套文档对照</a><a class="btn primary" href="prd-check.html">打开体检台</a></span>
+    <span class="l-en"><a class="btn ghost" href="cross-check.html">Compare a doc set</a><a class="btn primary" href="prd-check.html">Open the checker</a></span>
+  </div>
 </div></div>
 
-<section class="hero"><div class="wrap hero-grid">
+<section class="hero"><div class="wrap hero-grid"><div class="l-zh">
   <div>
     <h1 class="manifesto"><span>不以 AI 验 AI</span><span>拒绝幻觉膨胀</span><span><em>拒绝废话文档</em></span></h1>
     <p class="thesis">危险的不是写错了，<br>是把<span class="keep">没定的事</span>，写成了<span class="keep">定了的事</span>。</p>
@@ -186,9 +199,36 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       </article>
     </div>
   </div>
-</div></section>
+</div><div class="l-en">
+  <div>
+    <h1 class="manifesto"><span>No AI judging AI</span><span>No hallucinated bulk</span><span><em>No filler docs</em></span></h1>
+    <p class="thesis">The danger isn't being wrong.<br>It's typesetting <span class="keep">what isn't decided</span> as <span class="keep">what is</span>.</p>
+    <p class="lede">The most dangerous part of a spec is usually the part that looks most like a spec. A parameter table gives a precise default on the left and admits in small type on the right that nobody has signed off. A data-source list says "TBD" on row one, and eleven chapters of formulas downstream compute perfectly anyway. Readers see the formulas, and the whole chain gets built on an input that doesn't exist.</p>
+    <div class="cta">
+      <a class="btn primary lg" href="prd-check.html">Paste a document</a>
+      <a class="btn lg" href="#limits">What it can't check</a>
+    </div>
+  </div>
+  <div class="demo">
+    <div class="demo-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:6px">what it gives you</span></div>
+    <div class="demo-body">
+      <article class="cc">
+        <div class="top"><span class="tag">Dangling input</span><span class="ref">L507 &#8599;</span></div>
+        <h3>"Patents" is still empty, and 3 places downstream already compute with it</h3>
+        <p class="why">The input hasn't arrived, but the formulas, metrics and charts that depend on it are already written.</p>
+        <div class="blk out"><b>If nobody fixes this</b>Day one of implementation stops here. During the wait, everyone believes the plan is ready.</div>
+        <div class="blk"><b>Ask &middot; whoever can say if this data is obtainable</b>Can we actually get it? Who is chasing it, where is it stuck, when does it land?</div>
+      </article>
+      <article class="cc ai">
+        <div class="top"><span class="tag">AI traces</span><span class="tag soft">not counted</span><span class="ref">L231 &#8599;</span></div>
+        <h3>11 section headings repeat 4+ times — a template was filled in</h3>
+        <div class="blk"><b>The wording stays soft, because this is a way out</b>Some sections look like they exist to keep the structure. Deleting them or marking them "not applicable" costs nothing.</div>
+      </article>
+    </div>
+  </div>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>为什么这件事必须有工具</h2>
   <p class="lede">因为成本是不对称的。而且这个不对称，全部由不写文档的那个人承担。</p>
   <div class="asym">
@@ -206,9 +246,27 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
     </div>
   </div>
   <p class="punch"><b>制造垃圾的成本趋近于零，清理垃圾的成本高上天。</b>这个工具做的，是把那 3 天压缩成 10 秒——而且把结论变成一句能当面问出口的话。</p>
-</div></section>
+</div><div class="l-en">
+  <h2>Why this needs a tool at all</h2>
+  <p class="lede">Because the cost is asymmetric. And the asymmetry is paid entirely by the person who didn't write the document.</p>
+  <div class="asym">
+    <div>
+      <p class="who">Producing something that looks complete</p>
+      <p class="num">30 sec</p>
+      <p class="what">One prompt, and out comes tight professional vocabulary, architecture diagrams, interface definitions. The author never has to verify any of it, because verifying changes nothing about how complete it looks.</p>
+      <div class="bar-v"><i style="width:2%;background:var(--md)"></i></div>
+    </div>
+    <div>
+      <p class="who">Clearing the false logic out of it</p>
+      <p class="num">3 days</p>
+      <p class="what">Sorting specs from wishes line by line, checking which package names are real and which were invented. Those days appear on nobody's plan, and missing one means a production rollback later.</p>
+      <div class="bar-v"><i style="width:100%;background:var(--hi)"></i></div>
+    </div>
+  </div>
+  <p class="punch"><b>Producing slop costs nothing. Clearing it costs everything.</b> Brandolini's law, now running at machine speed. This tool compresses those three days into ten seconds — and turns the result into a sentence you can say out loud.</p>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>它找的是一种特定的病：因果链被折叠</h2>
   <p class="lede">真实的工程是严格的状态机：上一步的输出质量和异常边界，决定下一步的数据结构。假方案把这条链直接折叠了——假装所有输入都已就位，于是每一步都能一口气写完。</p>
   <figure>
@@ -263,9 +321,63 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
     </svg>
     <figcaption>两张图的差别，就是「这份文档能不能照着干」的全部内容。</figcaption>
   </figure>
-</div></section>
+</div><div class="l-en">
+  <h2>It looks for one specific disease: a folded causal chain</h2>
+  <p class="lede">Real engineering is a strict state machine: the output quality and failure modes of step one determine the data structures of step two. Fake plans fold that chain flat — assume every input is already there, and every step after it can be written in a single pass.</p>
+  <figure>
+    <svg viewBox="0 0 980 300" role="img" aria-label="the same pipeline as written, and as built">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g font-family="system-ui,-apple-system,sans-serif" font-size="13">
+        <text x="0" y="16" fill="currentColor" opacity=".55" font-size="12.5">how it reads in the document</text>
+        <g color="var(--ok)">
+          <g fill="var(--ok-tint)" stroke="var(--ok)" stroke-width="1.5">
+            <rect x="0" y="32" width="168" height="50" rx="11"/>
+            <rect x="203" y="32" width="168" height="50" rx="11"/>
+            <rect x="406" y="32" width="168" height="50" rx="11"/>
+            <rect x="609" y="32" width="168" height="50" rx="11"/>
+            <rect x="812" y="32" width="168" height="50" rx="11"/>
+          </g>
+          <g stroke="currentColor" stroke-width="1.5" marker-end="url(#ar2)">
+            <line x1="170" y1="57" x2="196" y2="57"/><line x1="373" y1="57" x2="399" y2="57"/>
+            <line x1="576" y1="57" x2="602" y2="57"/><line x1="779" y1="57" x2="805" y2="57"/>
+          </g>
+        </g>
+        <g fill="currentColor" text-anchor="middle" font-size="13.5">
+          <text x="84" y="62">data source</text><text x="287" y="62">metrics</text><text x="490" y="62">formulas</text>
+          <text x="693" y="62">charts</text><text x="896" y="62">conclusions</text>
+        </g>
+        <text x="0" y="150" fill="currentColor" opacity=".55" font-size="12.5">how it goes when you build it</text>
+        <g>
+          <rect x="0" y="166" width="168" height="50" rx="11" fill="none" stroke="var(--hi)" stroke-width="1.8" stroke-dasharray="6 5"/>
+          <g fill="var(--soft)" stroke="var(--line)" stroke-width="1.5">
+            <rect x="203" y="166" width="168" height="50" rx="11"/>
+            <rect x="406" y="166" width="168" height="50" rx="11"/>
+            <rect x="609" y="166" width="168" height="50" rx="11"/>
+            <rect x="812" y="166" width="168" height="50" rx="11"/>
+          </g>
+          <g stroke="var(--line)" stroke-width="1.5" color="var(--line)" marker-end="url(#ar2)">
+            <line x1="170" y1="191" x2="196" y2="191"/><line x1="373" y1="191" x2="399" y2="191"/>
+            <line x1="576" y1="191" x2="602" y2="191"/><line x1="779" y1="191" x2="805" y2="191"/>
+          </g>
+          <text x="84" y="196" fill="var(--hi)" text-anchor="middle" font-size="13.5" font-weight="600">TBD</text>
+          <g fill="currentColor" opacity=".45" text-anchor="middle" font-size="13.5">
+            <text x="287" y="196">metrics</text><text x="490" y="196">formulas</text>
+            <text x="693" y="196">charts</text><text x="896" y="196">conclusions</text>
+          </g>
+          <text x="591" y="246" fill="var(--hi)" text-anchor="middle" font-size="13.5">&#8593; all four are void; rework is the whole chain</text>
+          <text x="84" y="246" fill="currentColor" opacity=".55" text-anchor="middle" font-size="13">step one never arrived</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>The gap between those two pictures is the entire question of whether a document can be built from.</figcaption>
+  </figure>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>市面上的 AI 检测，解决不了这件事</h2>
   <div class="vs">
     <div class="old">
@@ -283,9 +395,27 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <p class="so" style="margin-top:12px">只说「这里有问题」而不说「不处理会怎样」和「去找谁」，等于没说。</p>
     </div>
   </div>
-</div></section>
+</div><div class="l-en">
+  <h2>AI detectors don't solve this</h2>
+  <div class="vs">
+    <div class="old">
+      <h3>A typical AI detector</h3>
+      <p class="quote">87% likely AI-generated</p>
+      <p class="so">And then what? Send it back? In real work the question is meaningless: the answer is always yes, and it should be. Nobody hand-writes documents any more, and nobody should have to.</p>
+    </div>
+    <div class="new">
+      <h3>Three different things get checked here</h3>
+      <ol>
+        <li><b>The problem</b>which line, quoted from the source</li>
+        <li><b>The business cost</b>what happens downstream if it's ignored</li>
+        <li><b>Which human to ask, and what</b>a sentence you can say out loud</li>
+      </ol>
+      <p class="so" style="margin-top:12px">Saying "there's a problem here" without saying what it costs and who to ask is the same as saying nothing.</p>
+    </div>
+  </div>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>在一份真实的 6 万字 PRD 上</h2>
   <p class="lede">产业分析类需求文档，11 章，239 个标题，102 张表。打开页面、粘进去、拿到结果，全程不到十秒。</p>
   <div class="stats">
@@ -308,9 +438,32 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <div class="blk out"><b>不处理的话，业务上会怎样</b>验证成本全部落在接手的人身上。只要有一个是假的，照着搭的那一段就是白干。</div>
     </article>
   </div></div>
-</div></section>
+</div><div class="l-en">
+  <h2>On a real 60,000-character PRD</h2>
+  <p class="lede">An industry-analysis requirements doc: 11 chapters, 239 headings, 102 tables. Open the page, paste it, read the result — under ten seconds, start to finish.</p>
+  <div class="stats">
+    <div class="stat hi"><b>4</b><span>blocking &middot; work can't start</span></div>
+    <div class="stat md"><b>7</b><span>to clarify &middot; needs an answer first</span></div>
+    <div class="stat ai"><b>2</b><span>AI traces &middot; a note, not a problem</span></div>
+    <div class="stat"><b>2545</b><span>lines, each finding anchored to one</span></div>
+  </div>
+  <div class="demo" style="margin-top:22px"><div class="demo-body">
+    <article class="cc">
+      <div class="top"><span class="tag">Undecided, typeset as decided</span><span class="ref">L137 &#8599;</span></div>
+      <h3>38 parameters in one table, 30 of them marked "needs sign-off"</h3>
+      <p class="why">One row says two opposite things: a precise default on the left, an admission on the right that nobody agreed to it. Readers only remember the left.</p>
+      <div class="blk out"><b>If nobody fixes this</b>Downstream treats 30 unsettled numbers as settled. When a value changes, every calculation, chart and conclusion built on it is redone — and that rework lands on whoever implemented it.</div>
+    </article>
+    <article class="cc md">
+      <div class="top"><span class="tag">Unverified specifics</span><span class="ref">L111 &#8599;</span></div>
+      <h3>19 package / CLI / endpoint names, none marked as verified</h3>
+      <p class="why">Exactly what models are best at inventing. They look like the hardest facts in the document and they are the highest-hallucination part of it.</p>
+      <div class="blk out"><b>If nobody fixes this</b>Verification time lands entirely on whoever builds from it. If even one is invented, that part of the build is wasted.</div>
+    </article>
+  </div></div>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>最有用的那几条检查，不需要懂你的业务</h2>
   <p class="lede">它看不懂你的公式合不合理——这个它从不假装。但有一类问题是纯算术，谁都能判定，而且<b>对方无法辩论</b>：</p>
   <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
@@ -320,9 +473,19 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
     <div class="stat hi"><b>20% / 15%</b><span>同一个名目，这份文档一个数，那份另一个数</span></div>
   </div>
   <p class="punch">不需要争论「这样写好不好」，只需要回答「哪个是对的」。这就是为什么输出是问题而不是评分。</p>
-</div></section>
+</div><div class="l-en">
+  <h2>The most useful checks need no knowledge of your business</h2>
+  <p class="lede">It can't tell whether your formula is sound — it never pretends to. But one class of problem is pure arithmetic: anyone can adjudicate it, and <b>there is nothing to argue about</b>.</p>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+    <div class="stat hi"><b>&ne;100%</b><span>percentages declared as weights don't sum to 100</span></div>
+    <div class="stat hi"><b>5 &ne; 6</b><span>says "5 items:" and then lists 6</span></div>
+    <div class="stat hi"><b>100% + if</b><span>"fully automated" next to "provided the source can be connected"</span></div>
+    <div class="stat hi"><b>20% / 15%</b><span>same name, one number here, a different one there</span></div>
+  </div>
+  <p class="punch">Nobody has to debate whether this is well written. They only have to say which one is correct. That's why the output is questions, never a score.</p>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>一份查不出来的，一套才查得出来</h2>
   <p class="lede">一套材料里最危险的问题，不在任何一份文档里面。</p>
   <div class="vs" style="margin-top:26px">
@@ -339,9 +502,26 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
   </div>
   <p class="punch">两份单独读都挑不出毛病，只有并排放才看得见。把一整套拖进去，它把所有「同一个名目、不同数字」的地方列给你，标明各自出自哪份的第几行。</p>
   <div class="cta"><a class="btn primary lg" href="cross-check.html">打开一套文档对照</a></div>
-</div></section>
+</div><div class="l-en">
+  <h2>What one document hides, a set reveals</h2>
+  <p class="lede">The most dangerous problem in a document set is in none of the documents.</p>
+  <div class="vs" style="margin-top:26px">
+    <div class="new">
+      <h3>Document A</h3>
+      <p class="quote">C &nbsp;Operational support&nbsp; 2 items&nbsp; <b style="color:var(--hi)">20%</b><br>D &nbsp;Outcomes&nbsp; 3 items&nbsp; <b style="color:var(--hi)">20%</b></p>
+      <p class="so">30 + 30 + 20 + 20 = 100&nbsp; &#10003; internally consistent</p>
+    </div>
+    <div class="new">
+      <h3>Document B</h3>
+      <p class="quote">C Operational support (2 items, <b style="color:var(--hi)">15%</b>)<br>D Outcomes (3 items, <b style="color:var(--hi)">25%</b>)</p>
+      <p class="so">30 + 30 + 15 + 25 = 100&nbsp; &#10003; also consistent</p>
+    </div>
+  </div>
+  <p class="punch">Read either one alone and nothing is wrong. Only side by side does it show. Drop the whole set in and it lists every place the same name carries a different number, with the file and line for each.</p>
+  <div class="cta"><a class="btn primary lg" href="cross-check.html">Compare a document set</a></div>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>两个模式，措辞完全不一样</h2>
   <p class="lede">默认是自检。这是有意的——一个只能用来挑别人毛病的工具，第一次用完就会被所有人记恨。</p>
   <div class="modes">
@@ -359,9 +539,27 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
     </div>
   </div>
   <p class="punch">你得能说「我自己每份文档发出去之前都过一遍」，别人用它才不觉得被针对。</p>
-</div></section>
+</div><div class="l-en">
+  <h2>Two modes, deliberately different wording</h2>
+  <p class="lede">Self-check is the default. That's on purpose — a tool that can only be used to find fault with other people gets resented the first time it's used.</p>
+  <div class="modes">
+    <div class="mode">
+      <p class="k">default</p>
+      <h3>Self-check &middot; I wrote this</h3>
+      <p>Read it once before sending. It doesn't grade you; it shows where the next person will get stuck and what you can fix right now. Exports as a personal checklist.</p>
+      <div class="ex"><b>it says things like</b>Until "Patents" actually lands, collapse the sections that depend on it or mark them "to be filled once data arrives." Writing them out in full now means handing over a document that looks buildable and isn't.</div>
+    </div>
+    <div class="mode b">
+      <p class="k">switch</p>
+      <h3>Review &middot; someone sent me this</h3>
+      <p>Decide whether you can build from it. Each finding gives the problem, the business cost, and which human to ask what. Exports as a message you can send.</p>
+      <div class="ex"><b>it says things like</b>Can we actually get "Patents" today? Who is chasing it, where is it stuck, when does it land? If it doesn't, do we cut the parts that depend on it or pause the whole thing?</div>
+    </div>
+  </div>
+  <p class="punch">You need to be able to say "I run this on everything I send." That's what makes it safe for anyone else to use.</p>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>AI 痕迹会标出来，但那是台阶，不是罪状</h2>
   <div class="cols">
     <div>
@@ -377,9 +575,25 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <p style="color:var(--muted);font-size:15px;margin-top:12px">同样的理由，这里<b style="color:var(--ink)">永远不给文档打分</b>。分数会被辩论（「你凭什么说我 60 分」），问题不能被辩论——对方只能回答，或者回答不上来。</p>
     </div>
   </div>
-</div></section>
+</div><div class="l-en">
+  <h2>AI traces are flagged, but as a way out, not a charge</h2>
+  <div class="cols">
+    <div>
+      <p class="lede" style="margin-top:0">The flag does two things:</p>
+      <ul style="margin-top:14px">
+        <li><b>It warns the reader.</b>Knowing which sections came out in one pass makes you read them with one eye open.</li>
+        <li><b>It gives the author a way out.</b>"That part was my AI, just delete it" is a hundred times easier to say than "I got it wrong."</li>
+      </ul>
+    </div>
+    <div>
+      <p style="color:var(--muted);font-size:15px">If pointing at a problem means accusing someone of incompetence, they can only dig in, and the conversation dies. Leave the blame with the model and people keep a way out.</p>
+      <p style="color:var(--muted);font-size:15px;margin-top:12px">So this tier is counted separately and <b style="color:var(--ink)">never added to the questions that must be answered</b>.</p>
+      <p style="color:var(--muted);font-size:15px;margin-top:12px">Same reason there is <b style="color:var(--ink)">never a score</b>. A score invites argument ("who says I'm a 60?"). A question doesn't — you either answer it or you can't.</p>
+    </div>
+  </div>
+</div></div></section>
 
-<section><div class="wrap">
+<section><div class="wrap"><div class="l-zh">
   <h2>它自己不用 AI。一行都没有。</h2>
   <p class="lede">全是确定性正则，在你的浏览器里跑完。这不是省钱，是三个换来的东西：</p>
   <div class="cols">
@@ -392,9 +606,22 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <li><b>可验证。</b>代码公开，一共一个 HTML 文件。不用信这段话，自己搜 <code>fetch</code>，一个都没有。</li>
     </ul></div>
   </div>
-</div></section>
+</div><div class="l-en">
+  <h2>It uses no AI. Not one line.</h2>
+  <p class="lede">Deterministic regex, running in your browser. That isn't about saving money. It buys three things:</p>
+  <div class="cols">
+    <div><ul>
+      <li><b>It can't hallucinate.</b>Using AI to audit AI inflation produces inflated audits.</li>
+      <li><b>Your document never leaves your machine.</b>No backend, no account, no network calls, works offline — the only reason a colleague will paste a confidential spec into it.</li>
+    </ul></div>
+    <div><ul>
+      <li><b>Zero cost, zero latency.</b>No key to request, no budget to wait for. Open it and it works.</li>
+      <li><b>It's checkable.</b>The source is public and it is one HTML file. Don't take this paragraph's word for it — search it for <code>fetch</code>. There isn't one.</li>
+    </ul></div>
+  </div>
+</div></div></section>
 
-<section id="limits"><div class="wrap">
+<section id="limits"><div class="wrap"><div class="l-zh">
   <h2>这个工具查不了什么</h2>
   <p class="lede">写明边界是它存在的理由本身。一份不肯说自己做不到什么的文档，正是它要查的东西。</p>
   <div class="cols">
@@ -408,18 +635,69 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <li><b>它绝不聪明。</b>没有模型参与，所以不会幻觉，代价是它只认得出结构，认不出意思。</li>
     </ul></div>
   </div>
-</div></section>
+</div><div class="l-en">
+  <h2>What this tool cannot check</h2>
+  <p class="lede">Stating its own limits is the whole reason it gets to exist. A document that refuses to say what it can't do is exactly what it was built to find.</p>
+  <div class="cols">
+    <div><ul>
+      <li><b>It can't tell right from wrong.</b>It doesn't know your business. Whether a formula is sound or a metric means anything — no idea, and no pretending.</li>
+      <li><b>Definition clashes only at the numeric level.</b>Same parameter, different values; a symbol reused; weights that don't sum; mismatched units. A disagreement written out in prose it cannot see. Known gap, not patched.</li>
+    </ul></div>
+    <div><ul>
+      <li><b>It can't see "correct but undoable."</b>Headcount, budget, schedule, access — not in the document, not visible.</li>
+      <li><b>A hit is not a verdict.</b>Each one only means "a human needs to answer this here."</li>
+      <li><b>It is never clever.</b>No model anywhere, so it never hallucinates — and it only recognises structure, never meaning.</li>
+    </ul></div>
+  </div>
+</div></div></section>
 
-<section class="end"><div class="wrap">
+<section class="end"><div class="wrap"><div class="l-zh">
   <h2>下一份文档发出去之前，先让它过一遍。</h2>
   <div class="cta">
     <a class="btn primary lg" href="prd-check.html">打开体检台</a>
     <a class="btn lg" href="https://github.com/haodaz/betterprd">看源码</a>
   </div>
-</div></section>
+</div><div class="l-en">
+  <h2>Run it once before the next document goes out.</h2>
+  <div class="cta">
+    <a class="btn primary lg" href="prd-check.html">Open the checker</a>
+    <a class="btn lg" href="https://github.com/haodaz/betterprd">Read the source</a>
+  </div>
+</div></div></section>
 
 <footer><div class="wrap">
-  <span><a href="https://www.betterprd.com/" style="text-decoration:none">betterprd.com</a> · 不以 AI 验 AI</span>
-  <span>纯前端 · 不联网 · 文档不出本机 · <a href="https://github.com/haodaz/betterprd">源码</a></span>
+  <span class="l-zh"><a href="https://www.betterprd.com/" style="text-decoration:none">betterprd.com</a> · 不以 AI 验 AI</span>
+  <span class="l-zh">纯前端 · 不联网 · 文档不出本机 · <a href="https://github.com/haodaz/betterprd">源码</a></span>
+  <span class="l-en"><a href="https://www.betterprd.com/" style="text-decoration:none">betterprd.com</a> · no AI judging AI</span>
+  <span class="l-en">front-end only · no network · your document stays on your machine · <a href="https://github.com/haodaz/betterprd">source</a></span>
 </div></footer>
+<script>
+(function(){
+  var saved = null;
+  try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
+  var lang = (saved === "en" || saved === "zh") ? saved
+    : ((navigator.language || "").toLowerCase().indexOf("zh") === 0 ? "zh" : "en");
+  var TITLE = {
+    zh: { t:"文档体检台", d:"不以 AI 验 AI。把一份 PRD 粘进去，输出开工前必须让活人回答的问题——问题点、业务影响、该找谁确认。纯前端，不联网，文档不出本机。" },
+    en: { t:"Doc Health Check", d:"No AI judging AI. Paste a PRD and get the questions a human has to answer before work starts: the problem, the business cost, and who to ask. Front-end only, no network, your document stays on your machine." }
+  };
+  function apply(l){
+    lang = l;
+    document.documentElement.lang = (l === "en" ? "en" : "zh-CN");
+    document.title = TITLE[l].t;
+    var m = document.querySelector('meta[name="description"]');
+    if (m) m.setAttribute("content", TITLE[l].d);
+    Array.prototype.forEach.call(document.querySelectorAll("#langsw button"), function(b){
+      b.classList.toggle("on", b.dataset.l === l);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#langsw button"), function(b){
+    b.onclick = function(){
+      try { localStorage.setItem("bp_lang", b.dataset.l); } catch (e) {}
+      apply(b.dataset.l);
+    };
+  });
+  apply(lang);
+})();
+</script>
 </body></html>
