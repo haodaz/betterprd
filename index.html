@@ -1,20 +1,378 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>文档体检台</title>
-<meta name="description" content="把一份 PRD / 方案 / 报告粘进去，输出开工前必须让活人回答的问题。纯前端，不联网，文档不出本机。">
-<meta http-equiv="refresh" content="0; url=prd-check.html">
-<link rel="canonical" href="prd-check.html">
+<meta name="description" content="不以 AI 验 AI。把一份 PRD 粘进去，输出开工前必须让活人回答的问题——问题点、业务影响、该找谁确认。纯前端，不联网，文档不出本机。">
 <style>
+:root{
+  --bg:#F7F6FC; --card:#FFFFFF; --ink:#191833; --muted:#6E6C8A; --line:rgba(25,24,51,.10); --soft:#EFEDF8;
+  --hi:#C0562F; --hi-tint:#FBEDE7; --hi-ink:#8A3A1C;
+  --md:#B9791C; --md-tint:#FBF3E4; --md-ink:#7A4F0E;
+  --ai:#3B78FF; --ai-tint:#E8F0FF; --ai-ink:#1E3F86;
+  --ok:#2E8B64; --ok-tint:#E4F3EC;
+  --shadow:0 10px 34px rgba(60,52,140,.08);
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+  --hi-tint:#3C2114; --hi-ink:#F2A882; --md-tint:#3A2B12; --md-ink:#F0C070;
+  --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+  --shadow:0 10px 34px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+  --hi-tint:#3C2114; --hi-ink:#F2A882; --md-tint:#3A2B12; --md-ink:#F0C070;
+  --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+  --shadow:0 10px 34px rgba(0,0,0,.35);
+}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F7F6FC;color:#191833;
-  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;line-height:1.7}
-@media (prefers-color-scheme:dark){body{background:#14131F;color:#F1F0FA}}
-main{text-align:center;padding:24px;max-width:46ch}
-p{margin:0 0 14px;color:#6E6C8A;text-wrap:balance}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+p,li,td,small,em,b,span{text-wrap:balance}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.25;font-weight:700;letter-spacing:.005em}
+h1{font-size:clamp(30px,5.4vw,56px)}
+h2{font-size:clamp(23px,3.1vw,34px)}
+h3{font-size:17px;font-weight:600}
+p{margin:0}
 a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:clamp(18px,4vw,40px)}
+section{padding-block:clamp(52px,7vw,96px)}
+section+section{border-top:1px solid var(--line)}
+.eyebrow{font-size:13px;letter-spacing:.14em;color:var(--muted)}
+.lede{font-size:17.5px;color:var(--muted);max-width:60ch;margin-top:18px}
+
+.bar{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:baseline;gap:10px;font-weight:600;font-size:16px}
+.brand .sub{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.03em}
+@media (max-width:680px){.brand .sub{display:none}}
+.btn{display:inline-block;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:9px 18px;box-shadow:var(--shadow);text-decoration:none;font-size:14.5px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.lg{padding:13px 26px;font-size:16px;border-radius:13px}
+
+/* hero */
+.hero{padding-block:clamp(44px,8vw,104px) clamp(40px,6vw,80px)}
+.hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(24px,4vw,56px);align-items:center}
+@media (max-width:940px){.hero-grid{grid-template-columns:1fr}}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--md-tint) 62%);padding-inline:2px}
+.cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+
+/* 示意卡 */
+.demo{background:var(--card);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+.demo-head{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.demo-body{padding:15px}
+.cc{border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:var(--bg);border-left:4px solid var(--hi)}
+.cc.md{border-left-color:var(--md)} .cc.ai{border-left-color:var(--ai)}
+.cc+.cc{margin-top:11px}
+.cc .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--hi-tint);color:var(--hi-ink)}
+.cc.md .tag{background:var(--md-tint);color:var(--md-ink)}
+.cc.ai .tag{background:var(--ai-tint);color:var(--ai-ink)}
+.tag.soft{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.ref{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cc h3{font-size:14.5px;margin-bottom:6px}
+.cc .why{font-size:13px;color:var(--muted)}
+.blk{margin-top:9px;font-size:13.5px;border-radius:10px;padding:9px 11px;background:var(--soft)}
+.blk>b{display:block;font-size:11px;letter-spacing:.05em;color:var(--muted);font-weight:500;margin-bottom:3px}
+.blk.out{background:transparent;border:1px solid var(--line)}
+
+/* 不对称 */
+.asym{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+@media (max-width:760px){.asym{grid-template-columns:1fr}}
+.asym > div{background:var(--card);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+.asym .num{font-size:clamp(34px,5vw,52px);font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.asym .who{font-size:13px;color:var(--muted);letter-spacing:.04em;margin-bottom:6px}
+.asym .what{margin-top:8px;color:var(--muted);font-size:14.5px}
+.asym .bar-v{height:8px;border-radius:99px;background:var(--soft);margin-top:16px;overflow:hidden}
+.asym .bar-v i{display:block;height:100%;border-radius:99px}
+.punch{margin-top:26px;font-size:18px;max-width:62ch}
+
+/* 图 */
+figure{margin:34px 0 0}
+figcaption{font-size:13px;color:var(--muted);margin-top:12px;text-align:center}
+svg{display:block;width:100%;height:auto}
+
+/* 对照 */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+@media (max-width:760px){.vs{grid-template-columns:1fr}}
+.vs > div{border-radius:18px;padding:22px 24px;border:1px solid var(--line)}
+.vs .old{background:transparent}
+.vs .new{background:var(--card);box-shadow:var(--shadow)}
+.vs h3{margin-bottom:10px}
+.vs .quote{font-family:var(--mono);font-size:13px;background:var(--soft);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.vs ol{margin:0;padding-left:20px;font-size:14.5px}
+.vs li{margin-bottom:7px}
+.vs li b{display:block}
+.vs .so{color:var(--muted);font-size:14.5px}
+
+/* 统计 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-top:30px}
+.stat{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
+.stat.hi{border-top-color:var(--hi)} .stat.md{border-top-color:var(--md)} .stat.ai{border-top-color:var(--ai)}
+.stat b{display:block;font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* 两模式 */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+@media (max-width:760px){.modes{grid-template-columns:1fr}}
+.mode{background:var(--card);border-radius:18px;padding:24px;box-shadow:var(--shadow);border-top:3px solid var(--ok)}
+.mode.b{border-top-color:var(--ai)}
+.mode .k{font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.mode h3{margin:6px 0 10px;font-size:19px}
+.mode p{font-size:14.5px;color:var(--muted)}
+.mode .ex{margin-top:14px;font-size:13.5px;background:var(--soft);border-radius:10px;padding:11px 13px}
+.mode .ex b{display:block;font-size:11px;letter-spacing:.05em;color:var(--muted);font-weight:500;margin-bottom:3px}
+
+/* 列表 */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,48px);margin-top:28px}
+@media (max-width:800px){.cols{grid-template-columns:1fr}}
+.cols ul{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
+.cols li{margin-bottom:9px}
+.cols li b{color:var(--ink)}
+
+.end{text-align:center;padding-block:clamp(56px,8vw,104px)}
+.end h2{max-width:22ch;margin:0 auto}
+.end .cta{justify-content:center;margin-top:28px}
+footer{border-top:1px solid var(--line);padding-block:26px;font-size:13px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 </style></head><body>
-<main>
-  <p>正在进入文档体检台…</p>
-  <p>没有自动跳转的话，<a href="prd-check.html">点这里</a>。</p>
-</main>
+
+<div class="bar"><div class="wrap">
+  <div class="brand"><span>文档体检台</span><span class="sub">不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档</span></div>
+  <a class="btn primary" href="prd-check.html">打开体检台</a>
+</div></div>
+
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <p class="eyebrow">不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档</p>
+    <h1 style="margin-top:16px">危险的不是写错了，<br>是把<em>没定的事</em>，写成了定了的事。</h1>
+    <p class="lede">一份方案里最要命的地方，往往长得最像规格：参数表左边给出精确默认值，右边小字写着「需业务确认」；数据源第一行标着「待定」，后面十一章的公式照样算得天衣无缝。读的人只看见公式，于是整条链路在一个不存在的输入上开工。</p>
+    <div class="cta">
+      <a class="btn primary lg" href="prd-check.html">粘一份文档试试</a>
+      <a class="btn lg" href="#limits">它查不了什么</a>
+    </div>
+  </div>
+  <div class="demo">
+    <div class="demo-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:6px">输出长这样</span></div>
+    <div class="demo-body">
+      <article class="cc">
+        <div class="top"><span class="tag">悬空依赖</span><span class="ref">L507 ↗</span></div>
+        <h3>「专利」这一环还是空的，下游已经有 3 处在用它算</h3>
+        <p class="why">输入还没拿到，依赖它的公式、指标、图表却已经写完了。</p>
+        <div class="blk out"><b>不处理的话，业务上会怎样</b>真开工第一步就卡住。等的那段时间里，所有人都以为方案已经就绪。</div>
+        <div class="blk"><b>找谁 · 能回答「这数据到底拿不拿得到」的人</b>现在到底能不能拿到？谁在推、卡在哪一步、预计什么时候有？</div>
+      </article>
+      <article class="cc ai">
+        <div class="top"><span class="tag">AI 痕迹</span><span class="tag soft">不计入问题</span><span class="ref">L231 ↗</span></div>
+        <h3>11 个章节标题各重复 4 次以上，是同一套骨架套出来的</h3>
+        <div class="blk"><b>措辞是软的，因为这是台阶</b>哪几节其实是为了对齐格式才填的？直接删掉或标「本章不适用」就行，不丢人。</div>
+      </article>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>为什么这件事必须有工具</h2>
+  <p class="lede">因为成本是不对称的。而且这个不对称，全部由不写文档的那个人承担。</p>
+  <div class="asym">
+    <div>
+      <p class="who">生产一份看起来很完整的方案</p>
+      <p class="num">30 秒</p>
+      <p class="what">提示词一敲，结构严密的专业黑话、架构图、接口定义哗啦啦吐出来。写的人不必验，因为验不验都不影响它「看起来完整」。</p>
+      <div class="bar-v"><i style="width:2%;background:var(--md)"></i></div>
+    </div>
+    <div>
+      <p class="who">把里面的假逻辑挑干净</p>
+      <p class="num">3 天</p>
+      <p class="what">逐条分辨哪些是规格、哪些是愿望，哪个包名是真的、哪个是编的。这几天不计入任何人的工作量，挑漏一个就是一次线上返工。</p>
+      <div class="bar-v"><i style="width:100%;background:var(--hi)"></i></div>
+    </div>
+  </div>
+  <p class="punch"><b>制造垃圾的成本趋近于零，清理垃圾的成本高上天。</b>这个工具做的，是把那 3 天压缩成 10 秒——而且把结论变成一句能当面问出口的话。</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>它找的是一种特定的病：因果链被折叠</h2>
+  <p class="lede">真实的工程是严格的状态机：上一步的输出质量和异常边界，决定下一步的数据结构。假方案把这条链直接折叠了——假装所有输入都已就位，于是每一步都能一口气写完。</p>
+  <figure>
+    <svg viewBox="0 0 980 300" role="img" aria-label="同一条链路在文档里和真开工时的两种样子">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g font-family="system-ui,-apple-system,sans-serif" font-size="13">
+        <text x="0" y="16" fill="currentColor" opacity=".55" font-size="12.5">文档里看起来的样子</text>
+        <g color="var(--ok)">
+          <g fill="var(--ok-tint)" stroke="var(--ok)" stroke-width="1.5">
+            <rect x="0" y="32" width="168" height="50" rx="11"/>
+            <rect x="203" y="32" width="168" height="50" rx="11"/>
+            <rect x="406" y="32" width="168" height="50" rx="11"/>
+            <rect x="609" y="32" width="168" height="50" rx="11"/>
+            <rect x="812" y="32" width="168" height="50" rx="11"/>
+          </g>
+          <g stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)">
+            <line x1="170" y1="57" x2="196" y2="57"/><line x1="373" y1="57" x2="399" y2="57"/>
+            <line x1="576" y1="57" x2="602" y2="57"/><line x1="779" y1="57" x2="805" y2="57"/>
+          </g>
+        </g>
+        <g fill="currentColor" text-anchor="middle" font-size="13.5">
+          <text x="84" y="62">数据源</text><text x="287" y="62">指标</text><text x="490" y="62">公式</text>
+          <text x="693" y="62">图表</text><text x="896" y="62">结论</text>
+        </g>
+
+        <text x="0" y="150" fill="currentColor" opacity=".55" font-size="12.5">真开工时的样子</text>
+        <g>
+          <rect x="0" y="166" width="168" height="50" rx="11" fill="none" stroke="var(--hi)" stroke-width="1.8" stroke-dasharray="6 5"/>
+          <g fill="var(--soft)" stroke="var(--line)" stroke-width="1.5">
+            <rect x="203" y="166" width="168" height="50" rx="11"/>
+            <rect x="406" y="166" width="168" height="50" rx="11"/>
+            <rect x="609" y="166" width="168" height="50" rx="11"/>
+            <rect x="812" y="166" width="168" height="50" rx="11"/>
+          </g>
+          <g stroke="var(--line)" stroke-width="1.5" color="var(--line)" marker-end="url(#ar)">
+            <line x1="170" y1="191" x2="196" y2="191"/><line x1="373" y1="191" x2="399" y2="191"/>
+            <line x1="576" y1="191" x2="602" y2="191"/><line x1="779" y1="191" x2="805" y2="191"/>
+          </g>
+          <text x="84" y="196" fill="var(--hi)" text-anchor="middle" font-size="13.5" font-weight="600">待定</text>
+          <g fill="currentColor" opacity=".45" text-anchor="middle" font-size="13.5">
+            <text x="287" y="196">指标</text><text x="490" y="196">公式</text>
+            <text x="693" y="196">图表</text><text x="896" y="196">结论</text>
+          </g>
+          <text x="591" y="246" fill="var(--hi)" text-anchor="middle" font-size="13.5">↑ 这四格全部作废，返工量按整条链路算</text>
+          <text x="84" y="246" fill="currentColor" opacity=".55" text-anchor="middle" font-size="13">第一环没拿到</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>两张图的差别，就是「这份文档能不能照着干」的全部内容。</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>市面上的 AI 检测，解决不了这件事</h2>
+  <div class="vs">
+    <div class="old">
+      <h3>常见的 AIGC 检测</h3>
+      <p class="quote">本文 87% 疑似 AI 生成</p>
+      <p class="so">所以呢？你能拿这句话去干什么——把文档退回去？在我们这种业务里，这个问题本身就没有意义：答案永远是「是」，而且本来就该是。现在没人全手写文档，也不必。</p>
+    </div>
+    <div class="new">
+      <h3>这里查的是另外三件事</h3>
+      <ol>
+        <li><b>问题点</b>具体在第几行，原文照抄出来</li>
+        <li><b>业务影响</b>不处理的话，下游会发生什么</li>
+        <li><b>该找哪个活人确认什么</b>一句能当面问出口的话</li>
+      </ol>
+      <p class="so" style="margin-top:12px">只说「这里有问题」而不说「不处理会怎样」和「去找谁」，等于没说。</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>在一份真实的 6 万字 PRD 上</h2>
+  <p class="lede">产业分析类需求文档，11 章，239 个标题，102 张表。打开页面、粘进去、拿到结果，全程不到十秒。</p>
+  <div class="stats">
+    <div class="stat hi"><b>4</b><span>阻断项 · 不回答没法开工</span></div>
+    <div class="stat md"><b>4</b><span>待澄清 · 开工前要有答案</span></div>
+    <div class="stat ai"><b>2</b><span>AI 痕迹 · 备注，不算问题</span></div>
+    <div class="stat"><b>2545</b><span>行原文，逐行标出位置</span></div>
+  </div>
+  <div class="demo" style="margin-top:22px"><div class="demo-body">
+    <article class="cc">
+      <div class="top"><span class="tag">未决伪装</span><span class="ref">L137 ↗</span></div>
+      <h3>这张表 38 行参数，30 行自己标着「需确认」</h3>
+      <p class="why">同一行在说两件相反的事：左边给出精确默认值，右边承认没人定过。读的人只会记住左边那个数。</p>
+      <div class="blk out"><b>不处理的话，业务上会怎样</b>下游会把 30 个没定的数当成定了的数写进代码。等真定下来，牵连的计算、图表、结论要全部回炉，而返工不会被算作任何人的工作量。</div>
+    </article>
+    <article class="cc md">
+      <div class="top"><span class="tag">未验证具体物</span><span class="ref">L111 ↗</span></div>
+      <h3>19 个包名 / CLI / 接口地址，没有一个标注验证过</h3>
+      <p class="why">模型最擅长编造的就是这种长得很像真的的名字。它们看上去是全文最硬的部分，实际是幻觉率最高的部分。</p>
+      <div class="blk out"><b>不处理的话，业务上会怎样</b>验证成本全部落在接手的人身上。只要有一个是假的，照着搭的那一段就是白干。</div>
+    </article>
+  </div></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>两个模式，措辞完全不一样</h2>
+  <p class="lede">默认是自检。这是有意的——一个只能用来挑别人毛病的工具，第一次用完就会被所有人记恨。</p>
+  <div class="modes">
+    <div class="mode">
+      <p class="k">默认</p>
+      <h3>自检 · 我自己写的</h3>
+      <p>发出去之前先过一遍。不挑错，只告诉你哪几处会让接手的人卡住，以及你现在能动手补什么。导出是一份自查清单。</p>
+      <div class="ex"><b>它会这样说</b>在「专利」真拿到之前，把依赖它的那几节折叠起来，或标上「待数据到位后补」。现在就写完整，等于交出一份看着能开工、其实开不了工的文档。</div>
+    </div>
+    <div class="mode b">
+      <p class="k">切换</p>
+      <h3>体检 · 别人给我的</h3>
+      <p>判断这份能不能照着干。每条给出问题点、业务影响、该找哪个活人确认什么。导出是一条可以直接发群的消息。</p>
+      <div class="ex"><b>它会这样说</b>「专利」现在到底能不能拿到？谁在推、卡在哪一步、预计什么时候有？拿不到的话，依赖它的那几节是先砍掉还是整体暂停？</div>
+    </div>
+  </div>
+  <p class="punch">你得能说「我自己每份文档发出去之前都过一遍」，别人用它才不觉得被针对。</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>AI 痕迹会标出来，但那是台阶，不是罪状</h2>
+  <div class="cols">
+    <div>
+      <p class="lede" style="margin-top:0">标出来只为两件事：</p>
+      <ul style="margin-top:14px">
+        <li><b>给读的人一个心理准备。</b>哪几段可能没经过人工核对，看的时候多留一个心眼。</li>
+        <li><b>给写的人一个退路。</b>「这段是我的 AI 自己加的，删掉就行」，比「我写错了」容易说出口一百倍。</li>
+      </ul>
+    </div>
+    <div>
+      <p style="color:var(--muted);font-size:15px">指出问题如果等于指控对方能力有问题，对方只能硬撑，事情就谈不下去。把锅留给模型，沟通才能发生。</p>
+      <p style="color:var(--muted);font-size:15px;margin-top:12px">所以这一档单独算，<b style="color:var(--ink)">不计入「必须回答的问题」</b>，提问的措辞也是软的。</p>
+      <p style="color:var(--muted);font-size:15px;margin-top:12px">同样的理由，这里<b style="color:var(--ink)">永远不给文档打分</b>。分数会被辩论（「你凭什么说我 60 分」），问题不能被辩论——对方只能回答，或者回答不上来。</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>它自己不用 AI。一行都没有。</h2>
+  <p class="lede">全是确定性正则，在你的浏览器里跑完。这不是省钱，是三个换来的东西：</p>
+  <div class="cols">
+    <div><ul>
+      <li><b>不会幻觉。</b>用 AI 去查 AI 的膨胀，查出来的东西自己也会膨胀。</li>
+      <li><b>文档不出本机。</b>没有后端、没有账号、不联网、断网也能用——这是同事敢把保密文档粘进去的唯一前提。</li>
+    </ul></div>
+    <div><ul>
+      <li><b>零成本零延迟。</b>不用申请 key，不用等预算，打开就能用。</li>
+      <li><b>可验证。</b>代码公开，一共一个 HTML 文件。不用信这段话，自己搜 <code>fetch</code>，一个都没有。</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section id="limits"><div class="wrap">
+  <h2>这个工具查不了什么</h2>
+  <p class="lede">写明边界是它存在的理由本身。一份不肯说自己做不到什么的文档，正是它要查的东西。</p>
+  <div class="cols">
+    <div><ul>
+      <li><b>查不了内容对错。</b>它不懂你的业务，公式合不合理、指标有没有意义，一概不知，也不装懂。</li>
+      <li><b>查不了跨章节的口径冲突。</b>同一个指标在第 2 章和第 5 章用了两套权重，目前检测不出来。已知缺口，没假装补上。</li>
+    </ul></div>
+    <div><ul>
+      <li><b>查不出「写得对但做不到」。</b>资源、排期、人力、授权，文档里不写就看不见。</li>
+      <li><b>命中不等于有罪。</b>每条只是「这里需要一个人回答」。答得上来就划掉。</li>
+      <li><b>它绝不聪明。</b>没有模型参与，所以不会幻觉，代价是它只认得出结构，认不出意思。</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section class="end"><div class="wrap">
+  <h2>下一份文档发出去之前，先让它过一遍。</h2>
+  <div class="cta">
+    <a class="btn primary lg" href="prd-check.html">打开体检台</a>
+    <a class="btn lg" href="https://github.com/haodaz/betterprd">看源码</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>文档体检台 · 不以 AI 验 AI</span>
+  <span>纯前端 · 不联网 · 文档不出本机</span>
+</div></footer>
 </body></html>
