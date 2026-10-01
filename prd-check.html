@@ -1053,7 +1053,7 @@ var I18N = {
     },
     exp:{
       copiedN:function(n){ return "已复制 " + n + " 条"; },
-      mdTitle:"# 文档体检报告", mdDoc:"受检文档", mdTime:"体检时间",
+      sep:"：", gap:"　", mdTitle:"# 文档体检报告", mdDoc:"受检文档", mdTime:"体检时间",
       mdSize:function(r){ return "- 体量：" + r.lines + " 行 · " + r.chars + " 字 · " + r.sections + " 个章节 · " + r.tables + " 张表"; },
       mdVerdict:{
         self:function(n,r){ return "- 结论：**发出去之前有 " + n + " 处最好先补上**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。"; },
@@ -1335,7 +1335,7 @@ var I18N = {
       '<p>So this tier is counted separately and <b>never added to the questions that must be answered</b>. It is a note, not a charge.</p>',
     exp:{
       copiedN:function(n){ return "Copied " + n + " items"; },
-      mdTitle:"# Document health check", mdDoc:"Document", mdTime:"Checked at",
+      sep:": ", gap:"  ", mdTitle:"# Document health check", mdDoc:"Document", mdTime:"Checked at",
       mdSize:function(r){ return "- Size: " + r.lines + " lines · " + r.chars + " chars · " + r.sections + " headings · " + r.tables + " tables"; },
       mdVerdict:{
         self:function(n,r){ return "- Verdict: **" + n + " things worth fixing before sending** (blocking " + r.hi + " · clarify " + r.md + "); plus " + r.ai + " AI traces, not counted."; },
@@ -1591,8 +1591,8 @@ function buildMarkdown(){
   var out = [];
   out.push(E.mdTitle);
   out.push("");
-  out.push("- " + E.mdDoc + "：" + docLabel());
-  out.push("- " + E.mdTime + "：" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
+  out.push("- " + E.mdDoc + E.sep + docLabel());
+  out.push("- " + E.mdTime + E.sep + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
   out.push(E.mdSize(r));
   out.push(E.mdVerdict[state.mode](real.length, r));
   out.push("");
@@ -1622,7 +1622,7 @@ function buildMarkdown(){
     out.push("");
     out.push(E.mdAiNote);
     out.push("");
-    ai.forEach(function(f){ var g = F(f); out.push("- **[L" + f.line + "] " + g.title + "**　" + g.ask); });
+    ai.forEach(function(f){ var g = F(f); out.push("- **[L" + f.line + "] " + g.title + "**" + E.gap + g.ask); });
     out.push("");
   }
   if (lo.length){
