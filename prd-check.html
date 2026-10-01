@@ -203,7 +203,7 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
   <h2>这个工具查不了什么</h2>
   <ul>
     <li><b>查不了对错。</b>它不懂你的业务，公式是否合理、指标是否有意义，一概不懂，也不装懂。</li>
-    <li><b>口径冲突只查得到数值层面的。</b>同名参数不同值、符号复用、权重不配平、单位/粒度不一致，这四类查得到。用文字描述出来的定义分歧——比如两章对「活跃用户」的口径说法不同但没给数——查不到，这需要真正理解语义，仍是缺口。</li>
+    <li><b>口径冲突只查得到数值层面的。</b>同名参数不同值、符号复用、权重不配平、单位/粒度不一致、窗口长度不一致，这五类查得到。用文字描述出来的定义分歧——比如两章对「活跃用户」的口径说法不同但没给数——查不到，这需要真正理解语义，仍是缺口。</li>
     <li><b>查不出「写得对但做不到」。</b>资源、排期、人力、授权，文档里不写，工具就看不见。</li>
     <li><b>AI 痕迹是概率不是证据。</b>写得工整的人也会被标上。它只说「这段值得多看一眼」，不说「这段是机器写的」。</li>
     <li><b>命中不等于有罪。</b>每一条都只是「这里需要一个活人回答」。回答得上来就划掉。</li>
@@ -666,9 +666,13 @@ function analyzeDoc(text){
   function isMeta(t){ return RE_PATCH.test(t) || /冲突|应为|重算|原稿|本版(统一|采用|修正)|附录\s*B/.test(t); }
 
   var defs = {}, tups = {};
+  var rawOf = {};
   function pushDef(name, raw, ln){
+    var orig = String(name).replace(/\*\*/g, "").trim();
     name = normName(name);
     if (name.length < 2 || name.length > 16) return;
+    var srch = orig.replace(/[（(][^）)]*[）)]/g, "").replace(/[·、,，:：「」"']/g, "").trim();
+    if (!rawOf[name] && srch.length >= 2 && srch.length <= 40) rawOf[name] = srch;
     if (/^[\d\-–—]/.test(name)) return;
     if (isMeta(lines[ln - 1] || "")) return;
     var clean = String(raw).replace(/\*\*/g, "").trim();
@@ -688,8 +692,8 @@ function analyzeDoc(text){
     if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
       var hd = cells(lines[i]), ni = -1, vi = -1;
       for (var x = 0; x < hd.length; x++){
-        if (ni < 0 && /参数|指标|字段|名称|项目|维度/.test(hd[x])) ni = x;
-        if (vi < 0 && /默认值|取值|阈值|权重|系数|设定值|建议值|^值$/.test(hd[x])) vi = x;
+        if (ni < 0 && /参数|指标|字段|名称|项目|维度|^\s*(parameter|metric|field|name|item|dimension|setting)s?\s*$/i.test(hd[x])) ni = x;
+        if (vi < 0 && /默认值|取值|阈值|权重|系数|设定值|建议值|^值$|^\s*(default|value|threshold|weight|coefficient|setting)s?\s*$/i.test(hd[x])) vi = x;
       }
       var jj = i + 2;
       while (jj < lines.length && isTableRow(lines[jj])){
@@ -753,8 +757,8 @@ function analyzeDoc(text){
     if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
       var hd2 = cells(lines[i]), n2 = -1, s2 = -1;
       for (var y = 0; y < hd2.length; y++){
-        if (n2 < 0 && /参数|指标|名称|变量名|项目|维度/.test(hd2[y])) n2 = y;
-        if (s2 < 0 && /^符号$|记号|^变量$|数学符号/.test(hd2[y])) s2 = y;
+        if (n2 < 0 && /参数|指标|名称|变量名|项目|维度|^\s*(parameter|metric|name|variable|item|dimension)s?\s*$/i.test(hd2[y])) n2 = y;
+        if (s2 < 0 && /^符号$|记号|^变量$|数学符号|^\s*(symbol|notation|sym)\s*$/i.test(hd2[y])) s2 = y;
       }
       var j2 = i + 2;
       while (j2 < lines.length && isTableRow(lines[j2])){
@@ -843,10 +847,12 @@ function analyzeDoc(text){
   var unitClash = [];
   Object.keys(defs).forEach(function(nm){
     if (nm.length < 3) return;
+    var key = rawOf[nm] || nm;
+    var kci = /[A-Za-z]/.test(key), kk = kci ? key.toLowerCase() : key;
     UNIT.forEach(function(U){
       var found = {}, at = {};
       for (var q = 0; q < lines.length; q++){
-        if (lines[q].indexOf(nm) < 0) continue;
+        if ((kci ? lines[q].toLowerCase() : lines[q]).indexOf(kk) < 0) continue;
         if (isMeta(lines[q])) continue;
         U.vals.forEach(function(v){
           if (lines[q].indexOf(v) >= 0 && !found[v]){ found[v] = 1; at[v] = q + 1; }
@@ -870,6 +876,55 @@ function analyzeDoc(text){
       who:"出数的人（先把口径统一写死在一个地方）",
       ask:"这几个指标在不同章节的" + unitClash[0].kind + "不一致，统一成哪个？建议在文档开头单独写一节口径定义，后面全部引用它。",
       refs: unitClash.slice(0, 20).map(function(u){ return u.at[u.vals[0]]; }) });
+  }
+
+  function winDays(t){
+    var str = String(t);
+    var mz = str.match(/(?:最近|近|过去|往前|回溯)\s*(\d+)\s*(天|日|周|个月|个季度|季度|年)/);
+    if (mz){
+      var mz2 = { "天":1, "日":1, "周":7, "个月":30, "个季度":90, "季度":90, "年":365 };
+      return parseInt(mz[1], 10) * (mz2[mz[2]] || 0);
+    }
+    var me = str.match(/(?:last|past|previous|trailing|recent)\s+(\d+)\s+(day|week|month|quarter|year)s?/i);
+    if (me){
+      var me2 = { "day":1, "week":7, "month":30, "quarter":90, "year":365 };
+      return parseInt(me[1], 10) * (me2[me[2].toLowerCase()] || 0);
+    }
+    return null;
+  }
+  function winRaw(t){
+    var m = String(t).match(/(?:最近|近|过去|往前|回溯)\s*\d+\s*(?:天|日|周|个月|个季度|季度|年)|(?:last|past|previous|trailing|recent)\s+\d+\s+(?:day|week|month|quarter|year)s?/i);
+    return m ? m[0] : "";
+  }
+  var winClash = [];
+  Object.keys(defs).forEach(function(nm){
+    if (nm.length < 3) return;
+    var wkey = rawOf[nm] || nm;
+    var wci = /[A-Za-z]/.test(wkey), wk = wci ? wkey.toLowerCase() : wkey;
+    var found = {}, at = {}, raws = {};
+    for (var q = 0; q < lines.length; q++){
+      if (isMeta(lines[q])) continue;
+      if ((wci ? lines[q].toLowerCase() : lines[q]).indexOf(wk) < 0) continue;
+      var d = winDays(lines[q]);
+      if (!d) continue;
+      if (!found[d]){ found[d] = 1; at[d] = q + 1; raws[d] = winRaw(lines[q]); }
+    }
+    var ks = Object.keys(found), lns = {};
+    ks.forEach(function(k2){ lns[at[k2]] = 1; });
+    if (ks.length >= 2 && Object.keys(lns).length >= 2) winClash.push({ name:nm, ks:ks, at:at, raws:raws });
+  });
+  if (winClash.length){
+    add({ k:"clashWindow", p:{n:winClash.length}, rule:"口径冲突", sev:"md", line:winClash[0].at[winClash[0].ks[0]],
+      title:"有 " + winClash.length + " 个指标，在不同地方用了不同长度的统计窗口",
+      ex: winClash.slice(0, 6).map(function(u){
+        return (rawOf[u.name] || u.name) + "：" + u.ks.map(function(k2){ return u.raws[k2] + "（L" + u.at[k2] + "）"; }).join("　vs　");
+      }).join("\n"),
+      why:"同一个指标，一处算最近 6 个月、一处算最近 8 个月。单位一样，所以「月 vs 季度」那条查不出来，但算出来的根本不是一个数。",
+      impact:"两处的数会差一截，却都长得像对的，不会报错。等到有人把它们放进同一张表或同一句结论里，才会发现对不上，而那时候通常已经对外讲过了。",
+      who:"定义这个指标的人（窗口定死写在指标名旁边）",
+      fix:"选一个窗口，写在指标定义处，其余位置全部改成引用它。如果两个窗口都真的需要，就给它们不同的名字。",
+      ask:"这几个指标在不同章节用了不同长度的窗口，以哪个为准？如果两个窗口都要留，建议改成两个名字，别共用一个。",
+      refs: winClash.slice(0, 20).map(function(u){ return u.at[u.ks[0]]; }) });
   }
 
   // ============ AI 痕迹 ============
@@ -1338,6 +1393,15 @@ var I18N = {
         fix:function(p){ return "Pick one unit, state it next to the metric name, and convert everywhere else. If both are genuinely needed, give them different names."; },
         ask:function(p){ return "This metric is measured one way in one section and another way elsewhere. Which is the standard, and should the other be converted or renamed?"; }
       },
+      clashWindow: {
+        rule:"Definition clash",
+        title:function(p){ return p.n + " metrics use a different lookback window in different places"; },
+        why:function(p){ return "The same metric computed over the last 6 months in one place and the last 8 in another. The unit matches, so a unit check won't catch it, but the numbers are not the same number."; },
+        impact:function(p){ return "Both values look correct and neither errors. The mismatch only surfaces when someone puts them in one table or one sentence, which is usually after it has been presented."; },
+        who:function(p){ return "whoever defined the metric"; },
+        fix:function(p){ return "Fix one window next to the metric definition and reference it everywhere else. If both windows are genuinely needed, give them separate names."; },
+        ask:function(p){ return "These metrics use different lookback windows in different sections. Which one is standard? If both are needed, they should be named differently rather than sharing one name."; }
+      },
       aiTemplate: {
         rule:"AI traces",
         title:function(p){ return p.n + " section headings repeat 4+ times across the document — a template was filled in"; },
@@ -1428,7 +1492,7 @@ var I18N = {
     },
     limitsBox:'<h2>What this tool cannot check</h2><ul>' +
       '<li><b>It can\'t tell right from wrong.</b> It doesn\'t know your business. Whether a formula makes sense or a metric means anything — it has no idea, and it doesn\'t pretend to.</li>' +
-      '<li><b>Definition clashes only at the numeric level.</b> Same parameter with different values, a symbol reused for two quantities, weights that don\'t sum, mismatched units — those it finds. A disagreement written out in prose, with no numbers attached, it cannot see. That needs real semantics, and it\'s still a gap.</li>' +
+      '<li><b>Definition clashes only at the numeric level.</b> Same parameter with different values, a symbol reused for two quantities, weights that don\'t sum, mismatched units, mismatched lookback windows — those it finds. A disagreement written out in prose, with no numbers attached, it cannot see. That needs real semantics, and it\'s still a gap.</li>' +
       '<li><b>It can\'t see "correct but undoable."</b> Headcount, budget, schedule, access — if the document doesn\'t say it, the tool can\'t know it.</li>' +
       '<li><b>AI traces are probability, not proof.</b> Tidy writers get flagged too. It says "worth a second look," never "a machine wrote this."</li>' +
       '<li><b>A hit is not a verdict.</b> Every one of them only means "a human needs to answer this here." Answered, crossed off.</li>' +
