@@ -42,6 +42,12 @@ a{color:var(--brand-ink)}
 .brand{font-weight:600;font-size:15px;text-decoration:none}
 .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:7px 14px;box-shadow:var(--shadow);text-decoration:none;font-size:14px}
 .btn.primary{background:var(--brand);color:var(--brand-on);border-color:var(--brand)}
+.l-zh,.l-en{display:contents}
+html[lang="en"] .l-zh{display:none}
+html:not([lang="en"]) .l-en{display:none}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.langsw button{border:none;background:transparent;color:var(--muted);padding:5px 11px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.langsw button.on{background:var(--brand);color:var(--brand-on)}
 article{padding-block:clamp(34px,6vw,64px) 40px}
 .meta{color:var(--muted);font-size:14px;margin-top:14px}
 .lede{font-size:19px;color:var(--muted);margin-top:22px}
@@ -69,11 +75,131 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <a class="brand" href="/">Doc Health Check</a>
-  <a class="btn primary" href="prd-check.html">Try it</a>
+  <a class="brand" href="/"><span class="l-zh">文档体检台</span><span class="l-en">Doc Health Check</span></a>
+  <span style="display:flex;gap:8px;align-items:center">
+    <span class="langsw" id="langsw"><button data-l="zh">中文</button><button data-l="en">EN</button></span>
+    <a class="btn primary" href="prd-check.html"><span class="l-zh">打开体检台</span><span class="l-en">Try it</span></a>
+  </span>
 </div></div>
 
 <article><div class="wrap">
+<div class="l-zh">
+  <h1>一个检查 AI 生成文档的工具，它自己不用 AI</h1>
+  <p class="meta">在一份 6 万字的真实 PRD 上查出了什么，以及它在 Kubernetes KEP 和 RFC 9110 上误报了什么。</p>
+  <p class="lede">现在我收到的每一份文档，都有一部分是机器写的。这没问题。有问题的是：机器写的那部分，和已经定下来的那部分，排版一模一样——而我往往要等到动手三天之后才分得出来。</p>
+
+  <h2>问题不在于「是不是 AI 写的」</h2>
+  <p>市面上的 AI 检测只回答一个问题：<em>这是不是模型写的？</em>在真实工作里这个问题没有意义。答案永远是「是」，而且本来就该是——现在没有谁的文档是全手写的，也不该要求谁全手写。</p>
+  <p>我真正需要被回答的问题，窄得多，也有用得多：</p>
+  <blockquote><p>这份文档里，哪些地方其实还没定，却被排版成了已经定了？</p></blockquote>
+  <p>这才是那个病。参数表左边给出精确默认值，右边小字写着「需业务确认」；数据源清单第一行标着「待定」，后面十一章的公式照样算得天衣无缝。读的人记住的是默认值和公式，于是整条链路在一个不存在的输入上开工。</p>
+  <p>人很少这么写。模型天天这么写——因为它生成的各个章节互相不知道对方的存在，而且它唯一在优化的目标就是「看起来完整」。</p>
+
+  <h2>为什么不用模型</h2>
+  <p>最顺手的做法当然是把文档喂给大模型，问它哪里有问题。我没这么做，三个理由：</p>
+  <ul>
+    <li><b>用 AI 去查 AI 的膨胀，查出来的东西自己也会膨胀。</b>我要的是能直接拿进会议室、不用先自己复核一遍的结论。</li>
+    <li><b>这些文档是保密的。</b>同事唯一肯把真实文档粘进去的版本，是没有后端、不发任何网络请求的版本。这个约束是产品本身，不是产品的缺陷。</li>
+    <li><b>确定性是可核验的。</b>每一条命中都指向一个行号，没有任何东西是生成出来的。它不会幻觉——代价是它绝不聪明。这个取舍是刻意的。</li>
+  </ul>
+  <p>所以它是正则。一个 HTML 文件，没有构建步骤，全部在浏览器里跑完。整套规则引擎你一次就能读完。</p>
+
+  <h2>在一份 6 万字的真 PRD 上查出了什么</h2>
+  <p>一份产业分析类产品的内部需求文档。2545 行，260 个标题，102 张表。十一章，每一章都填满了。看上去极其完备。</p>
+  <p>浏览器里十秒：</p>
+  <table>
+    <tr><th>档位</th><th>数量</th><th>含义</th></tr>
+    <tr><td>阻断</td><td class="n">4</td><td>不等人回答，活真的开不了工</td></tr>
+    <tr><td>待澄清</td><td class="n">7</td><td>开工前需要有答案</td></tr>
+    <tr><td>AI 痕迹</td><td class="n">2</td><td>给读者的备注，从不计入问题数</td></tr>
+  </table>
+  <p>四条阻断项，原样照抄输出：</p>
+
+  <div class="card">
+    <span class="tag">未决伪装</span>
+    <h4>这张表 38 行参数，30 行自己标着「需确认」</h4>
+    <p>同一行在说两件相反的事：左边给了精确默认值，右边承认这个值没人定过。读的人只会记住左边。</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">悬空依赖</span>
+    <h4>「专利」这一环还是空的，下游已经有 3 处在用它算</h4>
+    <p>数据源那一行写着「待定」。而消费它的公式、归一化步骤和图表，全都已经写完了。</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">缺失却照算</span>
+    <h4>有 2 行一边标着「数据缺失」，一边照样算出了结果</h4>
+    <p>这条最要命。缺失被如实标注了，但它没有阻断计算。缺失声明和结果数字并排躺在同一行里，而被引用出去的只有那个数字。</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">未验证具体物</span>
+    <h4>17 个包名 / CLI / 接口地址，没有一个标注验证过</h4>
+    <p>仓库名、命令行名、endpoint。它们看上去是文档里最硬的部分，实际是幻觉率最高的部分。每一个都要有人搭进去一个下午。</p>
+  </div>
+
+  <p>还有两条口径冲突。我认为这是最值得说的一类，因为人几乎不会犯：</p>
+  <ul>
+    <li><b>β 被定义了两次。</b>参数表里它是 LDA 超参（0.01）；往后四章，它是期望膨胀期的趋势斜率阈值（&gt;0.001）。实现第五章的人读了第一章的定义，就会安安静静地做错。公式照样跑得通，输出照样像模像样。</li>
+    <li><b>同一个融资指标，第 2 章按月算，第 5 章按季度算。</b>名字一样、单位一样、粒度不同。两个看起来可比、实际不可比的数。</li>
+  </ul>
+  <p>同一套材料的另一份文档里，有一句写着「L3 的 5 项：」，后面列了 6 个。纯算术。没人发现，因为那个数和那个清单是分两次生成的。</p>
+
+  <h2>最值钱的规则，不需要懂你的业务</h2>
+  <p>这个工具没法判断一个公式合不合理——它从不假装能。但有一类问题是纯算术，而且恰恰是这一类最有用，因为<b>它没得辩</b>：</p>
+  <ul>
+    <li>声明为权重的百分比加起来是 105%，不是 100%</li>
+    <li>「五项：」后面列了六个</li>
+    <li>「100% 自动」旁边写着「前提是数据源可接入」</li>
+    <li>一个符号被定义成两个不同的量</li>
+    <li>同一个指标，一处算最近 6 个月，一处算最近 12 个月</li>
+  </ul>
+  <p>没有人需要争论这份文档<em>写得好不好</em>，只需要说哪个数是对的。这也是为什么输出永远是一串问题、永远不打分：分数会被辩论（「你凭什么说我 60 分」），问题不会——你要么答得上来，要么答不上来，而答不上来的那几条就是这份文档真实的进度。</p>
+
+  <h2>我认为最重要的一节，而它不是技术</h2>
+  <p>工具会标出看起来像一次性生成的段落。把这件事做成「指控」很容易。我刻意做成了相反的东西。</p>
+  <blockquote><p>「这段是我的 AI 自己加的，删掉就行」，比「我写错了」容易说出口一百倍。</p></blockquote>
+  <p>指出问题如果等于指控对方能力有问题，对方就只能硬撑，事情谈不下去——然后问题照样上线。把锅留给模型，人才有退路，沟通才真的发生。</p>
+  <p>所以 AI 痕迹这一档单独算，从不计入「必须回答的问题」。它的措辞也是刻意软的：<em>「要是哪条本来就是模型自己加的，你说一声我直接划掉，不用解释。」</em></p>
+  <p>同样的理由，默认模式是自检，不是体检。一个只能用来挑别人毛病的工具，第一次用完就会被所有人记恨。你得能先说「我自己每份文档发出去之前都过一遍」，别人才肯碰它。</p>
+
+  <h2>在值得尊敬的文档上量误报</h2>
+  <p>合成样本只能证明一条规则会触发，证明不了它准。所以我拿两份公开的英文文档当对照组——写它们的人非常擅长写规格，因此上面的每一条命中，默认都是可疑的：</p>
+  <pre><code>curl -sL https://raw.githubusercontent.com/kubernetes/enhancements/master/keps/NNNN-kep-template/README.md
+curl -sL https://www.rfc-editor.org/rfc/rfc9110.txt</code></pre>
+  <p>第一次跑的结果很难看，而且难看得很有价值。</p>
+  <table>
+    <tr><th>文档</th><th>未验证具体物 · 修之前</th><th>修之后</th></tr>
+    <tr><td>Kubernetes KEP 模板</td><td class="n">37</td><td class="n">11</td></tr>
+    <tr><td>RFC 9110</td><td class="n">122</td><td class="n">15</td></tr>
+    <tr><td>6 万字真 PRD（真命中）</td><td class="n">19</td><td class="n">17</td></tr>
+  </table>
+  <p>从中挖出两个真缺陷：</p>
+  <p><b>RFC 9110 被报了「没有验收标准」。</b>它有规范性要求——MUST、SHALL、规范性引用。它对正确性的定义比我收到过的任何 PRD 都严格，只是它不用「验收」这个词。词表现在覆盖了 RFC 2119 关键词。</p>
+  <p><b>「未验证具体物」在对着参考文献开火。</b>这条规则的前提是<em>这些名字是模型编的</em>。可是在真的工程文档里，标识符本来就多——而且我一查发现，KEP 模板里反引号标识符总共只有 5 个，其余三十多条命中全是文档引用链接。三处改动修好了它：跳过围栏代码块、跳过 Markdown 链接与引用式定义、把全文出现 3 次以上的标识符视为真实（编出来的名字通常只提一次，真正在用的会反复出现）。</p>
+  <p>误报降了约七成，而真命中的数字一个没掉。基线数字和那两条 curl 命令现在写在仓库里，改任何规则都要复跑——命中数只许降，不许升。</p>
+  <p>有一条已知的噪音我没修：RFC 9110 上「无源数字」仍然有 82 条，因为英文词表里含 <em>window</em>、<em>weight</em>、<em>ratio</em>，而它们在 HTTP 里都是真术语。它属于「待澄清」不是「阻断」，而收紧它会伤到这个工具真正要服务的那类文档的召回。所以它留着，并写明。</p>
+
+  <h2>它查不了什么</h2>
+  <p>写明这一段，本身就是这个工具存在的理由。一份不肯说自己做不到什么的文档，正是它要查的东西。</p>
+  <ul>
+    <li><b>查不了对错。</b>它不懂你的业务。</li>
+    <li><b>口径冲突只查得到数值层面的。</b>两章对「活跃用户」的说法不同、但都没给数——它看不见。试过，确定性规则要么零命中，要么对所有合理差异乱叫。仍是缺口。</li>
+    <li><b>查不出「写得对但做不到」。</b>人力、预算、权限，文档里不写就看不见。</li>
+    <li><b>命中不等于有罪。</b>每一条都只是「这里需要一个活人回答」。</li>
+  </ul>
+
+  <h2>试一下</h2>
+  <p>粘一份文档进去看看。它在你的浏览器里跑完，不上传、不联网、断网也能用。别信这句话——源码就一个 HTML 文件，自己搜 <code>fetch</code>，一个都没有。</p>
+
+  <div class="end">
+    <a class="btn primary" href="prd-check.html">打开体检台</a>
+    <a class="btn" href="cross-check.html">一套文档对照</a>
+    <a class="btn" href="https://github.com/haodaz/betterprd">GitHub 源码</a>
+  </div>
+</div>
+<div class="l-en">
   <h1>A linter for AI-generated specs that uses no AI</h1>
   <p class="meta">What it found in a real 60,000-character PRD, and what it falsely flagged in a Kubernetes KEP and in RFC 9110.</p>
   <p class="lede">Every spec I receive now is partly machine-written. That is fine. What is not fine is that the machine-written parts are typeset exactly like the decided parts, and I can't tell them apart until I'm three days into building.</p>
@@ -188,10 +314,44 @@ curl -sL https://www.rfc-editor.org/rfc/rfc9110.txt</code></pre>
     <a class="btn" href="cross-check.html">Compare a document set</a>
     <a class="btn" href="https://github.com/haodaz/betterprd">Source on GitHub</a>
   </div>
+</div>
 </div></article>
 
 <footer><div class="wrap">
-  <span><a href="/" style="text-decoration:none">betterprd.com</a> &middot; no AI judging AI</span>
-  <span>front-end only &middot; no network &middot; your document stays on your machine</span>
+  <span><a href="/" style="text-decoration:none">betterprd.com</a> &middot; <span class="l-zh">不以 AI 验 AI</span><span class="l-en">no AI judging AI</span></span>
+  <span class="l-zh">纯前端 &middot; 不联网 &middot; 文档不出本机</span>
+  <span class="l-en">front-end only &middot; no network &middot; your document stays on your machine</span>
 </div></footer>
+<script>
+(function(){
+  var T = {
+    zh:{ t:"一个检查 AI 生成文档的工具，它自己不用 AI",
+         d:"在一份 6 万字的真实 PRD 上查出了什么，以及它在 Kubernetes KEP 和 RFC 9110 上误报了什么。纯前端确定性正则，不联网、不调模型。" },
+    en:{ t:"A linter for AI-generated specs that uses no AI",
+         d:"What it found in a real 60,000-character PRD, and what it falsely flagged in a Kubernetes KEP and in RFC 9110." }
+  };
+  var q = (location.search.match(/[?&]lang=(zh|en)/) || [])[1];
+  var saved = null;
+  try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
+  var lang = q || ((saved === "en" || saved === "zh") ? saved
+    : ((navigator.language || "").toLowerCase().indexOf("zh") === 0 ? "zh" : "en"));
+  function apply(l){
+    document.documentElement.lang = (l === "en" ? "en" : "zh-CN");
+    document.title = T[l].t;
+    var m = document.querySelector('meta[name="description"]');
+    if (m) m.setAttribute("content", T[l].d);
+    Array.prototype.forEach.call(document.querySelectorAll("#langsw button"), function(b){
+      b.classList.toggle("on", b.dataset.l === l);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#langsw button"), function(b){
+    b.onclick = function(){
+      try { localStorage.setItem("bp_lang", b.dataset.l); } catch (e) {}
+      apply(b.dataset.l);
+    };
+  });
+  if (q){ try { localStorage.setItem("bp_lang", q); } catch (e) {} }
+  apply(lang);
+})();
+</script>
 </body></html>
