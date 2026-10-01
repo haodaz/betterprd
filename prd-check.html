@@ -155,6 +155,7 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
     <div class="row">
       <input type="file" id="file" accept=".md,.txt,.markdown,text/*" class="hidden">
       <button class="btn" id="btn-file">选择文件</button>
+      <button class="btn ghost" id="btn-clear">清空</button>
       <span class="hint" id="filehint"></span>
     </div>
   </div>
@@ -218,6 +219,13 @@ function analyzeDoc(text){
   function cells(s){ return s.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(function(c){ return c.replace(/\*\*/g, "").trim(); }); }
   function isSep(s){ return /^\s*\|[\s:\-|]+\|\s*$/.test(s); }
   function near(i, r, span){ span = span || 3; var a = Math.max(0, i - span), b = Math.min(lines.length - 1, i + span); for (var k = a; k <= b; k++){ if (r.test(lines[k])) return true; } return false; }
+  function isHead(s){
+    var t = s.trim();
+    if (/^#{1,6}\s/.test(t)) return true;
+    if (t.length < 2 || t.length > 40) return false;
+    if (/[。；！？]/.test(t)) return false;
+    return /^第[一二三四五六七八九十百]+[章节部分层讲步]|^[一二三四五六七八九十]+、\s*\S|^\d+(\.\d+){0,3}[、.．]?\s+\S|^附[件录][A-Z0-9]|^§/.test(t);
+  }
   function sampleLines(arr, n){ return arr.slice(0, n).map(function(x){ return "L" + (x + 1) + "  " + excerpt(lines[x], 88); }).join("\n"); }
 
   var RE_PENDING = /待定|待确认|待校准|待补充|待评估|待梳理|暂定|另行(确定|约定)|后续(补充|确认|完善)|视情况|有待|TBD|TODO/;
@@ -226,8 +234,11 @@ function analyzeDoc(text){
   var RE_DOWN    = /公式|计算|指标|权重|得分|评分|阈值|图表|绘制|输出表|归一化|回归|聚类/;
   var RE_SRC     = /来源|依据|参考|引自|根据.{0,8}(调研|报告|论文|实测|基线)|见附录|出处|实测|基线|经验值|业界(常用|通行)/;
   var RE_NUMRULE = /(阈值|权重|系数|并发|上限|下限|占比|倍数|窗口|迭代次数|超参)/;
-  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调/;
-  var RE_ACTOR   = /(系统|平台|AI|模型|程序|引擎)\s*(将|会|可|需)?\s*(自动|智能|实时)?\s*(识别|分析|判断|生成|计算|提取|调用|清洗|打标|归类|推荐|预测)/;
+  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调|判定条件|判定标准|达标标准|准入条件|通过条件|过渡条件|硬门槛|一票否决|上线标准|完成的定义/;
+  var AUTOVERB = "识别|分析|判断|生成|计算|提取|调用|清洗|打标|归类|推荐|预测|对接|校验|评分|追溯|监控|判定|采集|结构化|匹配|推送|重评|预警|验证|诊断|比对|汇总|预填|审核|纠错|重算|归集";
+  var RE_ACTOR   = new RegExp(
+    "(系统|平台|AI|模型|程序|引擎|后台)[^。；！？\n]{0,14}(自动|智能|实时|持续)[^。；！？\n]{0,8}(" + AUTOVERB + ")" +
+    "|(系统|平台|AI|模型|引擎)\\s*(将|会|可|需|能|负责)?\\s*(" + AUTOVERB + ")");
   var RE_COND    = /当|若|如果|一旦|触发|输入为|入参|前置条件|依赖于/;
   var HOLLOW = ["赋能","抓手","闭环","打通","深度挖掘","智能分析","全面覆盖","有效提升","显著增强","一体化","全链路","精准画像","高效协同","数字化转型","重塑","助力","夯实","持续优化","先进的大模型","业界领先","降本增效","端到端"];
   var CODE_STOP = {"json":1,"csv":1,"yaml":1,"yml":1,"pdf":1,"html":1,"xml":1,"utf-8":1,"api":1,"url":1,"id":1,"http":1,"https":1,"md":1,"txt":1,"sql":1,"png":1,"jpg":1,"plaintext":1,"bash":1,"shell":1,"python":1,"javascript":1,"n/a":1};
@@ -374,6 +385,7 @@ function analyzeDoc(text){
   for (i = 0; i < lines.length; i++){
     if (!RE_NUMRULE.test(lines[i])) continue;
     if (!/[0-9]/.test(lines[i])) continue;
+    if (/\d{1,3}(\.\d+)?\s*%/.test(lines[i])) continue;
     if (near(i, RE_SRC, 3)) continue;
     nums.push(i);
   }
@@ -387,6 +399,85 @@ function analyzeDoc(text){
       fix:"每个数后面补一句出处；补不出来的就改成「待校准」。没有出处的精确数字会让人以为有人算过，于是没人再去算。",
       ask:"这些阈值和权重是跑过数据反推的，还是先填上等以后校准？如果是后者，建议统一写成「待定」，不要给默认值——给了就会有人直接用。",
       refs: nums.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R6b 无源比例 ============
+  var pcts = [];
+  for (i = 0; i < lines.length; i++){
+    if (!/\d{1,3}(\.\d+)?\s*%/.test(lines[i])) continue;
+    if (near(i, RE_SRC, 3)) continue;
+    if (!/[\u4e00-\u9fa5]{4,}/.test(lines[i])) continue;
+    pcts.push(i);
+  }
+  if (pcts.length){
+    add({ rule:"无源比例", sev:"md", line:pcts[0] + 1,
+      title:"有 " + pcts.length + " 处百分比结论，没写是怎么算出来的",
+      ex: sampleLines(pcts, 4),
+      why:"百分比是整份文档里最容易被单独摘出去引用的东西。它会被抄进汇报材料、写进 PPT 标题，而抄的人不会回头确认口径。",
+      impact:"这个数一旦被引用出去就收不回来。等有人问「这个百分比分母是什么」，答不上来的时候塌的是整份文档的信用，不是这一个数。",
+      who:"出这个数的人（通常就是写文档的人自己）",
+      fix:"在每个百分比后面补一句口径：分母是什么、怎么统计的、什么时候统计的。补不出来就改成定性说法（「大部分」「少数」），别给精确数字——给了就一定会被人当结论引用。",
+      ask:"这个百分比具体是怎么得出来的？分母是哪些、样本是什么、什么时候统计的？",
+      refs: pcts.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R6c 文档自曝由 AI 生成 ============
+  var RE_DISCLOSE = /本(内容|文档|文章|报告)由[^\n]{0,24}(生成|产出)|由\s*(Coze|扣子|ChatGPT|GPT-?[0-9]|Claude|文心|通义|豆包|Kimi|DeepSeek|Gemini|Copilot|智谱|讯飞星火)[^\n]{0,12}(生成|撰写|输出)|人工智能生成合成内容|AI\s*生成内容|Generated (by|with) (AI|ChatGPT|GPT|Claude|Gemini|Copilot)|本文(由|经)\s*AI/i;
+  var disc = [];
+  for (i = 0; i < lines.length; i++){ if (RE_DISCLOSE.test(lines[i])) disc.push(i); }
+  if (disc.length){
+    add({ rule:"AI 痕迹", sev:"ai", line:disc[0] + 1,
+      title:"文档自己声明了是 AI 生成的",
+      ex: sampleLines(disc, 3),
+      why:"这是最确凿的一种标记——不用猜，文档自己写了。很多人贴这段只是走合规流程，但它同时也在说：这份内容没有逐句经过人手。",
+      impact:"没有坏处，前提是读的人看见了。这行字通常在文档最末尾，而绝大多数人读不到那里就已经按文档开工了。",
+      who:"不用找谁。这条是把末尾那行字提到最前面来。",
+      fix:"既然已经声明了，就在文档开头也写一句，别只放在末尾——让接手的人第一眼就知道该用什么态度读。更重要的是：你自己再逐节过一遍，把模型自己补的、你并不打算承诺的内容删掉。",
+      ask:"文末写了是 AI 生成的，这个没问题，大家现在都这么写。我想确认的是：里面哪几节是你逐句过过的、哪几节是直接留下的？过过的那几节我按原文执行，没过的我就先不动，免得白做。",
+      refs: disc.map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R6d 条件化承诺：一边说全自动，一边承认前提没达成 ============
+  var condPromise = [];
+  for (i = 0; i < lines.length; i++){
+    if (!/前提是|取决于|依赖于|需.{0,8}(可)?(对接|接入|打通|授权)|若.{0,10}(可|能)(接入|对接|获取)|需要.{0,8}先/.test(lines[i])) continue;
+    if (!near(i, /100\s*%|全自动|零人工|无需(人工|专家)|\bL4\b|自动完成|纯机器/, 2)) continue;
+    condPromise.push(i);
+  }
+  if (condPromise.length){
+    add({ rule:"条件化承诺", sev:"hi", line:condPromise[0] + 1,
+      title:"有 " + condPromise.length + " 处一边写着「全自动 / 100%」，一边承认前提还没达成",
+      ex: sampleLines(condPromise, 4),
+      why:"「100% 自动，前提是数据源可接入」这种写法，把一个还没发生的条件和一个已经下的结论并排放在一起。读的人记住的是「100% 自动」，记不住后半句。",
+      impact:"这类条目最容易被直接写进排期和对外承诺。等真做到那一步发现接口压根没谈下来，工期已经报出去了，而且返工的理由在文档里是写了的——没人会认为是文档的问题。",
+      who:"能拍板「这个前提什么时候能满足」的人：对接方负责人、采购或商务",
+      fix:"把这几条的等级先降下来，或者在结论里直接写明「前提未达成前，本项按人工处理」。前提和结论不能并排放——结论会被记住，前提不会。",
+      ask:"这几条写着全自动，但前提是对方系统能对接。这个对接现在谈到哪一步了、谁在推、什么时候能定？在它定下来之前，这几项是按自动算还是按人工算？",
+      refs: condPromise.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R6e 权重和校验 ============
+  var wNums = [], wAt = [];
+  for (i = 0; i < lines.length; i++){
+    var mw, rw = /(\d{1,3}(?:\.\d+)?)\s*%\s*(?:权重|占比)|(?:权重|占比)[^0-9\n]{0,8}(\d{1,3}(?:\.\d+)?)\s*%/g;
+    while ((mw = rw.exec(lines[i])) !== null){
+      var v = parseFloat(mw[1] !== undefined ? mw[1] : mw[2]);
+      if (!isNaN(v)){ wNums.push(v); wAt.push(i); }
+    }
+  }
+  if (wNums.length >= 3){
+    var sum = wNums.reduce(function(a, b){ return a + b; }, 0);
+    if (Math.abs(sum - 100) > 0.5 && sum > 20 && sum < 300){
+      add({ rule:"权重不配平", sev:"hi", line:wAt[0] + 1,
+        title:"声明为权重的百分比共 " + wNums.length + " 个，加起来是 " + (Math.round(sum * 10) / 10) + "%，不是 100%",
+        ex: wNums.map(function(v, idx){ return "L" + (wAt[idx] + 1) + "  " + v + "%"; }).join("\n"),
+        why:"这是纯算术，不需要懂业务也能判断。权重不配平意味着评分体系要么漏了一项，要么某一项被重复计了。",
+        impact:"所有基于这套权重算出来的分数都是错的，而且错得不明显——分数照样算得出来，照样能排名，只有加总的时候才看得出问题。等有人按这个排名做了决策，再回头改权重，等于推翻已经做过的决定。",
+        who:"定这套权重的人",
+        fix:"把这几个数加一遍。要么补上漏掉的那一项，要么说明为什么不需要配平（比如这是相对权重、会动态归一化）——如果是后者，在表旁边写一句，别让人自己猜。",
+        ask:"这几项权重加起来是 " + (Math.round(sum * 10) / 10) + "%，不是 100%。是漏了一项，还是这里本来就是相对权重、后面会归一化？",
+        refs: wAt.map(function(x){ return x + 1; }) });
+    }
   }
 
   // ============ R7 空心自动化 ============
@@ -412,9 +503,13 @@ function analyzeDoc(text){
   // ============ R8 空心词 ============
   var hollowHits = [], hollowCount = 0;
   for (i = 0; i < lines.length; i++){
+    if (isHead(lines[i])) continue;
+    var lineHits = 0;
     for (var w = 0; w < HOLLOW.length; w++){
-      if (lines[i].indexOf(HOLLOW[w]) >= 0){ hollowCount++; if (hollowHits.length < 30) hollowHits.push(i); break; }
+      var at = -1;
+      while ((at = lines[i].indexOf(HOLLOW[w], at + 1)) >= 0) lineHits++;
     }
+    if (lineHits > 0){ hollowCount += lineHits; if (hollowHits.length < 30) hollowHits.push(i); }
   }
   if (hollowCount >= 5){
     add({ rule:"空心词", sev:"lo", line:hollowHits[0] + 1,
@@ -455,7 +550,7 @@ function analyzeDoc(text){
   function sigHit(s){ for (var q = 0; q < S.length; q++){ if (S[q].test(s)) return true; } return false; }
 
   var heads = [];
-  for (i = 0; i < lines.length; i++){ if (/^#{1,6}\s/.test(lines[i])) heads.push({ ln:i, t:lines[i] }); }
+  for (i = 0; i < lines.length; i++){ if (isHead(lines[i])) heads.push({ ln:i, t:lines[i] }); }
   var normCount = {}, normFirst = {};
   heads.forEach(function(hd){
     var n = hd.t.replace(/^#+\s*/, "").replace(/[0-9０-９.·、\s]/g, "").trim();
@@ -465,9 +560,19 @@ function analyzeDoc(text){
   });
   var repeated = Object.keys(normCount).filter(function(n){ return normCount[n] >= 4; });
 
+  var blocks = heads.slice();
+  if (blocks.length < 3){
+    blocks = [];
+    var cnt = 0;
+    for (i = 0; i < lines.length; i++){
+      if (!lines[i].trim()) continue;
+      if (cnt % 25 === 0) blocks.push({ ln:i, t:lines[i] });
+      cnt++;
+    }
+  }
   var aiSections = [], aiLines = [];
-  for (var s = 0; s < heads.length; s++){
-    var a = heads[s].ln, b = (s + 1 < heads.length ? heads[s + 1].ln : lines.length);
+  for (var s = 0; s < blocks.length; s++){
+    var a = blocks[s].ln, b = (s + 1 < blocks.length ? blocks[s + 1].ln : lines.length);
     var n = 0, hit = 0, hitAt = [];
     for (var p = a; p < b; p++){
       if (!lines[p].trim()) continue;
@@ -707,6 +812,12 @@ $("#btn-reset").onclick = function(){
   window.scrollTo({ top:0, behavior:"smooth" });
 };
 $("#btn-file").onclick = function(){ $("#file").click(); };
+$("#btn-clear").onclick = function(){
+  $("#input").value = ""; $("#file").value = ""; state.res = null; state.name = "";
+  $("#filehint").textContent = "";
+  $("#report").classList.add("hidden"); $("#panes").classList.add("hidden");
+  $("#input").focus();
+};
 function readFile(f){
   if (!f) return;
   var r = new FileReader();
