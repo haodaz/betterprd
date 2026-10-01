@@ -480,6 +480,81 @@ function analyzeDoc(text){
     }
   }
 
+  // ============ R6f 自述数量与实际列举不符 ============
+  var CN = { "一":1,"二":2,"两":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,"十":10,"十一":11,"十二":12,"十三":13,"十四":14,"十五":15 };
+  var miscount = [];
+  for (i = 0; i < lines.length; i++){
+    var mc, rc = /(\d{1,3}|[一二两三四五六七八九十]{1,3})\s*(项|个|条|类|步|批|大类|方面|维度)\s*[：:]/g;
+    while ((mc = rc.exec(lines[i])) !== null){
+      var raw = mc[1];
+      var declared = /^\d+$/.test(raw) ? parseInt(raw, 10) : CN[raw];
+      if (!declared || declared < 2 || declared > 30) continue;
+      var tail = lines[i].slice(mc.index + mc[0].length);
+      tail = tail.replace(/（[^）]*）/g, "").replace(/\([^)]*\)/g, "");
+      tail = tail.split(/[。；;]/)[0];
+      var parts = tail.split(/[、，,]/).map(function(x){ return x.trim(); }).filter(function(x){ return x.length >= 2; });
+      if (parts.length < 2) continue;
+      if (parts.length !== declared){
+        miscount.push({ ln:i, declared:declared, actual:parts.length, unit:mc[2] });
+      }
+    }
+  }
+  if (miscount.length){
+    add({ rule:"数量对不上", sev:"hi", line:miscount[0].ln + 1,
+      title:"有 " + miscount.length + " 处「说是 N 个，实际列了 M 个」",
+      ex: miscount.slice(0, 4).map(function(x){ return "L" + (x.ln + 1) + "  声称 " + x.declared + " " + x.unit + "，实际列出 " + x.actual + " 个\n      " + excerpt(lines[x.ln], 80); }).join("\n"),
+      why:"这是纯算术，不需要懂业务也能判断。自己写的数和自己列的清单对不上，说明这段是分两次生成的，中间没人把两边对一遍。",
+      impact:"这种数字会被直接引用进汇报和排期。更麻烦的是它会连锁——如果总数是靠这几个分项加出来的，那总数也是错的，而总数通常已经印在首页了。",
+      who:"文档作者（这条不用开会，自己数一遍就行）",
+      fix:"把这几处的数字和清单对一遍，改成一致。顺手检查一下：有没有别的地方引用了这个总数——错的数字很少单独存在。",
+      ask:"这里写的是 " + miscount[0].declared + " " + miscount[0].unit + "，但后面列了 " + miscount[0].actual + " 个。是清单多了一个，还是数字少写了一个？另外总数那里要不要跟着改？",
+      refs: miscount.map(function(x){ return x.ln + 1; }) });
+  }
+
+  // ============ R6g 性能 / 工期承诺无依据 ============
+  var promises = [];
+  for (i = 0; i < lines.length; i++){
+    if (!/(\d+\s*[-~至到]\s*\d+|\d+)\s*(秒|分钟|小时|天|周|个月|月)/.test(lines[i])) continue;
+    if (!/压缩|缩短|提升至|完成|响应|耗时|交付|上线|周期|工期|预计|可在|即可|控制在|不超过/.test(lines[i])) continue;
+    if (near(i, RE_SRC, 3)) continue;
+    promises.push(i);
+  }
+  if (promises.length){
+    add({ rule:"无依据的工期", sev:"md", line:promises[0] + 1,
+      title:"有 " + promises.length + " 处时间承诺，没写是怎么估出来的",
+      ex: sampleLines(promises, 4),
+      why:"时间数字是文档里最容易被当真的东西。它会被直接抄进排期表，而估它的人往往没有做过这件事。",
+      impact:"排期一旦按这个数报出去，后面每一次延期都变成实现方的问题，没人会回头质疑这个数本身是拍的。",
+      who:"真正做过同类事情的人（不是写文档的人）",
+      fix:"每个时间数字后面补一句依据：是按什么算的、参照了哪次的实际耗时。估不出来就写区间并标「待验证」，别给一个看起来很确定的数。",
+      ask:"这个时间是怎么估出来的——参照了哪次的实际耗时，还是先填一个？如果是后者，建议标成「待验证」，不然它会被直接写进排期。",
+      refs: promises.slice(0, 30).map(function(x){ return x + 1; }) });
+  }
+
+  // ============ R6h 吹捧与夸张残留 ============
+  var HYPE = ["极其精妙","极为精妙","非常精妙","极致","炫酷","超级","完美","震撼","惊艳","无与伦比","革命性","颠覆性","史诗级","壮观","极度","绝佳","卓越","顶级","一流","极大提升","精准投递","深度赋能","强力","完胜","碾压"];
+  var hype = [], hypeN = 0;
+  for (i = 0; i < lines.length; i++){
+    var hn = 0;
+    for (var hw = 0; hw < HYPE.length; hw++){
+      var at2 = -1;
+      while ((at2 = lines[i].indexOf(HYPE[hw], at2 + 1)) >= 0) hn++;
+    }
+    if (/您的.{0,10}(反馈|想法|思路|建议).{0,8}(精妙|正确|到位|清晰|棒)|说得(非常)?对|完全正确/.test(lines[i])) hn++;
+    if (hn > 0){ hypeN += hn; if (hype.length < 30) hype.push(i); }
+  }
+  if (hypeN >= 3){
+    add({ rule:"吹捧残留", sev:"lo", line:hype[0] + 1,
+      title:"出现 " + hypeN + " 处「极致 / 炫酷 / 极其精妙」一类夸张措辞",
+      ex: sampleLines(hype, 4),
+      why:"技术文档里出现这种措辞，通常不是作者在夸自己，而是模型在对着作者说话——这些句子本来是对话里的恭维，被原样留在了文档里。",
+      impact:"它本身不影响执行，但它泄露了一件事：这份文档没有被从头读过一遍。读的人看到这种词，会顺带怀疑其余部分的严谨程度。",
+      who:"文档作者（自己删，不用问任何人）",
+      fix:"全部删掉。顺便检查有没有「根据您的反馈」「我将开始编写」「请点击 Proceed」这类对话残留——它们和这些词是一起留下的。",
+      ask:"这几处措辞像是对话里带出来的，删掉不影响内容。顺便看看有没有别的对话残留一起清掉？",
+      refs: hype.map(function(x){ return x + 1; }) });
+  }
+
   // ============ R7 空心自动化 ============
   var auto = [];
   for (i = 0; i < lines.length; i++){
@@ -544,7 +619,8 @@ function analyzeDoc(text){
     /[\u4e00-\u9fa5]{2,8}（[A-Za-z][A-Za-z0-9\s\-\/]{2,40}）/,
     /^\s*[-*]\s*\*\*[^*]{2,24}\*\*\s*[：:]/,
     /①|②|③|第一，|第二，|第三，|其一|其二/,
-    /★|✅|⭐|🔹|📌|✔|🚀|💡/,
+    /[\uD83C-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\u2B00-\u2BFF]\uFE0F?|★|✔/,
+    /\[!(IMPORTANT|NOTE|WARNING|TIP|CAUTION)\]|根据您的(最新)?(反馈|要求|指示)|我将(直接)?(开始|着手)(编写|实现|执行|开发)|如果确认[，,]?\s*请|请点击\s*(Proceed|继续|确认)|希望这.{0,8}有(帮助|所帮助)|以下是(我为您|为您)/i,
     /不仅.{0,30}而且|一方面.{0,60}另一方面|既.{0,25}又/
   ];
   function sigHit(s){ for (var q = 0; q < S.length; q++){ if (S[q].test(s)) return true; } return false; }
