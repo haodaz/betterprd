@@ -1,0 +1,330 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一套文档对照</title>
+<meta name="description" content="把一整套文档一起拖进来，找出互相打架的数字。每份单看都自洽，加起来才露馅。纯前端，不联网，文档不出本机。">
+<style>
+:root{
+  --bg:#F7F6FC; --card:#FFFFFF; --ink:#191833; --muted:#6E6C8A; --line:rgba(25,24,51,.10); --soft:#EFEDF8;
+  --hi:#C0562F; --hi-tint:#FBEDE7; --hi-ink:#8A3A1C;
+  --brand:#2F5AE8; --brand-tint:#E7EDFF; --brand-ink:#1B3AA0; --brand-on:#FFFFFF;
+  --ok:#2E8B64; --ok-tint:#E4F3EC;
+  --shadow:0 10px 34px rgba(60,52,140,.08);
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+  --hi-tint:#3B1E14; --hi-ink:#F0A183; --ok-tint:#17342A;
+  --brand:#6B8AFF; --brand-tint:#1E2750; --brand-ink:#B6C6FF; --brand-on:#10111F;
+  --shadow:0 10px 34px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
+  --hi-tint:#3B1E14; --hi-ink:#F0A183; --ok-tint:#17342A;
+  --brand:#6B8AFF; --brand-tint:#1E2750; --brand-ink:#B6C6FF; --brand-on:#10111F;
+  --shadow:0 10px 34px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+p,li,td,small,em,b,span{text-wrap:balance}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3;font-weight:600}
+h1{font-size:clamp(23px,3vw,32px);font-weight:700}
+h2{font-size:18px} h3{font-size:16px}
+p{margin:0} a{color:inherit}
+button{font-family:inherit;font-size:14px;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:clamp(14px,3vw,32px)}
+.bar{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:baseline;gap:10px;font-weight:600}
+.brand .sub{font-size:12px;color:var(--muted);font-weight:400}
+@media (max-width:680px){.brand .sub{display:none}}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:7px 14px;box-shadow:var(--shadow);text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--brand);color:var(--brand-on);border-color:var(--brand)}
+.btn.ghost{box-shadow:none;background:transparent}
+.intake{padding-block:clamp(20px,4vw,40px)}
+.lede{color:var(--muted);max-width:70ch;margin-top:10px;font-size:14.5px}
+.drop{margin-top:18px;background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:26px;box-shadow:var(--shadow);text-align:center}
+.drop.over{border-color:var(--brand);background:var(--brand-tint)}
+.drop p{color:var(--muted);font-size:14px}
+.files{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.f{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:13.5px}
+.f .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f .m{color:var(--muted);font-family:var(--mono);font-size:11.5px;margin-left:auto;white-space:nowrap}
+.f button{border:none;background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 2px}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:22px}
+.stat{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
+.stat.hi{border-top-color:var(--hi)}
+.stat b{display:block;font-size:26px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+.verdict{margin-top:14px;background:var(--card);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--hi)}
+.verdict.clean{border-left-color:var(--ok)}
+.verdict b{display:block;margin-bottom:4px}
+.verdict p{font-size:14px;color:var(--muted)}
+.cards{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.cc{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--hi);border-radius:14px;padding:15px 17px;box-shadow:var(--shadow)}
+.vals{margin-top:11px;display:flex;flex-direction:column;gap:7px}
+.v{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;background:var(--bg);border-radius:10px;padding:8px 11px}
+.v b{font-family:var(--mono);font-size:14px;color:var(--hi-ink);background:var(--hi-tint);border-radius:6px;padding:1px 8px;white-space:nowrap}
+.v .src{font-size:12.5px;color:var(--muted);min-width:0}
+.v .src i{font-style:normal;color:var(--ink);font-weight:600}
+.v .q{display:block;font-family:var(--mono);font-size:11.5px;margin-top:3px;word-break:break-word}
+.blk{margin-top:11px;font-size:13.5px;border-radius:10px;padding:9px 11px;background:var(--soft)}
+.blk>b{display:block;font-size:11px;letter-spacing:.05em;color:var(--muted);font-weight:500;margin-bottom:3px}
+.foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-block:20px 50px}
+.note-block{border-top:1px solid var(--line);padding-block:30px 50px}
+.note-block ul{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+.note-block li{margin-bottom:6px}
+.note-block p{color:var(--muted);font-size:14px;margin-top:12px;max-width:72ch}
+.hidden{display:none!important}
+</style></head><body>
+
+<div class="bar"><div class="wrap">
+  <div class="brand"><span>一套文档对照</span><span class="sub">每份单看都自洽，加起来才露馅</span></div>
+  <div class="acts">
+    <a class="btn ghost" href="prd-check.html">单份体检</a>
+    <button class="btn ghost" id="btn-reset">清空</button>
+    <button class="btn primary" id="btn-run">开始对照</button>
+  </div>
+</div></div>
+
+<div class="wrap intake">
+  <h1>这几份文档，说的是同一件事吗？</h1>
+  <p class="lede">一套材料里最难发现的问题不在任何一份文档里面——每份单独读都自洽、加起来都是 100%，只有把两份并排放才看得出口径对不上。这里只做一件确定的事：<b>把各文档里「同一个名目下的数字」拎出来比一遍</b>，不一致的列给你。不理解语义，不判断谁对谁错。</p>
+  <div class="drop" id="drop">
+    <p>把一整套文档拖进来，或者</p>
+    <div style="margin-top:12px"><button class="btn" id="btn-file">选择文件（可多选）</button></div>
+    <input type="file" id="file" accept=".md,.txt,.markdown,text/*" multiple class="hidden">
+    <p style="margin-top:12px;font-size:12.5px">至少两份才有对照的意义。全部在你本机浏览器里跑，不上传、不联网。</p>
+  </div>
+  <div class="files" id="files"></div>
+</div>
+
+<div class="wrap hidden" id="report">
+  <div class="summary" id="summary"></div>
+  <div class="verdict" id="verdict"></div>
+  <div class="cards" id="cards"></div>
+  <div class="foot">
+    <button class="btn" id="btn-copy">复制成一条可以发群的消息</button>
+    <button class="btn ghost" id="btn-dl">下载对照报告 .md</button>
+    <span id="state" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+</div>
+
+<div class="wrap note-block">
+  <h2>这个对照查不了什么</h2>
+  <ul>
+    <li><b>只比数字，不比意思。</b>两份文档对同一件事用了不同说法、但数字一样，它看不出来。</li>
+    <li><b>不判断谁对谁错。</b>它只告诉你两处不一致，哪个是对的只有你知道。</li>
+    <li><b>认不出改了名的东西。</b>「运行保障支撑度」和「保障维度」在它眼里是两个名目。</li>
+    <li><b>名目太短会漏。</b>名目不足 3 个字的、或者数字前面没有名目的，一律跳过——宁可漏，不乱报。</li>
+    <li><b>同一份文档内部的矛盾不在这里。</b>那个交给<a href="prd-check.html">单份体检</a>。</li>
+  </ul>
+  <p>和体检台一样：纯前端确定性匹配，没有模型参与，所以不会幻觉，但也绝不聪明。</p>
+</div>
+<script>
+/*EXTRACT_START*/
+function extractFacts(lines){
+  var UNITS = "%|项|个|条|类|批|步|周|个月|月|天|级|层|维度";
+  var LEAD = ["其中","包括","全部","可进入","进入","分为","含","共","有","约","即"];
+  var STOP = /^(合计|总计|小计|共计|总共|总数|汇总)/;
+  function clean(w){
+    var t = String(w).replace(/^[A-Za-z0-9一二三四五六七八九十]+[.、．·\s]*/, "").trim();
+    if (/^分[A-Za-z0-9]/.test(t)) t = t.slice(1).replace(/^[A-Za-z0-9]+[.、．·\s]*/, "");
+    var changed = true;
+    while (changed){
+      changed = false;
+      for (var i = 0; i < LEAD.length; i++){
+        if (t.length - LEAD[i].length >= 3 && t.indexOf(LEAD[i]) === 0){
+          t = t.slice(LEAD[i].length).replace(/^[A-Za-z0-9]+[.、．·\s]*/, "");
+          changed = true;
+        }
+      }
+    }
+    return t.trim();
+  }
+  function labelBefore(ls, i, at){
+    var pre = ls[i].slice(0, at).replace(/[（(][^）)]*$/, "");
+    var m = pre.match(/([一-龥][一-龥A-Za-z·]{2,14})[^一-龥A-Za-z]{0,8}$/);
+    if (m){
+      var c = clean(m[1]);
+      if (c.length >= 3) return c;
+    }
+    var win = [];
+    for (var k = i - 1; k >= 0 && k >= i - 5; k--){
+      var t = ls[k].trim();
+      if (!t) continue;
+      if (/^[-|+=\s]*$/.test(t)) continue;
+      if (STOP.test(t)) return null;
+      if (t.length > 26) break;
+      win.push(t);
+    }
+    for (var a = 0; a < win.length; a++){
+      var m1 = win[a].match(/^[A-Da-d0-9]{1,3}\s*[.、．·]?\s*([一-龥][一-龥A-Za-z·]{2,14})$/);
+      if (m1){ var c1 = clean(m1[1]); if (c1.length >= 3) return c1; }
+    }
+    for (var b = 0; b < win.length; b++){
+      if (/^\d/.test(win[b])) continue;
+      if (/[：:]/.test(win[b])) continue;
+      var m2 = win[b].match(/^([一-龥][一-龥A-Za-z·]{2,14})$/);
+      if (m2){ var c2 = clean(m2[1]); if (c2.length >= 3) return c2; }
+    }
+    return null;
+  }
+  var facts = [];
+  for (var i = 0; i < lines.length; i++){
+    var re = new RegExp("(\\d{1,4}(?:\\.\\d+)?)\\s*(" + UNITS + ")", "g");
+    var m;
+    while ((m = re.exec(lines[i])) !== null){
+      var label = labelBefore(lines, i, m.index);
+      if (!label || label.length < 3) continue;
+      facts.push({ label: label, unit: m[2], value: parseFloat(m[1]), line: i + 1, text: lines[i].trim() });
+    }
+  }
+  return facts;
+}
+
+function crossCheck(docs){
+  var SEP = "@@|@@";
+  var bag = {};
+  docs.forEach(function(d){
+    extractFacts(d.lines).forEach(function(f){
+      var key = f.label + SEP + f.unit;
+      (bag[key] = bag[key] || []).push({ doc: d.name, value: f.value, line: f.line, text: f.text });
+    });
+  });
+  var conflicts = [];
+  Object.keys(bag).forEach(function(key){
+    var rows = bag[key];
+    var byVal = {}, docSet = {};
+    rows.forEach(function(r){ (byVal[r.value] = byVal[r.value] || []).push(r); docSet[r.doc] = 1; });
+    var vals = Object.keys(byVal);
+    if (vals.length < 2) return;
+    var nDocs = Object.keys(docSet).length;
+    if (nDocs < 2) return;
+    var crossesDocs = false;
+    vals.forEach(function(v){
+      var ds = {};
+      byVal[v].forEach(function(r){ ds[r.doc] = 1; });
+      if (Object.keys(ds).length < nDocs) crossesDocs = true;
+    });
+    if (!crossesDocs) return;
+    var parts = key.split(SEP);
+    conflicts.push({
+      label: parts[0], unit: parts[1],
+      values: vals.map(function(v){ return { value: parseFloat(v), rows: byVal[v] }; })
+                  .sort(function(a, b){ return a.value - b.value; })
+    });
+  });
+  conflicts.sort(function(a, b){ return b.values.length - a.values.length || a.label.localeCompare(b.label); });
+  return conflicts;
+}
+/*EXTRACT_END*/
+
+var $ = function(s){ return document.querySelector(s); };
+var state = { docs: [], conflicts: [] };
+function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function renderFiles(){
+  $("#files").innerHTML = state.docs.map(function(d, i){
+    return '<div class="f"><span class="n">' + esc(d.name) + "</span>" +
+           '<span class="m">' + d.lines.length + " 行</span>" +
+           '<button data-i="' + i + '" title="移除">&#10005;</button></div>';
+  }).join("");
+  Array.prototype.forEach.call($("#files").querySelectorAll("button"), function(b){
+    b.onclick = function(){ state.docs.splice(parseInt(b.dataset.i, 10), 1); renderFiles(); };
+  });
+}
+
+function run(){
+  if (state.docs.length < 2){ alert("至少放两份文档进来才能对照。"); return; }
+  state.conflicts = crossCheck(state.docs);
+  var n = state.conflicts.length;
+  var totalLines = state.docs.reduce(function(a, d){ return a + d.lines.length; }, 0);
+  $("#summary").innerHTML =
+    '<div class="stat hi"><b>' + n + "</b><span>处名目相同、数字不同</span></div>" +
+    '<div class="stat"><b>' + state.docs.length + "</b><span>份文档参与对照</span></div>" +
+    '<div class="stat"><b>' + totalLines + "</b><span>行原文</span></div>";
+  var v = $("#verdict");
+  if (!n){
+    v.className = "verdict clean";
+    v.innerHTML = "<b>没有发现同名目不同值的情况。</b><p>这不代表这套文档一致——它只说明「同一个名目后面跟的数字」没有互相打架。改了名的、换了说法的，它认不出来。</p>";
+  } else {
+    v.className = "verdict";
+    v.innerHTML = "<b>有 " + n + " 处同一个名目，在不同文档里给了不同的数。</b><p>这类问题单看任何一份都发现不了——每份自己都是自洽的。下面每条都标了各自出自哪份文档的第几行。你只需要定一个口径，然后把其余几处一起改掉。</p>";
+  }
+  $("#cards").innerHTML = state.conflicts.map(function(c){
+    return '<article class="cc">' +
+      "<h3>「" + esc(c.label) + "」的" + (c.unit === "%" ? "数值" : "数量") + "，有 " + c.values.length + " 种说法</h3>" +
+      '<div class="vals">' + c.values.map(function(g){
+        return '<div class="v"><b>' + g.value + esc(c.unit) + '</b><span class="src">' +
+          g.rows.map(function(r){ return "<i>" + esc(r.doc) + "</i> 第 " + r.line + " 行"; }).join("　/　") +
+          '<span class="q">' + esc(g.rows[0].text.slice(0, 120)) + "</span></span></div>";
+      }).join("") + "</div>" +
+      '<div class="blk"><b>要确认的事</b>「' + esc(c.label) + "」到底是 " +
+        c.values.map(function(g){ return g.value + c.unit; }).join(" 还是 ") +
+        "？定下来之后另外几处要一起改——这个数大概率已经被别的地方引用了。</div>" +
+      "</article>";
+  }).join("");
+  $("#report").classList.remove("hidden");
+  $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function addFiles(list){
+  var arr = Array.prototype.slice.call(list);
+  var left = arr.length;
+  if (!left) return;
+  arr.forEach(function(f){
+    var r = new FileReader();
+    r.onload = function(){
+      state.docs.push({ name: f.name, lines: String(r.result).split(/\r?\n/) });
+      if (--left === 0){ renderFiles(); if (state.docs.length >= 2) run(); }
+    };
+    r.readAsText(f, "utf-8");
+  });
+}
+$("#btn-file").onclick = function(){ $("#file").click(); };
+$("#file").onchange = function(e){ addFiles(e.target.files); e.target.value = ""; };
+var drop = $("#drop");
+["dragenter", "dragover"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); }); });
+["dragleave", "drop"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); }); });
+drop.addEventListener("drop", function(e){ addFiles(e.dataTransfer.files); });
+$("#btn-run").onclick = run;
+$("#btn-reset").onclick = function(){
+  state.docs = []; state.conflicts = [];
+  renderFiles(); $("#report").classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+function buildText(){
+  var out = ["我把这 " + state.docs.length + " 份文档里同名目的数字对了一遍，有 " + state.conflicts.length + " 处对不上：", ""];
+  state.conflicts.forEach(function(c, i){
+    out.push((i + 1) + "、「" + c.label + "」");
+    c.values.forEach(function(g){
+      out.push("　　" + g.value + c.unit + "　——　" + g.rows.map(function(r){ return r.doc + " 第 " + r.line + " 行"; }).join("、"));
+    });
+    out.push("");
+  });
+  out.push("不是说哪份写错了，是得先定一个口径，然后把其余几处一起改掉——这些数多半已经被别的地方引用了。");
+  return out.join("\n");
+}
+$("#btn-copy").onclick = function(){
+  if (!state.conflicts.length) return;
+  navigator.clipboard.writeText(buildText()).then(function(){
+    $("#state").textContent = "已复制";
+    setTimeout(function(){ $("#state").textContent = ""; }, 2400);
+  });
+};
+$("#btn-dl").onclick = function(){
+  if (!state.conflicts.length) return;
+  var md = "# 一套文档对照报告\n\n- 参与对照：" + state.docs.map(function(d){ return d.name; }).join("、") +
+           "\n- 发现 " + state.conflicts.length + " 处同名目不同值\n\n" + buildText() +
+           "\n\n---\n\n只比数字，不比意思；不判断谁对谁错；改了名的认不出来。全程在本机浏览器内完成，文档未上传。\n";
+  var blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "文档对照报告.md";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+};
+</script>
+</body></html>

@@ -156,7 +156,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 
 <div class="bar"><div class="wrap">
   <div class="brand"><span>文档体检台</span><span class="sub">问题点 · 业务影响 · 该找谁确认</span></div>
-  <a class="btn primary" href="prd-check.html">打开体检台</a>
+  <div class="acts"><a class="btn ghost" href="cross-check.html">一套文档对照</a><a class="btn primary" href="prd-check.html">打开体检台</a></div>
 </div></div>
 
 <section class="hero"><div class="wrap hero-grid">
@@ -308,6 +308,37 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
       <div class="blk out"><b>不处理的话，业务上会怎样</b>验证成本全部落在接手的人身上。只要有一个是假的，照着搭的那一段就是白干。</div>
     </article>
   </div></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>最有用的那几条检查，不需要懂你的业务</h2>
+  <p class="lede">它看不懂你的公式合不合理——这个它从不假装。但有一类问题是纯算术，谁都能判定，而且<b>对方无法辩论</b>：</p>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+    <div class="stat hi"><b>≠100%</b><span>声明为权重的百分比，加起来不是 100</span></div>
+    <div class="stat hi"><b>5 ≠ 6</b><span>写着「5 项：」，后面列了 6 个</span></div>
+    <div class="stat hi"><b>100% + 前提</b><span>一边写「全自动」，一边写「前提是数据源可接入」</span></div>
+    <div class="stat hi"><b>20% / 15%</b><span>同一个名目，这份文档一个数，那份另一个数</span></div>
+  </div>
+  <p class="punch">不需要争论「这样写好不好」，只需要回答「哪个是对的」。这就是为什么输出是问题而不是评分。</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>一份查不出来的，一套才查得出来</h2>
+  <p class="lede">一套材料里最危险的问题，不在任何一份文档里面。</p>
+  <div class="vs" style="margin-top:26px">
+    <div class="new">
+      <h3>文档 A</h3>
+      <p class="quote">C 运行保障支撑度　2 项　<b style="color:var(--hi)">20%</b><br>D 产出与贡献　3 项　<b style="color:var(--hi)">20%</b></p>
+      <p class="so">30 + 30 + 20 + 20 = 100　✓ 自洽</p>
+    </div>
+    <div class="new">
+      <h3>文档 B</h3>
+      <p class="quote">C 运行保障支撑度（2 项，<b style="color:var(--hi)">15%</b>）<br>D 产出与贡献（3 项，<b style="color:var(--hi)">25%</b>）</p>
+      <p class="so">30 + 30 + 15 + 25 = 100　✓ 也自洽</p>
+    </div>
+  </div>
+  <p class="punch">两份单独读都挑不出毛病，只有并排放才看得见。把一整套拖进去，它把所有「同一个名目、不同数字」的地方列给你，标明各自出自哪份的第几行。</p>
+  <div class="cta"><a class="btn primary lg" href="cross-check.html">打开一套文档对照</a></div>
 </div></section>
 
 <section><div class="wrap">
