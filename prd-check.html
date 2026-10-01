@@ -130,33 +130,37 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
 .slogan{margin-top:10px;font-size:14px;color:var(--muted);letter-spacing:.04em}
 .modes{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
 .modes .chip{padding:6px 14px;font-size:13px}
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.langsw button{border:none;background:transparent;color:var(--muted);padding:5px 12px;font-size:12.5px}
+.langsw button.on{background:var(--brand);color:var(--brand-on)}
 .hidden{display:none !important}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <div class="brand"><span>文档体检台</span><span class="sub">不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档</span></div>
+  <div class="brand"><span data-i18n="brandName">文档体检台</span><span class="sub" data-i18n="brandSub">不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档</span></div>
   <div class="acts">
-    <a class="btn ghost" href="cross-check.html">一套文档对照</a>
-    <button class="btn ghost" id="btn-sample">载入示例</button>
-    <button class="btn ghost" id="btn-reset">重来</button>
-    <button class="btn primary" id="btn-run">体检</button>
+    <div class="langsw" id="langsw"><button data-l="zh" class="on">中文</button><button data-l="en">EN</button></div>
+    <a class="btn ghost" href="cross-check.html" data-i18n="navCross">一套文档对照</a>
+    <button class="btn ghost" id="btn-sample" data-i18n="btnSample">载入示例</button>
+    <button class="btn ghost" id="btn-reset" data-i18n="btnReset">重来</button>
+    <button class="btn primary" id="btn-run" data-i18n="btnRun">体检</button>
   </div>
 </div></div>
 
 <div class="wrap intake" id="intake">
   <h1 id="h1">发出去之前，先自己过一遍</h1>
-  <p class="slogan">不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档</p>
+  <p class="slogan" data-i18n="slogan">不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档</p>
   <div class="modes" id="modes">
-    <button class="chip on" data-m="self">自检 · 我自己写的</button>
-    <button class="chip" data-m="other">体检 · 别人给我的</button>
+    <button class="chip on" data-m="self" data-i18n="modeSelf">自检 · 我自己写的</button>
+    <button class="chip" data-m="other" data-i18n="modeOther">体检 · 别人给我的</button>
   </div>
   <p class="lede" id="lede">市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。</p>
   <div class="drop" id="drop">
     <textarea id="input" placeholder="粘贴 Markdown / 纯文本全文，或把 .md / .txt 文件拖进来"></textarea>
     <div class="row">
       <input type="file" id="file" accept=".md,.txt,.markdown,text/*" class="hidden">
-      <button class="btn" id="btn-file">选择文件</button>
-      <button class="btn ghost" id="btn-clear">清空</button>
+      <button class="btn" id="btn-file" data-i18n="btnFile">选择文件</button>
+      <button class="btn ghost" id="btn-clear" data-i18n="btnClear">清空</button>
       <span class="hint" id="filehint"></span>
     </div>
   </div>
@@ -169,25 +173,25 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
 
 <div class="wrap split hidden" id="panes">
   <section class="pane">
-    <div class="pane-head"><h2>原文</h2><span class="meta" id="docmeta"></span></div>
+    <div class="pane-head"><h2 data-i18n="paneDoc">原文</h2><span class="meta" id="docmeta"></span></div>
     <div class="doc" id="doc"></div>
   </section>
   <section class="pane">
     <div class="pane-head">
-      <h2>卡片</h2>
+      <h2 data-i18n="paneCards">卡片</h2>
       <div class="filters" id="filters"></div>
     </div>
     <div class="cards" id="cards"></div>
     <div class="pane-head" style="border-top:1px solid var(--line);border-bottom:none">
       <button class="btn" id="btn-copyall">复制成一条可以直接发群的消息</button>
-      <button class="btn" id="btn-dl-md">下载报告 .md</button>
-      <button class="btn ghost" id="btn-dl-json">下载结果 .json</button>
+      <button class="btn" id="btn-dl-md" data-i18n="btnDlMd">下载报告 .md</button>
+      <button class="btn ghost" id="btn-dl-json" data-i18n="btnDlJson">下载结果 .json</button>
       <span class="meta" id="copystate"></span>
     </div>
   </section>
 </div>
 
-<div class="wrap explain"><div class="box">
+<div class="wrap explain"><div class="box" data-i18n="explainBox">
   <h2>为什么要把「疑似 AI 生成」标出来</h2>
   <p>不是为了抓人。现在没有谁的文档是全手写的，也不该要求谁全手写。标出来是为了两件事。</p>
   <p><b>一、给读的人一个提醒。</b>知道哪几段是一次性生成的，看的时候就会多留个心眼，不会把排版的完整当成内容的可靠。</p>
@@ -195,7 +199,7 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
   <p>所以这一档单独算，<b>不计入「必须回答的问题」</b>。它不是罪状，是一张备注。</p>
 </div></div>
 
-<div class="wrap limits">
+<div class="wrap limits" data-i18n="limitsBox">
   <h2>这个工具查不了什么</h2>
   <ul>
     <li><b>查不了对错。</b>它不懂你的业务，公式是否合理、指标是否有意义，一概不懂，也不装懂。</li>
@@ -1003,27 +1007,401 @@ var SAMPLE = [
 ].join("\n");
 
 var $ = function(s){ return document.querySelector(s); };
-var state = { res:null, filter:"all", lines:[], name:"", mode:"self" };
+var state = { res:null, filter:"all", lines:[], name:"", mode:"self", lang:"zh" };
+(function(){
+  var saved = null;
+  try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
+  if (saved === "en" || saved === "zh") state.lang = saved;
+  else if (typeof navigator !== "undefined" && navigator.language && navigator.language.toLowerCase().indexOf("zh") !== 0) state.lang = "en";
+})();
 var isSelf = function(){ return state.mode === "self"; };
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-var COPY = {
-  self: {
-    h1: "发出去之前，先自己过一遍",
-    lede: "这是你自己写的文档。这里不挑错，只告诉你三件事：哪几处会让接手的人卡住、卡住之后业务上会怎样、以及<b>你发出去之前最好先补上什么</b>。全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。",
-    copyBtn: "复制成一份自查清单"
+var I18N = {
+  zh: {
+    brandName:"文档体检台",
+    brandSub:"不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档",
+    navCross:"一套文档对照", btnSample:"载入示例", btnReset:"重来", btnRun:"体检",
+    slogan:"不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档",
+    modeSelf:"自检 · 我自己写的", modeOther:"体检 · 别人给我的",
+    btnFile:"选择文件", btnClear:"清空", paneDoc:"原文", paneCards:"卡片",
+    btnDlMd:"下载报告 .md", btnDlJson:"下载结果 .json",
+    inputPh:"粘贴 Markdown / 纯文本全文，或把 .md / .txt 文件拖进来",
+    needDoc:"先粘一份文档进来。", needRun:"先体检一份文档。",
+    fileMd:"体检报告-", fileJson:"体检结果-", mdSaved:"报告已下载", jsonSaved:"JSON 已下载（含原文摘录，转发前留意）",
+    docMeta:function(n){ return n.toLocaleString() + " 行　│　蓝条＝疑似 AI 生成"; },
+    statHi:"阻断项 · 不回答没法开工", statMd:"待澄清 · 开工前要有答案",
+    statLo:"修辞噪音 · 删了不影响信息", statAi:"AI 痕迹 · 备注，不算问题",
+    statMeta:function(r){ return r.chars.toLocaleString() + " 字 · " + r.sections + " 个标题 · " + r.tables + " 张表"; },
+    filAll:"全部", filHi:"阻断", filMd:"待澄清", filAi:"AI 痕迹", filLo:"噪音",
+    noneInTier:"这一档没有条目。",
+    lblImpact:"不处理的话，业务上会怎样", lblFix:"发出去之前，先做这件事", lblWho:"找谁 · ",
+    copyOne:"复制这条", copyAsk:"复制这句", copied:"已复制", notCounted:"不计入必答",
+    h1:{ self:"发出去之前，先自己过一遍", other:"这份文档，能不能照着干？" },
+    lede:{
+      self:"这是你自己写的文档。这里不挑错，只告诉你三件事：哪几处会让接手的人卡住、卡住之后业务上会怎样、以及<b>你发出去之前最好先补上什么</b>。全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。",
+      other:"市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。"
+    },
+    copyBtn:{ self:"复制成一份自查清单", other:"复制成一条可以直接发群的消息" },
+    verdictClean:{
+      self:"<b>没查出结构性问题，可以发了。</b><p>这不代表内容是对的——它只说明你没有把没定的事写成定了的事。内容对不对，还得人看。</p>",
+      other:"<b>没有检出结构性问题。</b><p>这不代表内容正确，只代表它没有把未决问题伪装成已决问题。内容对不对，还得人看。</p>"
+    },
+    verdict:{
+      self:function(n){ return "<b>发出去之前，有 " + n + " 处最好先补上。</b><p>这些不是错误，是接手的人会卡住的地方。你现在补，花十几分钟；他们卡住之后再回来问你，一来一回是两天，而且那两天里所有人都以为方案已经就绪。</p>"; },
+      other:function(n){ return "<b>开工前需要活人回答 " + n + " 个问题。</b><p>每张卡片都指向原文的具体位置，并写明了不处理会在业务上造成什么、该找谁。它们不是「这里写错了」，是「这里需要一个人回答」。回答得上来就划掉，回答不上来的那几条，就是这份文档真正的进度。</p>"; }
+    },
+    exp:{
+      copiedN:function(n){ return "已复制 " + n + " 条"; },
+      mdTitle:"# 文档体检报告", mdDoc:"受检文档", mdTime:"体检时间",
+      mdSize:function(r){ return "- 体量：" + r.lines + " 行 · " + r.chars + " 字 · " + r.sections + " 个章节 · " + r.tables + " 张表"; },
+      mdVerdict:{
+        self:function(n,r){ return "- 结论：**发出去之前有 " + n + " 处最好先补上**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。"; },
+        other:function(n,r){ return "- 结论：**开工前需要回答 " + n + " 个问题**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。"; }
+      },
+      mdNote:["> 这份报告只做一件事：找出被排版成「已决事项」的未决问题。",
+              "> 它不判断内容对错，也不判断文档是不是 AI 写的——那个问题没有意义，现在答案永远是「是」。",
+              "> 每一条都是「这里需要一个人回答」，不是「这里错了」。答得上来就划掉。"],
+      mdSecMain:{ self:"## 发出去之前要补的地方", other:"## 必须回答的问题" },
+      mdWhy:"**为什么是个问题**　", mdImpact:"**不处理的话**　",
+      mdFix:"**发出去之前，先做这件事**　", mdWho:function(w){ return "**去问 " + w + "**　"; },
+      mdSecAi:"## AI 痕迹（不计入必答，仅供阅读时参考）",
+      mdAiNote:"标出来不是为了抓人。文档里有 AI 很正常。标记有两个用处：读的人知道哪几段可能没经过人工核对；写的人有退路——「这段是我的 AI 自己加的」比「我写错了」容易说出口得多。",
+      mdSecLo:"## 修辞噪音（可忽略）",
+      mdLimits:["## 这份报告查不了什么", "",
+        "- 查不了内容对错。它不懂业务，公式合不合理、指标有没有意义，一概不知，也不装懂。",
+        "- 口径冲突只查得到数值层面的；用文字描述出来的定义分歧查不到，这是已知缺口。",
+        "- 查不出「写得对但做不到」——资源、排期、人力、授权，文档里不写就看不见。",
+        "- 命中不等于有罪。每条只是「这里需要一个人回答」。",
+        "- 它自己只是一堆确定性正则，没有模型参与，所以不会幻觉，但也绝不聪明。", "",
+        "---", "",
+        "由「文档体检台」生成 · 全程在本机浏览器内完成，文档未上传、未联网、未调用任何模型。"],
+      copySelfHead:function(n){ return "发出去之前自己过了一遍，有 " + n + " 处要补（按原文行号）：\n"; },
+      copySelfAi:"另外有几节是模型一口气写出来的，发之前再读一遍，把它自己补的、我并不打算承诺的内容删掉。\n",
+      copySelfItem:function(i,f,g){ return (i + 1) + "、【L" + f.line + "】" + g.title + "\n　　补什么：" + g.fix + "\n　　不补的话：" + g.impact; },
+      copyOtherHead:function(n){ return "我把文档过了一遍，整理出开工前需要确认的 " + n + " 个点，按原文行号列在下面。\n先说清楚：这些不是说文档写错了，是这些地方需要有个人拍板，不然下游没法动。\n"; },
+      copyOtherAi:"另外有几节看着像是 AI 一口气生成的——这很正常，大家现在都这么写。要是哪条本来就是模型自己加的，说一声直接划掉就行，不用解释。\n",
+      copyOtherItem:function(i,f,g){ return (i + 1) + "、【L" + f.line + "】" + g.title + "\n　　问：" + g.ask + "\n　　不处理的话：" + g.impact + "\n　　建议找：" + g.who; }
+    },
+    explainBox:document.querySelector('[data-i18n="explainBox"]').innerHTML,
+    limitsBox:document.querySelector('[data-i18n="limitsBox"]').innerHTML
   },
-  other: {
-    h1: "这份文档，能不能照着干？",
-    lede: "市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。",
-    copyBtn: "复制成一条可以直接发群的消息"
+  en: {
+    rules: {
+      tableSelfDeclared: {
+        rule:"Undecided, typeset as decided",
+        title:function(p){ return "This table has " + p.rows + " parameters, and " + p.yes + " of them are marked \"needs sign-off\" by the table itself"; },
+        why:function(p){ return "One row is saying two opposite things: a precise default on the left, and an admission on the right that nobody has agreed to it. Readers only remember the left."; },
+        impact:function(p){ return "Downstream will treat " + p.yes + " unsettled numbers as settled and start building. When someone finally decides and a value changes, every calculation, chart and conclusion built on it has to be redone — and that rework lands on whoever implemented it."; },
+        who:function(p){ return "whoever requested this + the person who can actually sign off on these business thresholds (usually not the author)"; },
+        fix:function(p){ return "Delete the defaults, or replace them with \"TBD\", then go get the real numbers from whoever can decide. If you can't get them today, put a line above the table: \"placeholder values, not to be built on until confirmed.\" A precise number is more dangerous than a blank."; },
+        ask:function(p){ return "For the " + p.yes + " rows marked as needing sign-off: who decides, and by when? Until then, does downstream wait or run with the defaults? If we run with defaults and the conclusion gets overturned later, whose hours does the rework come out of?"; }
+      },
+      danglingInput: {
+        rule:"Dangling input",
+        title:function(p){ return "\"" + p.ent + "\" is still empty, and " + p.n + " places downstream already compute with it"; },
+        why:function(p){ return "The input hasn't arrived, but the formulas, metrics and charts that depend on it are already written. This is the classic folded causal chain: pretend step one is done, and every step after it can be written in one pass."; },
+        impact:function(p){ return "Day one of implementation stops here. Either the whole chain waits for data, or someone runs it on fake numbers and redoes all " + p.n + " places later. During the wait, everyone believes the plan is ready."; },
+        who:function(p){ return "whoever can answer \"can we actually get this data\" — the data owner, procurement if it has to be bought, or the counterparty contact"; },
+        fix:function(p){ return "Until \"" + p.ent + "\" actually lands, collapse the sections that depend on it or mark them \"to be filled once data arrives.\" Writing them out in full now means handing over a document that looks buildable and isn't."; },
+        ask:function(p){ return "Can we actually get \"" + p.ent + "\" today? Who is chasing it, where is it stuck, when does it land? If it doesn't, do we cut the parts that depend on it (lines " + (p.head || []).slice(0,6).join(", ") + ") or pause the whole thing?"; }
+      },
+      missingButComputed: {
+        rule:"Missing yet computed",
+        title:function(p){ return p.n + " rows say \"data missing\" and still produce a number"; },
+        why:function(p){ return "The worst of the family: the gap was honestly labelled, but it didn't stop the calculation. The disclaimer and the number sit on the same row, and readers only see the number."; },
+        impact:function(p){ return "That number gets quoted — into decks, into external material, into decisions. When someone finally asks where it came from and the trail ends at a missing-data cell, the credibility of the whole report goes, not just that row."; },
+        who:function(p){ return "whoever produced the number + whoever is going to present it (both need to know)"; },
+        fix:function(p){ return "Either write, right there, how the gap was handled (zero? mean? carried forward?), or leave the cell empty and say \"data missing.\" A number with no provenance cannot be recalled once it enters a deck."; },
+        ask:function(p){ return "These rows are marked \"data missing\" but still produce a figure. How was it computed — treated as zero, filled with an average, or skipped? My suggestion: rows with gaps shouldn't emit a number at all. If it exists, someone will quote it, and nobody re-reads the disclaimer next to it."; }
+      },
+      pendingScattered: {
+        rule:"Undecided, typeset as decided",
+        title:function(p){ return p.n + " places say \"TBD / to be confirmed / placeholder\", scattered through the body"; },
+        why:function(p){ return "Being undecided isn't the problem. The problem is that these sit in the same font, the same tables and the same numbered sections as the settled content, so a reader can't tell a spec from a wish."; },
+        impact:function(p){ return "The next person plans and breaks down work as if the whole document were final, so progress is overstated. You find out at module N that a premise was never settled — after the schedule has already been committed."; },
+        who:function(p){ return "the author (ask them to pull the open items into one table)"; },
+        fix:function(p){ return "Lift these " + p.n + " open items into a single table at the top of the document and leave only references in the body. Then the first thing a reader sees is which parts are settled and which aren't."; },
+        ask:function(p){ return "Could the " + p.n + " open items be pulled into one table at the front? And until they're settled, which sections should nobody start on?"; }
+      },
+      patchMarks: {
+        rule:"Patch marks",
+        title:function(p){ return p.n + " \"correction note / should read\" style patches"; },
+        why:function(p){ return "Needing patches in prose means the previous version was produced in one pass and shipped without anyone reading it line by line. The patches cover the errors that happened to be caught."; },
+        impact:function(p){ return "Errors of the same kind are almost certainly still in there, sitting in sections nobody has read closely. And because this version looks revised, the next reader trusts it more, not less."; },
+        who:function(p){ return "the author (ask how the errors were found)"; },
+        fix:function(p){ return "You already know this class of error exists. Before sending, do one full pass for the same kind yourself — the patches only cover what was caught."; },
+        ask:function(p){ return "How were these errors found — did a person read line by line, or was it handed back to AI? Has anyone done a full-document pass for the same class of problem?"; }
+      },
+      unverifiedArtifacts: {
+        rule:"Unverified specifics",
+        title:function(p){ return p.n + " package / tool / endpoint names appear, none marked as verified"; },
+        why:function(p){ return "This is exactly what models are best at inventing: repo names, CLI names, endpoints, URLs with paths. They look like the hardest facts in the document and they are the highest-hallucination part of it."; },
+        impact:function(p){ return "Every one costs somebody time to verify, and that time appears on no one's plan. If even a few are invented, whoever builds from this burns days in setup — and blames themselves first."; },
+        who:function(p){ return "an engineer or data person who has actually run this path (not the author)"; },
+        fix:function(p){ return "Delete every tool, package and endpoint you haven't run yourself, or put one line above them: \"unverified candidates, not yet tested.\" Leave them in and somebody will build against them and find out the hard way."; },
+        ask:function(p){ return "Of these " + p.n + " tools and endpoints, which have actually been run? Could we drop the ones that haven't and add them back after they're verified, so nobody spends a day configuring something that doesn't exist?"; }
+      },
+      unsourcedNumbers: {
+        rule:"Unsourced numbers",
+        title:function(p){ return p.n + " thresholds / weights / coefficients with no source anywhere nearby"; },
+        why:function(p){ return "A precise number creates the impression that somebody calculated it. A threshold with no stated source is usually a placeholder dropped in so the paragraph would look complete."; },
+        impact:function(p){ return "These numbers decide what the final output looks like. Once a report built on placeholders goes out, changing the parameters later means retracting a conclusion you already stated in public — far more expensive than re-running the code."; },
+        who:function(p){ return "the algorithm or data person (ask whether these can be derived from real data)"; },
+        fix:function(p){ return "Add one line of provenance after each number. For the ones you can't, change them to \"to be calibrated.\" A precise number with no source makes everyone assume it was computed, so nobody computes it."; },
+        ask:function(p){ return "Were these thresholds derived from real data, or filled in now and calibrated later? If it's the latter, let's write \"TBD\" instead of a default — a default will just get used."; }
+      },
+      unsourcedPercent: {
+        rule:"Unsourced percentages",
+        title:function(p){ return p.n + " percentage claims with no stated basis"; },
+        why:function(p){ return "A percentage is the single most quotable thing in a document. It gets lifted into decks and headlines, and whoever lifts it never checks the denominator."; },
+        impact:function(p){ return "Once quoted, it can't be recalled. When somebody finally asks what the denominator was and nobody can say, what collapses is the credibility of the whole document, not that one figure."; },
+        who:function(p){ return "whoever produced the figure (usually the author)"; },
+        fix:function(p){ return "Add the basis after each percentage: what the denominator is, how it was counted, when. If you can't, switch to qualitative wording (\"most\", \"a few\") — a precise figure will be quoted as a finding."; },
+        ask:function(p){ return "How was this percentage arrived at — what's the denominator, what's the sample, and as of when?"; }
+      },
+      aiDisclosed: {
+        rule:"AI traces",
+        title:function(p){ return "The document states that it was AI-generated"; },
+        why:function(p){ return "The most certain marker there is — no inference needed, the document says so. Most people paste that line for compliance, but it also says: this content has not been through a human line by line."; },
+        impact:function(p){ return "No harm, as long as the reader sees it. That line is usually at the very bottom, and most people have started building from the document long before they get there."; },
+        who:function(p){ return "nobody to chase. This one just moves the footer up to the top."; },
+        fix:function(p){ return "Since it's already declared, say it at the top too, not only at the end — let the next person know how to read this from the first line. More importantly: go through it again yourself and cut what the model added that you aren't actually committing to."; },
+        ask:function(p){ return "The footer says this was AI-generated — that's fine, everyone works this way now. What I want to know is which sections you went through line by line and which ones you left as generated. I'll build from the first kind and hold off on the second, so nobody wastes the effort."; }
+      },
+      conditionalPromise: {
+        rule:"Conditional promise",
+        title:function(p){ return p.n + " places claim \"fully automated / 100%\" while admitting the precondition isn't met"; },
+        why:function(p){ return "\"100% automated, provided the data source can be connected\" puts an unmet condition and a finished conclusion side by side. Readers remember the first half."; },
+        impact:function(p){ return "These are the lines that go straight into schedules and external commitments. When it turns out the integration was never agreed, the dates are already public — and the caveat was technically in the document, so nobody blames the document."; },
+        who:function(p){ return "whoever can say when the precondition will actually be met: the integration owner, procurement, or the partner contact"; },
+        fix:function(p){ return "Downgrade these entries, or state plainly in the conclusion: \"until the precondition is met, this item is manual.\" A premise and a conclusion must not sit side by side — only the conclusion gets remembered."; },
+        ask:function(p){ return "These say fully automated, conditional on the other system being connectable. Where does that integration actually stand, who owns it, when is it settled? Until then, do we count these as automated or as manual?"; }
+      },
+      weightsOff: {
+        rule:"Weights don't sum",
+        title:function(p){ return p.n + " percentages declared as weights add up to " + p.sum + "%, not 100%"; },
+        why:function(p){ return "Pure arithmetic — no business knowledge needed. Weights that don't balance mean the scoring scheme either dropped something or counted something twice."; },
+        impact:function(p){ return "Every score computed from these weights is wrong, and wrong in a way that doesn't show: the numbers still compute, the ranking still renders, and only the total gives it away. By the time someone acts on that ranking, fixing the weights means overturning a decision already made."; },
+        who:function(p){ return "whoever set these weights"; },
+        fix:function(p){ return "Add them up once. Either restore the missing component, or say why they don't need to balance (relative weights, normalised later) — and if that's the case, write it next to the table instead of leaving people to guess."; },
+        ask:function(p){ return "These weights sum to " + p.sum + "%, not 100%. Is a component missing, or are these relative weights that get normalised downstream?"; }
+      },
+      countMismatch: {
+        rule:"Count mismatch",
+        title:function(p){ return p.n + " places say \"N items\" and then list a different number"; },
+        why:function(p){ return "Pure arithmetic again. The stated count and the list underneath disagree, which means the two were produced in separate passes and nobody reconciled them."; },
+        impact:function(p){ return "Counts like this get quoted straight into decks and schedules. Worse, they cascade: if a total was derived by adding these up, the total is wrong too — and the total is usually already on page one."; },
+        who:function(p){ return "the author (no meeting needed, just count once)"; },
+        fix:function(p){ return "Reconcile the number and the list. Then check whether the total is referenced anywhere else — a wrong count rarely travels alone."; },
+        ask:function(p){ return "This says " + p.declared + " " + p.unit + " but lists " + p.actual + ". Is the list one too many, or the number one too few? And does the total need updating as well?"; }
+      },
+      ungroundedTimeline: {
+        rule:"Ungrounded timeline",
+        title:function(p){ return p.n + " time commitments with no stated basis"; },
+        why:function(p){ return "Time figures are the most readily believed thing in any document. They get copied straight into a schedule, usually by someone who has never done the work being estimated."; },
+        impact:function(p){ return "Once the dates are committed, every slip becomes the implementer's problem, and nobody goes back to question whether the estimate was invented in the first place."; },
+        who:function(p){ return "somebody who has actually done this kind of work before (not the author)"; },
+        fix:function(p){ return "Add the basis after each duration: how it was derived, which past run it's benchmarked against. If you can't, give a range and mark it unverified — don't hand over a number that looks certain."; },
+        ask:function(p){ return "How was this estimate produced — benchmarked against a real past run, or put in as a placeholder? If it's a placeholder, let's label it, because otherwise it goes straight into the plan."; }
+      },
+      hypeLeftovers: {
+        rule:"Flattery left in",
+        title:function(p){ return p.n + " instances of \"brilliant / blazing fast / revolutionary\" style hype"; },
+        why:function(p){ return "In a technical document this usually isn't the author praising their own work — it's the model talking to the author. These sentences were compliments in a chat window, left in the file verbatim."; },
+        impact:function(p){ return "Harmless to execution, but it reveals something: nobody read this document start to finish. Readers who notice will start doubting the rigour of everything else."; },
+        who:function(p){ return "the author (just delete them, no one needs to be asked)"; },
+        fix:function(p){ return "Delete all of it. While you're in there, check for other conversation leftovers — \"based on your feedback\", \"I'll start implementing\", \"click Proceed\" — they tend to come as a set."; },
+        ask:function(p){ return "A few lines here read like they came out of a chat window; cutting them doesn't change the content. Worth sweeping for other conversation leftovers at the same time?"; }
+      },
+      hollowAutomation: {
+        rule:"Hollow automation",
+        title:function(p){ return p.n + " places where \"the system automatically\" does something, with no trigger, inputs or outputs"; },
+        why:function(p){ return "\"The model intelligently analyses…\" is the seam where the causal chain folds. Every step nobody knows how to build can be covered by a sentence like it."; },
+        impact:function(p){ return "In planning these read as one ticket each. In reality every one of them is a pipeline somebody has to design. Estimates come out systematically low, and the gap is absorbed entirely by whoever implements."; },
+        who:function(p){ return "the engineer who has to build it + the author (walk the fields together, out loud)"; },
+        fix:function(p){ return "For each \"automatically\", add four things: what triggers it, which fields from which table go in, where the output is written, and what happens on failure. The ones you can't write down are the ones you haven't thought through — mark them rather than covering them with \"intelligent analysis\"."; },
+        ask:function(p){ return "For each of these \"automatic\" steps: what triggers it, which fields are the input, where does the output land, and what happens when it fails?"; }
+      },
+      hollowWords: {
+        rule:"Filler words",
+        title:function(p){ return p.n + " instances of \"leverage / seamless / end-to-end\" style filler"; },
+        why:function(p){ return "These words share one property: delete them and the sentence carries the same information. High density usually means the document is using volume to stand in for depth."; },
+        impact:function(p){ return "Mostly it costs reading time, and it raises the document's apparent sophistication just enough that people feel awkward asking basic questions."; },
+        who:function(p){ return "the author (delete in passing, not worth a meeting)"; },
+        fix:function(p){ return "Just delete them. Read the paragraph again afterwards — nothing is missing."; },
+        ask:function(p){ return "If these sentences were deleted, would anyone know less than they do now?"; }
+      },
+      noAcceptance: {
+        rule:"No acceptance criteria",
+        title:function(p){ return "Nowhere does this document say how you'd know it was done right"; },
+        why:function(p){ return "Without acceptance criteria the deliverer can't prove they finished, and the requester never has to stand behind the outcome."; },
+        impact:function(p){ return "Whether the work counts as done gets settled by goodwill and volume. The usual result is repeated rework, and every round looks like the implementer underdelivered."; },
+        who:function(p){ return "whoever requested this + whoever signs it off at the end"; },
+        fix:function(p){ return "Add a closing section: what the acceptance conditions are, who verifies, against which data. That section protects you — without it, \"done\" is decided by someone else's mood."; },
+        ask:function(p){ return "Once this is built, what conditions decide that it's correct? Who verifies, against what data, and what happens if it doesn't pass? Worth writing down before work starts."; }
+      },
+      clashSameName: {
+        rule:"Definition clash",
+        title:function(p){ return p.n + " identically named parameters are given different values in different places"; },
+        why:function(p){ return "Humans almost never do this. It's the signature of content generated in one pass where the sections don't know about each other."; },
+        impact:function(p){ return "Two parts of the system get built against two different values. It won't fail loudly — the numbers still compute. It surfaces when two outputs that should agree don't, and by then nobody remembers which one was authoritative."; },
+        who:function(p){ return "whoever owns this parameter (and it needs one owner, not two)"; },
+        fix:function(p){ return "Pick one value, put it in one place, and reference it everywhere else. Two copies of a number will always drift apart."; },
+        ask:function(p){ return "This parameter has different values in different sections. Which one is authoritative, and can we keep it in one place so the others reference it instead of repeating it?"; }
+      },
+      clashSymbol: {
+        rule:"Definition clash",
+        title:function(p){ return p.n + " symbols are defined as different quantities in different sections"; },
+        why:function(p){ return "Reusing a symbol is normal in a single head and fatal across a document. The person implementing section 5 reads section 2's definition and silently builds the wrong thing."; },
+        impact:function(p){ return "The formula compiles and the output looks plausible, which is the worst case — it is wrong without being obviously wrong."; },
+        who:function(p){ return "whoever wrote the formulas"; },
+        fix:function(p){ return "Rename one of them. A subscript is enough. Keeping one symbol for two quantities saves the author a keystroke and costs the implementer a day."; },
+        ask:function(p){ return "This symbol means two different things in two sections. Can we rename one of them so nobody picks up the wrong definition?"; }
+      },
+      clashWeightSum: {
+        rule:"Definition clash",
+        title:function(p){ return p.n + " weight sets don't add up to 1 (or 100%)"; },
+        why:function(p){ return "Pure arithmetic. A weight set that doesn't balance means something was dropped or double-counted."; },
+        impact:function(p){ return "Every score derived from it is wrong while still looking computable and rankable. Only the total gives it away."; },
+        who:function(p){ return "whoever set the weights"; },
+        fix:function(p){ return "Add them up and fix the set, or state explicitly that they're relative weights normalised downstream."; },
+        ask:function(p){ return "This weight set doesn't sum to 1. Is a component missing, or is it normalised later?"; }
+      },
+      clashUnit: {
+        rule:"Definition clash",
+        title:function(p){ return p.n + " metrics use a different " + (p.kind === "时间粒度" ? "time granularity" : p.kind === "币种" ? "currency" : "unit") + " in different places"; },
+        why:function(p){ return "The same metric name, counted monthly in one chapter and quarterly in another, is not the same metric. Nothing in the document says so."; },
+        impact:function(p){ return "Two sections produce numbers that look comparable and aren't. Any chart that puts them side by side is wrong, and it will be presented before anyone notices."; },
+        who:function(p){ return "whoever defined this metric"; },
+        fix:function(p){ return "Pick one unit, state it next to the metric name, and convert everywhere else. If both are genuinely needed, give them different names."; },
+        ask:function(p){ return "This metric is measured one way in one section and another way elsewhere. Which is the standard, and should the other be converted or renamed?"; }
+      },
+      aiTemplate: {
+        rule:"AI traces",
+        title:function(p){ return p.n + " section headings repeat 4+ times across the document — a template was filled in"; },
+        why:function(p){ return "Every chapter carrying exactly the same sub-structure, including the sections with nothing to say, is what filling a template looks like. Hand-written documents are never that even."; },
+        impact:function(p){ return "An even skeleton makes people assume even content. The cells that had nothing in them were filled to keep the shape, and they look exactly like the cells that didn't."; },
+        who:function(p){ return "the author (deleting the empty ones costs nothing)"; },
+        fix:function(p){ return "Delete the sections that exist only to keep the format, or mark them \"not applicable.\" Empty sections holding up a skeleton just make readers spend time working out which chapters are real."; },
+        ask:function(p){ return "Some of these sections look like they were filled in to match the structure. Could those just be deleted or marked not applicable? Leaving them in makes it hard to tell which parts are real."; }
+      },
+      aiProse: {
+        rule:"AI traces",
+        title:function(p){ return p.n + " sections read as single-pass generated prose"; },
+        why:function(p){ return "Connective filler, parenthetical glosses, bold-colon lists, numbered triads, emoji. Any one means nothing; densely clustered, it usually means the section came out in one pass with nobody reading it line by line."; },
+        impact:function(p){ return "No harm, as long as the reader knows. Knowing makes you read these sections with one eye open instead of mistaking clean formatting for reliable content."; },
+        who:function(p){ return "nobody to chase. This is a note for whoever reads the document."; },
+        fix:function(p){ return "Re-read these sections and cut what the model added that you aren't actually committing to. If you don't, the next person will build it as a requirement and then come back asking why it can't be done."; },
+        ask:function(p){ return "These sections look like they came out in one pass. I pulled a few specific points from them. If any of those were the model's additions rather than your intent, just say so and I'll drop them — no explanation needed."; }
+      }
+    },
+    brandName:"Doc Health Check",
+    brandSub:"No AI judging AI　No hallucinated bulk　No filler docs",
+    navCross:"Compare a doc set", btnSample:"Load sample", btnReset:"Start over", btnRun:"Check",
+    slogan:"No AI judging AI　·　No hallucinated bulk　·　No filler docs",
+    modeSelf:"Self-check · I wrote this", modeOther:"Review · someone sent me this",
+    btnFile:"Choose file", btnClear:"Clear", paneDoc:"Source", paneCards:"Findings",
+    btnDlMd:"Download report .md", btnDlJson:"Download result .json",
+    inputPh:"Paste the full Markdown / plain text, or drop a .md / .txt file here",
+    needDoc:"Paste a document first.", needRun:"Run a check first.",
+    fileMd:"doc-health-", fileJson:"doc-health-", mdSaved:"Report downloaded", jsonSaved:"JSON downloaded (contains source excerpts — check before sharing)",
+    docMeta:function(n){ return n.toLocaleString() + " lines　│　blue bar = likely AI-generated"; },
+    statHi:"Blocking · work can't start until answered", statMd:"To clarify · needs an answer before kickoff",
+    statLo:"Rhetorical noise · delete it, nothing is lost", statAi:"AI traces · a note, not a problem",
+    statMeta:function(r){ return r.chars.toLocaleString() + " chars · " + r.sections + " headings · " + r.tables + " tables"; },
+    filAll:"All", filHi:"Blocking", filMd:"Clarify", filAi:"AI traces", filLo:"Noise",
+    noneInTier:"Nothing in this tier.",
+    lblImpact:"If nobody fixes this", lblFix:"Do this before you send it", lblWho:"Ask · ",
+    copyOne:"Copy this", copyAsk:"Copy this question", copied:"Copied", notCounted:"not counted",
+    h1:{ self:"Before you send it, read it once yourself", other:"Can anyone actually build from this?" },
+    lede:{
+      self:"This is your own draft. It doesn't grade you. It tells you three things: where the next person will get stuck, what that costs the business, and <b>what you should fill in before you hit send</b>. Everything runs in your browser — nothing is uploaded, no network calls, no model involved.",
+      other:"AI detectors only answer \"was this written by AI?\" In real work that question is meaningless — the answer is always yes, and it should be. <b>What actually matters is: where this will break, what that costs, and which human you need to ask.</b> Everything runs in your browser — nothing is uploaded, no network calls, no model involved."
+    },
+    copyBtn:{ self:"Copy as a personal checklist", other:"Copy as a message you can send" },
+    verdictClean:{
+      self:"<b>No structural problems. You can send it.</b><p>That doesn't mean the content is right. It only means you didn't typeset undecided things as if they were decided. Whether the content is correct still takes a human.</p>",
+      other:"<b>No structural problems found.</b><p>That doesn't mean the content is correct. It only means undecided things aren't dressed up as decided ones. Whether the content is right still takes a human.</p>"
+    },
+    verdict:{
+      self:function(n){ return "<b>" + n + " things worth fixing before you send this.</b><p>These aren't errors. They're the places where the next person gets stuck. Fixing them now costs you fifteen minutes. Letting them get stuck and come back to you costs two days — and for those two days everyone believes the plan is ready.</p>"; },
+      other:function(n){ return "<b>" + n + " questions a human needs to answer before work starts.</b><p>Every card points at a specific line, says what it costs if ignored, and names who to ask. None of them says \"this is wrong\" — they say \"someone needs to answer this.\" Cross off the ones that get answered. The ones that don't are this document's real progress.</p>"; }
+    },
+    explainBox:'<h2>Why flag "likely AI-generated" at all</h2>' +
+      '<p>Not to catch anyone. Nobody hand-writes documents any more, and nobody should have to. The flag does two things.</p>' +
+      '<p><b>One: it warns the reader.</b> Knowing which sections came out in one pass makes you read them with one eye open, instead of mistaking clean formatting for reliable content.</p>' +
+      '<p><b>Two: it gives the author a way out.</b> "That part was my AI, just delete it" is a hundred times easier to say than "I got it wrong." If pointing at a problem means accusing someone of incompetence, they can only dig in, and the conversation dies. Leave the blame with the model and people keep a way out — that\'s when the conversation actually happens.</p>' +
+      '<p>So this tier is counted separately and <b>never added to the questions that must be answered</b>. It is a note, not a charge.</p>',
+    exp:{
+      copiedN:function(n){ return "Copied " + n + " items"; },
+      mdTitle:"# Document health check", mdDoc:"Document", mdTime:"Checked at",
+      mdSize:function(r){ return "- Size: " + r.lines + " lines · " + r.chars + " chars · " + r.sections + " headings · " + r.tables + " tables"; },
+      mdVerdict:{
+        self:function(n,r){ return "- Verdict: **" + n + " things worth fixing before sending** (blocking " + r.hi + " · clarify " + r.md + "); plus " + r.ai + " AI traces, not counted."; },
+        other:function(n,r){ return "- Verdict: **" + n + " questions need a human answer before work starts** (blocking " + r.hi + " · clarify " + r.md + "); plus " + r.ai + " AI traces, not counted."; }
+      },
+      mdNote:["> This report does one thing: find problems that were typeset as if they were settled.",
+              "> It does not judge whether the content is correct, and it does not judge whether AI wrote it — that question is meaningless, the answer is always yes.",
+              "> Every item means \"a human needs to answer this\", not \"this is wrong\". Cross off the ones that get answered."],
+      mdSecMain:{ self:"## Fix before you send", other:"## Questions that need answering" },
+      mdWhy:"**Why it matters**　", mdImpact:"**If nobody fixes it**　",
+      mdFix:"**Do this before you send it**　", mdWho:function(w){ return "**Ask " + w + "**　"; },
+      mdSecAi:"## AI traces (not counted — context for the reader)",
+      mdAiNote:"Flagging these is not about catching anyone. AI in a document is normal. It does two things: the reader knows which sections may not have been checked line by line, and the author gets a way out — \"that part was my AI\" is far easier to say than \"I got it wrong\".",
+      mdSecLo:"## Rhetorical noise (ignorable)",
+      mdLimits:["## What this report cannot check", "",
+        "- It can't tell right from wrong. It doesn't know your business; whether a formula or metric makes sense, it has no idea and doesn't pretend to.",
+        "- Definition clashes only at the numeric level; a disagreement written out in prose is a known gap.",
+        "- It can't see \"correct but undoable\" — headcount, budget, schedule and access aren't in the document, so they aren't visible.",
+        "- A hit is not a verdict. Each one only means \"a human needs to answer this\".",
+        "- It is deterministic regex with no model involved, so it never hallucinates — and it is never clever.", "",
+        "---", "",
+        "Generated by Doc Health Check · entirely in your browser; nothing uploaded, no network calls, no model involved."],
+      copySelfHead:function(n){ return "Read my own draft once before sending. " + n + " things to fill in (by line number):\n"; },
+      copySelfAi:"A few sections came out of the model in one pass; I'll re-read those and cut anything it added that I'm not actually committing to.\n",
+      copySelfItem:function(i,f,g){ return (i + 1) + ". [L" + f.line + "] " + g.title + "\n    Fix: " + g.fix + "\n    If not: " + g.impact; },
+      copyOtherHead:function(n){ return "I went through the document and pulled out " + n + " things to confirm before work starts, by line number.\nTo be clear: none of this says the document is wrong. These are the places where someone needs to decide, otherwise downstream can't move.\n"; },
+      copyOtherAi:"A few sections look like they came out of a model in one pass — that's normal, everyone writes this way now. If any of these points were the model's addition rather than your intent, just say so and I'll drop them, no explanation needed.\n",
+      copyOtherItem:function(i,f,g){ return (i + 1) + ". [L" + f.line + "] " + g.title + "\n    Ask: " + g.ask + "\n    If ignored: " + g.impact + "\n    Suggested owner: " + g.who; }
+    },
+    limitsBox:'<h2>What this tool cannot check</h2><ul>' +
+      '<li><b>It can\'t tell right from wrong.</b> It doesn\'t know your business. Whether a formula makes sense or a metric means anything — it has no idea, and it doesn\'t pretend to.</li>' +
+      '<li><b>Definition clashes only at the numeric level.</b> Same parameter with different values, a symbol reused for two quantities, weights that don\'t sum, mismatched units — those it finds. A disagreement written out in prose, with no numbers attached, it cannot see. That needs real semantics, and it\'s still a gap.</li>' +
+      '<li><b>It can\'t see "correct but undoable."</b> Headcount, budget, schedule, access — if the document doesn\'t say it, the tool can\'t know it.</li>' +
+      '<li><b>AI traces are probability, not proof.</b> Tidy writers get flagged too. It says "worth a second look," never "a machine wrote this."</li>' +
+      '<li><b>A hit is not a verdict.</b> Every one of them only means "a human needs to answer this here." Answered, crossed off.</li>' +
+      '<li><b>It is a pile of rules.</b> Deterministic regex, no model anywhere, so it never hallucinates — and it is never clever.</li>' +
+      '</ul><p class="note">Stating its own limits is the whole reason this tool gets to exist. A document that refuses to say what it can\'t do is exactly what it was built to find.</p>'
   }
 };
+function F(f){
+  var R = I18N[state.lang].rules;
+  if (R && R[f.k]){
+    var g = R[f.k], q = f.p || {};
+    try {
+      return { rule:g.rule, title:g.title(q), why:g.why(q), impact:g.impact(q), who:g.who(q), fix:g.fix(q), ask:g.ask(q) };
+    } catch (e) {}
+  }
+  return { rule:f.rule, title:f.title, why:f.why, impact:f.impact, who:f.who, fix:f.fix, ask:f.ask };
+}
+function T(k){ var v = I18N[state.lang][k]; return (v === undefined || v === null) ? I18N.zh[k] : v; }
+function applyLang(){
+  document.documentElement.lang = (state.lang === "en" ? "en" : "zh-CN");
+  Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function(el){
+    var v = T(el.dataset.i18n);
+    if (typeof v === "string") el.innerHTML = v;
+  });
+  $("#input").placeholder = T("inputPh");
+  Array.prototype.forEach.call($("#langsw").children, function(b){
+    b.classList.toggle("on", b.dataset.l === state.lang);
+  });
+  applyMode();
+}
 function applyMode(){
-  var c = COPY[state.mode];
-  $("#h1").textContent = c.h1;
-  $("#lede").innerHTML = c.lede;
-  $("#btn-copyall").textContent = c.copyBtn;
+  $("#h1").textContent = T("h1")[state.mode];
+  $("#lede").innerHTML = T("lede")[state.mode];
+  $("#btn-copyall").textContent = T("copyBtn")[state.mode];
   Array.prototype.forEach.call($("#modes").children, function(b){
     b.classList.toggle("on", b.dataset.m === state.mode);
   });
@@ -1032,10 +1410,18 @@ function applyMode(){
 Array.prototype.forEach.call($("#modes").children, function(b){
   b.onclick = function(){ state.mode = b.dataset.m; applyMode(); };
 });
+Array.prototype.forEach.call($("#langsw").children, function(b){
+  b.onclick = function(){
+    state.lang = b.dataset.l;
+    try { localStorage.setItem("bp_lang", state.lang); } catch (e) {}
+    applyLang();
+    if (state.res){ renderSummary(state.res); renderCards(state.res); renderDoc(state.res); }
+  };
+});
 
 function run(){
   var text = $("#input").value;
-  if (!text.trim()){ alert("先粘一份文档进来。"); return; }
+  if (!text.trim()){ alert(T("needDoc")); return; }
   state.res = analyzeDoc(text);
   state.lines = text.split(/\r?\n/);
   renderSummary(state.res);
@@ -1049,22 +1435,18 @@ function run(){
 function renderSummary(res){
   var must = res.hi + res.md;
   $("#summary").innerHTML =
-    '<div class="stat hi"><b>' + res.hi + '</b><span>阻断项 · 不回答没法开工</span></div>' +
-    '<div class="stat md"><b>' + res.md + '</b><span>待澄清 · 开工前要有答案</span></div>' +
-    '<div class="stat lo"><b>' + res.lo + '</b><span>修辞噪音 · 删了不影响信息</span></div>' +
-    '<div class="stat ai"><b>' + res.ai + '</b><span>AI 痕迹 · 备注，不算问题</span></div>' +
-    '<div class="stat"><b>' + res.chars.toLocaleString() + '</b><span>字 · ' + res.sections + ' 个标题 · ' + res.tables + ' 张表</span></div>';
+    '<div class="stat hi"><b>' + res.hi + '</b><span>' + T("statHi") + '</span></div>' +
+    '<div class="stat md"><b>' + res.md + '</b><span>' + T("statMd") + '</span></div>' +
+    '<div class="stat lo"><b>' + res.lo + '</b><span>' + T("statLo") + '</span></div>' +
+    '<div class="stat ai"><b>' + res.ai + '</b><span>' + T("statAi") + '</span></div>' +
+    '<div class="stat"><b>' + res.chars.toLocaleString() + '</b><span>' + T("statMeta")(res) + '</span></div>';
   var v = $("#verdict");
   if (must === 0){
     v.className = "verdict clean";
-    v.innerHTML = isSelf()
-      ? "<b>没查出结构性问题，可以发了。</b><p>这不代表内容是对的——它只说明你没有把没定的事写成定了的事。内容对不对，还得人看。</p>"
-      : "<b>没有检出结构性问题。</b><p>这不代表内容正确，只代表它没有把未决问题伪装成已决问题。内容对不对，还得人看。</p>";
+    v.innerHTML = T("verdictClean")[state.mode];
   } else {
     v.className = "verdict";
-    v.innerHTML = isSelf()
-      ? "<b>发出去之前，有 " + must + " 处最好先补上。</b><p>这些不是错误，是接手的人会卡住的地方。你现在补，花十几分钟；他们卡住之后再回来问你，一来一回是两天，而且那两天里所有人都以为方案已经就绪。</p>"
-      : "<b>开工前需要活人回答 " + must + " 个问题。</b><p>每张卡片都指向原文的具体位置，并写明了不处理会在业务上造成什么、该找谁。它们不是「这里写错了」，是「这里需要一个人回答」。回答得上来就划掉，回答不上来的那几条，就是这份文档真正的进度。</p>";
+    v.innerHTML = T("verdict")[state.mode](must);
   }
 }
 
@@ -1084,14 +1466,14 @@ function renderDoc(res){
     out.push('<div class="ln' + cls + '" id="L' + ln + '"><i>' + ln + "</i><u></u><span>" + (esc(state.lines[i]) || " ") + "</span></div>");
   }
   $("#doc").innerHTML = out.join("");
-  $("#docmeta").textContent = res.lines.toLocaleString() + " 行　│　蓝条＝疑似 AI 生成";
+  $("#docmeta").textContent = T("docMeta")(res.lines);
 }
 
 function renderCards(res){
-  var names = { hi:"阻断", md:"待澄清", lo:"噪音", ai:"AI 痕迹" };
+  var names = { hi:T("filHi"), md:T("filMd"), lo:T("filLo"), ai:T("filAi") };
   $("#filters").innerHTML = ["all", "hi", "md", "lo", "ai"].map(function(k){
     var n = (k === "all") ? res.findings.length : res[k];
-    var label = (k === "all") ? "全部" : names[k];
+    var label = (k === "all") ? T("filAll") : names[k];
     return '<button class="chip' + (state.filter === k ? " on" : "") + '" data-f="' + k + '">' + label + " " + n + "</button>";
   }).join("");
   Array.prototype.forEach.call($("#filters").children, function(b){
@@ -1099,20 +1481,21 @@ function renderCards(res){
   });
 
   var fs = res.findings.filter(function(f){ return state.filter === "all" || f.sev === state.filter; });
-  if (!fs.length){ $("#cards").innerHTML = '<div class="empty">这一档没有条目。</div>'; return; }
+  if (!fs.length){ $("#cards").innerHTML = '<div class="empty">' + T("noneInTier") + '</div>'; return; }
   $("#cards").innerHTML = fs.map(function(f){
+    var g = F(f);
     return '<article class="cc ' + f.sev + '" id="C' + f.id + '">' +
-      '<div class="top"><span class="tag">' + esc(f.rule) + '</span>' +
+      '<div class="top"><span class="tag">' + esc(g.rule) + '</span>' +
       '<button class="jump" data-line="' + f.line + '">L' + f.line + ' ↗</button></div>' +
-      '<h3>' + esc(f.title) + '</h3>' +
+      '<h3>' + esc(g.title) + '</h3>' +
       '<div class="ex">' + esc(f.ex) + '</div>' +
-      '<p class="why">' + esc(f.why) + '</p>' +
-      '<div class="blk impact"><b>不处理的话，业务上会怎样</b>' + esc(f.impact) + '</div>' +
+      '<p class="why">' + esc(g.why) + '</p>' +
+      '<div class="blk impact"><b>' + T("lblImpact") + '</b>' + esc(g.impact) + '</div>' +
       (isSelf()
-        ? '<div class="blk"><b>发出去之前，先做这件事</b>' + esc(f.fix) + '</div>' +
-          '<button class="copy" data-ask="' + esc(f.fix).replace(/"/g, "&quot;") + '">复制这条</button>'
-        : '<div class="blk"><b>找谁 · ' + esc(f.who) + '</b>' + esc(f.ask) + '</div>' +
-          '<button class="copy" data-ask="' + esc(f.ask).replace(/"/g, "&quot;") + '">复制这句</button>') +
+        ? '<div class="blk"><b>' + T("lblFix") + '</b>' + esc(g.fix) + '</div>' +
+          '<button class="copy" data-ask="' + esc(g.fix).replace(/"/g, "&quot;") + '">' + T("copyOne") + '</button>'
+        : '<div class="blk"><b>' + T("lblWho") + esc(g.who) + '</b>' + esc(g.ask) + '</div>' +
+          '<button class="copy" data-ask="' + esc(g.ask).replace(/"/g, "&quot;") + '">' + T("copyAsk") + '</button>') +
       '</article>';
   }).join("");
 
@@ -1128,8 +1511,9 @@ function renderCards(res){
   Array.prototype.forEach.call($("#cards").querySelectorAll(".copy"), function(b){
     b.onclick = function(){
       navigator.clipboard.writeText(b.dataset.ask).then(function(){
-        b.textContent = "已复制";
-        setTimeout(function(){ b.textContent = "复制这句"; }, 1400);
+        var orig = b.textContent;
+        b.textContent = T("copied");
+        setTimeout(function(){ b.textContent = orig; }, 1400);
       });
     };
   });
@@ -1164,35 +1548,30 @@ drop.addEventListener("drop", function(e){ readFile(e.dataTransfer.files[0]); })
 
 $("#btn-copyall").onclick = function(){
   if (!state.res) return;
+  var E = T("exp");
   var real = state.res.findings.filter(function(f){ return f.sev === "hi" || f.sev === "md"; });
   var ai = state.res.findings.filter(function(f){ return f.sev === "ai"; });
   var txt;
   if (isSelf()){
-    txt = "发出去之前自己过了一遍，有 " + real.length + " 处要补（按原文行号）：\n";
-    if (ai.length) txt += "另外有几节是模型一口气写出来的，发之前再读一遍，把它自己补的、我并不打算承诺的内容删掉。\n";
-    txt += "\n" + real.map(function(f, i){
-      return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　补什么：" + f.fix + "\n　　不补的话：" + f.impact;
-    }).join("\n\n");
+    txt = E.copySelfHead(real.length);
+    if (ai.length) txt += E.copySelfAi;
+    txt += "\n" + real.map(function(f, i){ return E.copySelfItem(i, f, F(f)); }).join("\n\n");
   } else {
-    txt = "我把文档过了一遍，整理出开工前需要确认的 " + real.length + " 个点，按原文行号列在下面。\n" +
-      "先说清楚：这些不是说文档写错了，是这些地方需要有个人拍板，不然下游没法动。\n";
-    if (ai.length) txt += "另外有几节看着像是 AI 一口气生成的——这很正常，大家现在都这么写。要是哪条本来就是模型自己加的，说一声直接划掉就行，不用解释。\n";
-    txt += "\n" + real.map(function(f, i){
-      return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　问：" + f.ask + "\n　　不处理的话：" + f.impact + "\n　　建议找：" + f.who;
-    }).join("\n\n");
+    txt = E.copyOtherHead(real.length);
+    if (ai.length) txt += E.copyOtherAi;
+    txt += "\n" + real.map(function(f, i){ return E.copyOtherItem(i, f, F(f)); }).join("\n\n");
   }
   navigator.clipboard.writeText(txt).then(function(){
-    $("#copystate").textContent = "已复制 " + real.length + " 条";
+    $("#copystate").textContent = E.copiedN(real.length);
     setTimeout(function(){ $("#copystate").textContent = ""; }, 2600);
   });
 };
-
 function stamp(){
   var d = new Date(), z = function(n){ return (n < 10 ? "0" : "") + n; };
   return d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + "-" + z(d.getHours()) + z(d.getMinutes());
 }
 function docLabel(){
-  var n = state.name || "粘贴文本";
+  var n = state.name || (state.lang === "en" ? "pasted-text" : "粘贴文本");
   return n.replace(/\.(md|markdown|txt)$/i, "");
 }
 function save(filename, content, mime){
@@ -1204,99 +1583,87 @@ function save(filename, content, mime){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
 }
 function buildMarkdown(){
-  var r = state.res;
+  var r = state.res, E = T("exp");
   var real = r.findings.filter(function(f){ return f.sev === "hi" || f.sev === "md"; });
   var ai = r.findings.filter(function(f){ return f.sev === "ai"; });
   var lo = r.findings.filter(function(f){ return f.sev === "lo"; });
   var d = new Date();
   var out = [];
-  out.push("# 文档体检报告");
+  out.push(E.mdTitle);
   out.push("");
-  out.push("- 受检文档：" + docLabel());
-  out.push("- 体检时间：" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
-  out.push("- 体量：" + r.lines + " 行 · " + r.chars + " 字 · " + r.sections + " 个章节 · " + r.tables + " 张表");
-  out.push(isSelf()
-    ? "- 结论：**发出去之前有 " + real.length + " 处最好先补上**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。"
-    : "- 结论：**开工前需要回答 " + real.length + " 个问题**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。");
+  out.push("- " + E.mdDoc + "：" + docLabel());
+  out.push("- " + E.mdTime + "：" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
+  out.push(E.mdSize(r));
+  out.push(E.mdVerdict[state.mode](real.length, r));
   out.push("");
-  out.push("> 这份报告只做一件事：找出被排版成「已决事项」的未决问题。");
-  out.push("> 它不判断内容对错，也不判断文档是不是 AI 写的——那个问题没有意义，现在答案永远是「是」。");
-  out.push("> 每一条都是「这里需要一个人回答」，不是「这里错了」。答得上来就划掉。");
+  E.mdNote.forEach(function(x){ out.push(x); });
   out.push("");
   if (real.length){
-    out.push(isSelf() ? "## 发出去之前要补的地方" : "## 必须回答的问题");
+    out.push(E.mdSecMain[state.mode]);
     out.push("");
     real.forEach(function(f, i){
-      out.push("### " + (i + 1) + ". 【L" + f.line + " · " + f.rule + "】" + f.title);
+      var g = F(f);
+      out.push("### " + (i + 1) + ". [L" + f.line + " · " + g.rule + "] " + g.title);
       out.push("");
       out.push("```");
       out.push(f.ex);
       out.push("```");
       out.push("");
-      out.push("**为什么是个问题**　" + f.why);
+      out.push(E.mdWhy + g.why);
       out.push("");
-      out.push("**不处理的话**　" + f.impact);
+      out.push(E.mdImpact + g.impact);
       out.push("");
-      out.push(isSelf() ? "**发出去之前，先做这件事**　" + f.fix : "**去问 " + f.who + "**　" + f.ask);
+      out.push(isSelf() ? E.mdFix + g.fix : E.mdWho(g.who) + g.ask);
       out.push("");
     });
   }
   if (ai.length){
-    out.push("## AI 痕迹（不计入必答，仅供阅读时参考）");
+    out.push(E.mdSecAi);
     out.push("");
-    out.push("标出来不是为了抓人。文档里有 AI 很正常。标记有两个用处：读的人知道哪几段可能没经过人工核对；写的人有退路——「这段是我的 AI 自己加的」比「我写错了」容易说出口得多。");
+    out.push(E.mdAiNote);
     out.push("");
-    ai.forEach(function(f){
-      out.push("- **【L" + f.line + "】" + f.title + "**　" + f.ask);
-    });
+    ai.forEach(function(f){ var g = F(f); out.push("- **[L" + f.line + "] " + g.title + "**　" + g.ask); });
     out.push("");
   }
   if (lo.length){
-    out.push("## 修辞噪音（可忽略）");
+    out.push(E.mdSecLo);
     out.push("");
-    lo.forEach(function(f){ out.push("- 【L" + f.line + "】" + f.title); });
+    lo.forEach(function(f){ out.push("- [L" + f.line + "] " + F(f).title); });
     out.push("");
   }
-  out.push("## 这份报告查不了什么");
-  out.push("");
-  out.push("- 查不了内容对错。它不懂业务，公式合不合理、指标有没有意义，一概不知，也不装懂。");
-  out.push("- 查不了跨章节的口径冲突（同一指标在不同章节用了两套权重），这需要真正理解语义，是已知缺口。");
-  out.push("- 查不出「写得对但做不到」——资源、排期、人力、授权，文档里不写就看不见。");
-  out.push("- 命中不等于有罪。每条只是「这里需要一个人回答」。");
-  out.push("- 它自己只是一堆确定性正则，没有模型参与，所以不会幻觉，但也绝不聪明。");
-  out.push("");
-  out.push("---");
-  out.push("");
-  out.push("由「文档体检台」生成 · 全程在本机浏览器内完成，文档未上传、未联网、未调用任何模型。");
+  E.mdLimits.forEach(function(x){ out.push(x); });
   return out.join("\n");
 }
 function buildJSON(){
   var r = state.res;
   return JSON.stringify({
     schema: "aiverything.doccheck/v1",
-    checkedAt: new Date().toISOString(),
+    lang: state.lang,
     mode: state.mode,
+    checkedAt: new Date().toISOString(),
     source: { name: state.name || null, lines: r.lines, chars: r.chars, sections: r.sections, tables: r.tables },
-    summary: { mustAnswer: r.hi + r.md, blocking: r.hi, clarify: r.md, aiTrace: r.ai, noise: r.lo, aiLines: r.aiLines },
+    summary: { mustAnswer: r.hi + r.md, blocking: r.hi, clarify: r.md, aiTrace: r.ai, noise: r.lo },
     findings: r.findings.map(function(f){
-      return { rule:f.rule, severity:f.sev, line:f.line, title:f.title,
-               excerpt:f.ex, why:f.why, impact:f.impact, who:f.who, ask:f.ask, fix:f.fix || null, refs:f.refs || [] };
+      var g = F(f);
+      return { key:f.k, params:f.p || {}, rule:g.rule, severity:f.sev, line:f.line,
+               title:g.title, excerpt:f.ex, why:g.why, impact:g.impact,
+               who:g.who, ask:g.ask, fix:g.fix, refs:f.refs || [] };
     })
   }, null, 2);
 }
 $("#btn-dl-md").onclick = function(){
-  if (!state.res){ alert("先体检一份文档。"); return; }
-  save("体检报告-" + docLabel() + "-" + stamp() + ".md", buildMarkdown(), "text/markdown");
-  $("#copystate").textContent = "报告已下载";
+  if (!state.res){ alert(T("needRun")); return; }
+  save(T("fileMd") + docLabel() + "-" + stamp() + ".md", buildMarkdown(), "text/markdown");
+  $("#copystate").textContent = T("mdSaved");
   setTimeout(function(){ $("#copystate").textContent = ""; }, 2600);
 };
 $("#btn-dl-json").onclick = function(){
-  if (!state.res){ alert("先体检一份文档。"); return; }
-  save("体检结果-" + docLabel() + "-" + stamp() + ".json", buildJSON(), "application/json");
-  $("#copystate").textContent = "JSON 已下载（含原文摘录，转发前留意）";
+  if (!state.res){ alert(T("needRun")); return; }
+  save(T("fileJson") + docLabel() + "-" + stamp() + ".json", buildJSON(), "application/json");
+  $("#copystate").textContent = T("jsonSaved");
   setTimeout(function(){ $("#copystate").textContent = ""; }, 3600);
 };
 
-applyMode();
+applyLang();
 </script>
 </body></html>
