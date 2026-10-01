@@ -114,11 +114,14 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
 .limits ul{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
 .limits li{margin-bottom:5px}
 .limits .note{margin-top:14px;font-size:13px;color:var(--muted);max-width:74ch}
+.slogan{margin-top:10px;font-size:14px;color:var(--muted);letter-spacing:.04em}
+.modes{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.modes .chip{padding:6px 14px;font-size:13px}
 .hidden{display:none !important}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <div class="brand"><span>文档体检台</span><span class="sub">问题点 · 业务影响 · 该找谁确认</span></div>
+  <div class="brand"><span>文档体检台</span><span class="sub">不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档</span></div>
   <div class="acts">
     <button class="btn ghost" id="btn-sample">载入示例</button>
     <button class="btn ghost" id="btn-reset">重来</button>
@@ -127,8 +130,13 @@ textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line
 </div></div>
 
 <div class="wrap intake" id="intake">
-  <h1>这份文档，能不能照着干？</h1>
-  <p class="lede">市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。</p>
+  <h1 id="h1">发出去之前，先自己过一遍</h1>
+  <p class="slogan">不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档</p>
+  <div class="modes" id="modes">
+    <button class="chip on" data-m="self">自检 · 我自己写的</button>
+    <button class="chip" data-m="other">体检 · 别人给我的</button>
+  </div>
+  <p class="lede" id="lede">市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。</p>
   <div class="drop" id="drop">
     <textarea id="input" placeholder="粘贴 Markdown / 纯文本全文，或把 .md / .txt 文件拖进来"></textarea>
     <div class="row">
@@ -231,6 +239,7 @@ function analyzeDoc(text){
           why:"同一张表在说两件相反的事：左边给了精确默认值，右边承认这个值没人定过。读的人只会记住左边。",
           impact:"下游会拿这 " + yes + " 个没定的数当定了的数直接开工。等到有人真去确认、数值一改，所有基于它的计算、图表和结论要重跑一遍，返工量按整条链路算。",
           who:"需求提出方 + 真正能拍板这些业务阈值的人（通常不是写文档的人）",
+          fix:"把这些默认值先删掉、或者改成「待定」，再去找能拍板的人要一次真数。一时要不到的话，就在表头写一句「以下为占位值，未经确认不得据此开工」——留着精确数字比留空危险得多。",
           ask:"这张表里标「需确认」的 " + yes + " 项，谁来定、什么时候定？在定下来之前，下游是先停还是按默认值跑？如果按默认值跑出来的结论后面被推翻，返工算在谁的工时里？" });
       }
       i = j; continue;
@@ -263,6 +272,7 @@ function analyzeDoc(text){
         why:"第一环没落地，后面的公式、指标、图表却全写完了。这是最典型的因果链折叠：假装输入已经存在，中间状态就都能一气呵成写出来。",
         impact:"真开工时第一天就会卡在这里。要么整条链路停摆等数据，要么先拿假数跑通再全部重做——这 " + hits.length + " 处计算以及它们产出的结论都要重来。",
         who:"能回答「这个数据到底拿不拿得到」的人：数据负责人、采购/商务（如果要买）、或对方接口人",
+        fix:"在「" + ent + "」真拿到之前，把依赖它的那几节折叠起来，或者统一标上「待数据到位后补」。现在就把它们写完整，等于交出一份看着能开工、其实开不了工的文档。",
         ask:"「" + ent + "」现在到底能不能拿到？谁在推、卡在哪一步、预计什么时候有？拿不到的话，第 " + hits.slice(0, 6).join("、") + " 行这些依赖它的部分，是先砍掉还是整体暂停？",
         refs: hits.slice(0, 20) });
     }
@@ -285,6 +295,7 @@ function analyzeDoc(text){
       why:"这是整类问题里最要命的一种：缺失被如实标注了，但它没有阻断计算。缺失声明和结果数字并排躺在同一行里，而读报告的人只会看到那个数字。",
       impact:"这个数会被当成测算结果引用出去——进汇报、进对外材料、进决策。等有人回头问「这个数怎么来的」，追到源头是一行缺失数据，那时候信用是整份报告一起塌，不是这一行塌。",
       who:"出数的人 + 要拿这个数去汇报的人（两边都得知道）",
+      fix:"要么在原地写清楚缺失是怎么处理的（按 0、按均值、还是沿用上期），要么就空着写「数据缺失」。一个来路不明的数字一旦进了汇报材料，就收不回来了。",
       ask:"这几行标了「数据缺失」但还是出了数，这个数是怎么算的？缺失的那一项是按 0 处理、按均值补的，还是直接跳过了？建议缺失的行干脆不出数——出了就一定会被人引用，而且不会有人回头看旁边那句缺失说明。",
       refs: ghost.slice(0, 30).map(function(x){ return x + 1; }) });
   }
@@ -299,6 +310,7 @@ function analyzeDoc(text){
       why:"未决项本身不是问题。问题是它们和已决内容用同一种字号、同一张表、同一个章节号排在一起，读的人分不出哪些是规格、哪些是愿望。",
       impact:"接手的人会把整份文档当成已定稿来排期和拆任务，实际进度被高估。等做到第 N 个模块才发现前提没定，排期已经报出去了。",
       who:"文档作者（请他把未决项单独拉一张表）",
+      fix:"把这些未决项提到文档最前面单列一张表，正文里只留引用。读的人第一眼就能分清哪些定了、哪些还没定。",
       ask:"这 " + pend.length + " 处未决项，能不能单独列一张表放在文档最前面？在它们定下来之前，哪些章节是不能开工的？",
       refs: pend.slice(0, 30).map(function(x){ return x + 1; }) });
   }
@@ -313,6 +325,7 @@ function analyzeDoc(text){
       why:"需要成段打补丁，说明上一版是一次性整体生成、没人逐句校验就发出去了。补丁盖住的是被发现的那些，没被发现的还在原地。",
       impact:"同类错误大概率还有残留，而且散落在没人逐行读过的章节里。按这份文档做出来的东西，错在哪要到联调甚至上线才暴露。",
       who:"文档作者（问清楚错是怎么发现的）",
+      fix:"既然已经发现过这几类错，发出去之前自己把同类问题全文过一遍。补丁只盖住了被发现的那些，没被发现的还在原地。",
       ask:"上一版这些错是怎么发现的——是有人逐行看出来的，还是又交给 AI 查的？同一类问题有没有做过一次全文复查？",
       refs: patch.slice(0, 20).map(function(x){ return x + 1; }) });
   }
@@ -338,6 +351,7 @@ function analyzeDoc(text){
       why:"模型最擅长编的就是这类名字：仓库名、CLI 名、endpoint、带路径的 URL。它们看上去是文档里最硬的部分，实际是幻觉率最高的部分。",
       impact:"每一个都得有人花时间去验，验的工时不计入任何人的排期。其中只要有几个是编的，照着写的人会在环境配置阶段空耗好几天，而且会先怀疑是自己弄错了。",
       who:"真正跑过这条链路的工程/数据同事（不是文档作者）",
+      fix:"把没亲手跑通的工具名、包名、接口地址全删掉，或者统一加一行「以下为待验证候选，尚未实测」。留着就一定会有人照着搭，搭完才发现是假的。",
       ask:"这 " + order.length + " 个工具和接口，哪些是真跑通过的？没跑过的能不能先从文档里拿掉——等验证过再加回来，省得下游照着配半天。",
       refs: order.slice(0, 30).map(function(t){ return toks[t]; }) });
   }
@@ -357,6 +371,7 @@ function analyzeDoc(text){
       why:"精确的数字会制造「有人算过」的错觉。没写来源的阈值和权重，多半是生成时为了让段落显得完整填上去的占位值。",
       impact:"这些数直接决定最终结论长什么样。拿占位值跑出来的报告一旦发出去，后面再改参数，等于推翻已经对外说过的结论——这个代价比重跑代码大得多。",
       who:"算法/数据同事（问这些数能不能从真实数据反推）",
+      fix:"每个数后面补一句出处；补不出来的就改成「待校准」。没有出处的精确数字会让人以为有人算过，于是没人再去算。",
       ask:"这些阈值和权重是跑过数据反推的，还是先填上等以后校准？如果是后者，建议统一写成「待定」，不要给默认值——给了就会有人直接用。",
       refs: nums.slice(0, 30).map(function(x){ return x + 1; }) });
   }
@@ -376,6 +391,7 @@ function analyzeDoc(text){
       why:"「利用大模型进行智能分析」这类句子，是因果链被折叠的接缝——所有不知道怎么实现的环节，都能用它一句带过。",
       impact:"这些句子在排期时会被当成「一个点」，实际每一句背后都是一条要自己设计的链路。工期估算会系统性偏低，偏差全部由实现的人承担。",
       who:"要实现这段的工程同事 + 文档作者（当面把字段过一遍）",
+      fix:"每处「自动」补上四件事：谁触发、输入是哪几个字段、输出写回哪里、失败了怎么办。写不出来的那几处，说明你自己也还没想清楚——标出来，别用一句「智能分析」盖过去。",
       ask:"这几处「自动」，具体是什么触发的、输入是哪张表的哪几个字段、输出写回哪里、失败了怎么办？",
       refs: auto.slice(0, 30).map(function(x){ return x + 1; }) });
   }
@@ -394,6 +410,7 @@ function analyzeDoc(text){
       why:"这类词删掉之后句子信息量不变。密度高通常意味着文档在用体量冒充深度。",
       impact:"主要是浪费阅读时间，顺带抬高了文档的「看起来很专业」程度，让人不好意思提问。",
       who:"文档作者（顺手删即可，不值得开会）",
+      fix:"直接删。删完整段再读一遍，信息量一点不会少。",
       ask:"这几句话删掉之后，有谁会少知道一件事吗？",
       refs: hollowHits.map(function(x){ return x + 1; }) });
   }
@@ -408,6 +425,7 @@ function analyzeDoc(text){
       why:"没有验收标准的方案，交付方无法证明自己做完了，提出方也不必为结果负责。",
       impact:"做完之后算不算数，只能靠人情和嗓门决定。最常见的结局是反复返工，而且每一轮都显得像是实现方没做好。",
       who:"需求提出方 + 最终要签收的人",
+      fix:"在末尾加一节「怎么算做完了」：验收条件、谁来验、拿哪份数据验。这一节是在保护你自己——没有它，改到什么时候算完，全由对方心情决定。",
       ask:"这份文档做出来之后，用什么条件判定它是对的？谁来验、拿什么数据验、不通过怎么办？这个建议在开工前白纸黑字定下来。" });
   }
 
@@ -457,6 +475,7 @@ function analyzeDoc(text){
       why:"每一章都严格套同一套子章节骨架，包括本来没内容可写的那几节。手写几乎不会这么齐整——这是「填模板」留下的痕迹。",
       impact:"骨架齐整会让人误以为内容也齐整。实际上为了把每一格填满，空的那几格多半是编出来凑数的，而这些格子和有料的格子长得一模一样。",
       who:"文档作者（可以直接把空的那几节删掉，不丢人）",
+      fix:"把为了凑格式才填的那几节删掉，或者标成「本章不适用」。空章节撑着骨架，只会让读的人把时间花在分辨哪一章是真的。",
       ask:"这套骨架里有几节其实没内容，是为了对齐格式才填的吧？那几节直接删掉或者标成「本章不适用」就行，不用硬填——留着反而让人分不清哪些是真的。",
       refs: repeated.slice(0, 10).map(function(n){ return normFirst[n] + 1; }) });
   }
@@ -467,6 +486,7 @@ function analyzeDoc(text){
       why:"套话连接词、中英括注、粗体冒号列表、①②③ 这些特征集中出现。单个不说明什么，密集出现通常意味着这一段是模型一口气写出来、没人逐句过。",
       impact:"没有坏处，前提是读的人知道。知道之后看这几节会多留个心眼，不会把排版的完整当成内容的可靠。",
       who:"不用找谁。这是给读文档的人的备注。",
+      fix:"重读这几节，把模型自己补的、你并不打算承诺的内容删掉。你不删，接手的人就会当成需求去实现，然后回头来问你为什么做不出来。",
       ask:"这几节看着像是 AI 一口气生成的，我按原文逐条挑了几个点出来。要是哪条本来就是模型自己加的，你说一声我直接划掉，不用解释。",
       refs: aiLines.slice(0, 200) });
   }
@@ -533,8 +553,35 @@ var SAMPLE = [
 ].join("\n");
 
 var $ = function(s){ return document.querySelector(s); };
-var state = { res:null, filter:"all", lines:[], name:"" };
+var state = { res:null, filter:"all", lines:[], name:"", mode:"self" };
+var isSelf = function(){ return state.mode === "self"; };
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+var COPY = {
+  self: {
+    h1: "发出去之前，先自己过一遍",
+    lede: "这是你自己写的文档。这里不挑错，只告诉你三件事：哪几处会让接手的人卡住、卡住之后业务上会怎样、以及<b>你发出去之前最好先补上什么</b>。全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。",
+    copyBtn: "复制成一份自查清单"
+  },
+  other: {
+    h1: "这份文档，能不能照着干？",
+    lede: "市面上的 AI 检测只回答「是不是 AI 写的」。在我们这种业务里，这个问题没有意义——答案永远是「是」，而且本来就该是。<b>真正要查的是：哪些地方会出问题、出了问题业务上会怎样、以及这件事该跟哪个活人确认。</b>全部在你本机浏览器里跑，不上传、不联网、不调用任何模型。",
+    copyBtn: "复制成一条可以直接发群的消息"
+  }
+};
+function applyMode(){
+  var c = COPY[state.mode];
+  $("#h1").textContent = c.h1;
+  $("#lede").innerHTML = c.lede;
+  $("#btn-copyall").textContent = c.copyBtn;
+  Array.prototype.forEach.call($("#modes").children, function(b){
+    b.classList.toggle("on", b.dataset.m === state.mode);
+  });
+  if (state.res){ renderSummary(state.res); renderCards(state.res); }
+}
+Array.prototype.forEach.call($("#modes").children, function(b){
+  b.onclick = function(){ state.mode = b.dataset.m; applyMode(); };
+});
 
 function run(){
   var text = $("#input").value;
@@ -560,10 +607,14 @@ function renderSummary(res){
   var v = $("#verdict");
   if (must === 0){
     v.className = "verdict clean";
-    v.innerHTML = "<b>没有检出结构性问题。</b><p>这不代表内容正确，只代表它没有把未决问题伪装成已决问题。内容对不对，还得人看。</p>";
+    v.innerHTML = isSelf()
+      ? "<b>没查出结构性问题，可以发了。</b><p>这不代表内容是对的——它只说明你没有把没定的事写成定了的事。内容对不对，还得人看。</p>"
+      : "<b>没有检出结构性问题。</b><p>这不代表内容正确，只代表它没有把未决问题伪装成已决问题。内容对不对，还得人看。</p>";
   } else {
     v.className = "verdict";
-    v.innerHTML = "<b>开工前需要活人回答 " + must + " 个问题。</b><p>每张卡片都指向原文的具体位置，并写明了不处理会在业务上造成什么、该找谁。它们不是「这里写错了」，是「这里需要一个人回答」。回答得上来就划掉，回答不上来的那几条，就是这份文档真正的进度。</p>";
+    v.innerHTML = isSelf()
+      ? "<b>发出去之前，有 " + must + " 处最好先补上。</b><p>这些不是错误，是接手的人会卡住的地方。你现在补，花十几分钟；他们卡住之后再回来问你，一来一回是两天，而且那两天里所有人都以为方案已经就绪。</p>"
+      : "<b>开工前需要活人回答 " + must + " 个问题。</b><p>每张卡片都指向原文的具体位置，并写明了不处理会在业务上造成什么、该找谁。它们不是「这里写错了」，是「这里需要一个人回答」。回答得上来就划掉，回答不上来的那几条，就是这份文档真正的进度。</p>";
   }
 }
 
@@ -607,8 +658,11 @@ function renderCards(res){
       '<div class="ex">' + esc(f.ex) + '</div>' +
       '<p class="why">' + esc(f.why) + '</p>' +
       '<div class="blk impact"><b>不处理的话，业务上会怎样</b>' + esc(f.impact) + '</div>' +
-      '<div class="blk"><b>找谁 · ' + esc(f.who) + '</b>' + esc(f.ask) + '</div>' +
-      '<button class="copy" data-ask="' + esc(f.ask).replace(/"/g, "&quot;") + '">复制这句</button>' +
+      (isSelf()
+        ? '<div class="blk"><b>发出去之前，先做这件事</b>' + esc(f.fix) + '</div>' +
+          '<button class="copy" data-ask="' + esc(f.fix).replace(/"/g, "&quot;") + '">复制这条</button>'
+        : '<div class="blk"><b>找谁 · ' + esc(f.who) + '</b>' + esc(f.ask) + '</div>' +
+          '<button class="copy" data-ask="' + esc(f.ask).replace(/"/g, "&quot;") + '">复制这句</button>') +
       '</article>';
   }).join("");
 
@@ -656,12 +710,21 @@ $("#btn-copyall").onclick = function(){
   if (!state.res) return;
   var real = state.res.findings.filter(function(f){ return f.sev === "hi" || f.sev === "md"; });
   var ai = state.res.findings.filter(function(f){ return f.sev === "ai"; });
-  var txt = "我把文档过了一遍，整理出开工前需要确认的 " + real.length + " 个点，按原文行号列在下面。\n" +
-    "先说清楚：这些不是说文档写错了，是这些地方需要有个人拍板，不然下游没法动。\n";
-  if (ai.length) txt += "另外有几节看着像是 AI 一口气生成的——这很正常，大家现在都这么写。要是哪条本来就是模型自己加的，说一声直接划掉就行，不用解释。\n";
-  txt += "\n" + real.map(function(f, i){
-    return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　问：" + f.ask + "\n　　不处理的话：" + f.impact + "\n　　建议找：" + f.who;
-  }).join("\n\n");
+  var txt;
+  if (isSelf()){
+    txt = "发出去之前自己过了一遍，有 " + real.length + " 处要补（按原文行号）：\n";
+    if (ai.length) txt += "另外有几节是模型一口气写出来的，发之前再读一遍，把它自己补的、我并不打算承诺的内容删掉。\n";
+    txt += "\n" + real.map(function(f, i){
+      return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　补什么：" + f.fix + "\n　　不补的话：" + f.impact;
+    }).join("\n\n");
+  } else {
+    txt = "我把文档过了一遍，整理出开工前需要确认的 " + real.length + " 个点，按原文行号列在下面。\n" +
+      "先说清楚：这些不是说文档写错了，是这些地方需要有个人拍板，不然下游没法动。\n";
+    if (ai.length) txt += "另外有几节看着像是 AI 一口气生成的——这很正常，大家现在都这么写。要是哪条本来就是模型自己加的，说一声直接划掉就行，不用解释。\n";
+    txt += "\n" + real.map(function(f, i){
+      return (i + 1) + "、【L" + f.line + "】" + f.title + "\n　　问：" + f.ask + "\n　　不处理的话：" + f.impact + "\n　　建议找：" + f.who;
+    }).join("\n\n");
+  }
   navigator.clipboard.writeText(txt).then(function(){
     $("#copystate").textContent = "已复制 " + real.length + " 条";
     setTimeout(function(){ $("#copystate").textContent = ""; }, 2600);
@@ -696,14 +759,16 @@ function buildMarkdown(){
   out.push("- 受检文档：" + docLabel());
   out.push("- 体检时间：" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes());
   out.push("- 体量：" + r.lines + " 行 · " + r.chars + " 字 · " + r.sections + " 个章节 · " + r.tables + " 张表");
-  out.push("- 结论：**开工前需要回答 " + real.length + " 个问题**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。");
+  out.push(isSelf()
+    ? "- 结论：**发出去之前有 " + real.length + " 处最好先补上**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。"
+    : "- 结论：**开工前需要回答 " + real.length + " 个问题**（阻断 " + r.hi + " · 待澄清 " + r.md + "）；另有 AI 痕迹 " + r.ai + " 处，不计入。");
   out.push("");
   out.push("> 这份报告只做一件事：找出被排版成「已决事项」的未决问题。");
   out.push("> 它不判断内容对错，也不判断文档是不是 AI 写的——那个问题没有意义，现在答案永远是「是」。");
   out.push("> 每一条都是「这里需要一个人回答」，不是「这里错了」。答得上来就划掉。");
   out.push("");
   if (real.length){
-    out.push("## 必须回答的问题");
+    out.push(isSelf() ? "## 发出去之前要补的地方" : "## 必须回答的问题");
     out.push("");
     real.forEach(function(f, i){
       out.push("### " + (i + 1) + ". 【L" + f.line + " · " + f.rule + "】" + f.title);
@@ -716,7 +781,7 @@ function buildMarkdown(){
       out.push("");
       out.push("**不处理的话**　" + f.impact);
       out.push("");
-      out.push("**去问 " + f.who + "**　" + f.ask);
+      out.push(isSelf() ? "**发出去之前，先做这件事**　" + f.fix : "**去问 " + f.who + "**　" + f.ask);
       out.push("");
     });
   }
@@ -754,11 +819,12 @@ function buildJSON(){
   return JSON.stringify({
     schema: "aiverything.doccheck/v1",
     checkedAt: new Date().toISOString(),
+    mode: state.mode,
     source: { name: state.name || null, lines: r.lines, chars: r.chars, sections: r.sections, tables: r.tables },
     summary: { mustAnswer: r.hi + r.md, blocking: r.hi, clarify: r.md, aiTrace: r.ai, noise: r.lo, aiLines: r.aiLines },
     findings: r.findings.map(function(f){
       return { rule:f.rule, severity:f.sev, line:f.line, title:f.title,
-               excerpt:f.ex, why:f.why, impact:f.impact, who:f.who, ask:f.ask, refs:f.refs || [] };
+               excerpt:f.ex, why:f.why, impact:f.impact, who:f.who, ask:f.ask, fix:f.fix || null, refs:f.refs || [] };
     })
   }, null, 2);
 }
@@ -775,5 +841,6 @@ $("#btn-dl-json").onclick = function(){
   setTimeout(function(){ $("#copystate").textContent = ""; }, 3600);
 };
 
+applyMode();
 </script>
 </body></html>
