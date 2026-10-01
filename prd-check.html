@@ -239,7 +239,7 @@ function analyzeDoc(text){
   var RE_DOWN    = /公式|计算|指标|权重|得分|评分|阈值|图表|绘制|输出表|归一化|回归|聚类|formula|calculat|metric|weight|score|threshold|chart|plot|normali[sz]|regression|cluster|dashboard/i;
   var RE_SRC     = /来源|依据|参考|引自|根据.{0,8}(调研|报告|论文|实测|基线)|见附录|出处|实测|基线|经验值|业界(常用|通行)|\bsource\b|according to|benchmark|measured|baseline|see appendix|derived from|based on (our|the) (test|experiment|data)|\[\d+\]/i;
   var RE_NUMRULE = /(阈值|权重|系数|并发|上限|下限|占比|倍数|窗口|迭代次数|超参|threshold|weight|coefficient|concurrency|\bcap\b|\bfloor\b|ratio|multiplier|window|iterations|hyperparam|p9[59])/i;
-  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调|判定条件|判定标准|达标标准|准入条件|通过条件|过渡条件|硬门槛|一票否决|上线标准|完成的定义|acceptance criteri|definition of done|\bDoD\b|test plan|\bQA\b plan|rollback|sign-?off|success metric|how (we|you)'?ll know|verification step|exit criteri/i;
+  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调|判定条件|判定标准|达标标准|准入条件|通过条件|过渡条件|硬门槛|一票否决|上线标准|完成的定义|acceptance criteri|definition of done|\bDoD\b|test plan|\bQA\b plan|rollback|sign-?off|success metric|how (we|you)'?ll know|verification step|exit criteri|\bMUST\b|\bSHALL\b|\bREQUIRED\b|conformance|normative/;
   var AUTOVERB = "识别|分析|判断|生成|计算|提取|调用|清洗|打标|归类|推荐|预测|对接|校验|评分|追溯|监控|判定|采集|结构化|匹配|推送|重评|预警|验证|诊断|比对|汇总|预填|审核|纠错|重算|归集";
   var RE_ACTOR   = new RegExp(
     "(系统|平台|AI|模型|程序|引擎|后台)[^。；！？\n]{0,14}(自动|智能|实时|持续)[^。；！？\n]{0,8}(" + AUTOVERB + ")" +
@@ -365,18 +365,39 @@ function analyzeDoc(text){
   }
 
   // ============ R5 未验证的具体物 ============
-  var toks = {}, order = [];
+  var inFence = [], fence = false;
   for (i = 0; i < lines.length; i++){
+    if (/^\s*```/.test(lines[i])) fence = !fence;
+    inFence[i] = fence || /^\s{4,}\S/.test(lines[i]);
+  }
+  var toks = {}, order = [], seen = {};
+  function bump(t){ seen[t] = (seen[t] || 0) + 1; }
+  for (i = 0; i < lines.length; i++){
+    var mc0, rc0 = /`([^`\n]{3,60})`/g;
+    while ((mc0 = rc0.exec(lines[i])) !== null) bump(mc0[1].trim());
+    var mu0, ru0 = /https?:\/\/[^\s`"'\)\]）】，。]+/g;
+    while ((mu0 = ru0.exec(lines[i])) !== null) bump(mu0[0]);
+  }
+  for (i = 0; i < lines.length; i++){
+    if (inFence[i]) continue;
     var m, re = /`([^`\n]{3,60})`/g;
     while ((m = re.exec(lines[i])) !== null){
       var t = m[1].trim();
       if (!/^[A-Za-z][A-Za-z0-9_.\/\-]{2,}$/.test(t)) continue;
       if (!/[-_\/.]/.test(t)) continue;
       if (CODE_STOP[t.toLowerCase()]) continue;
+      if ((seen[t] || 0) >= 3) continue;
       if (!toks[t]){ toks[t] = i + 1; order.push(t); }
     }
+    if (/^\s*\[[^\]]+\]:\s*https?:/.test(lines[i])) continue;
     var mu, ru = /https?:\/\/[^\s`"'\)\]）】，。]+/g;
-    while ((mu = ru.exec(lines[i])) !== null){ var u = mu[0]; if (!toks[u]){ toks[u] = i + 1; order.push(u); } }
+    while ((mu = ru.exec(lines[i])) !== null){
+      var u = mu[0];
+      if ((seen[u] || 0) >= 3) continue;
+      var before = lines[i].slice(0, mu.index);
+      if (/\]\($/.test(before) || /<$/.test(before)) continue;
+      if (!toks[u]){ toks[u] = i + 1; order.push(u); }
+    }
   }
   if (order.length){
     add({ k:"unverifiedArtifacts", p:{n:order.length}, rule:"未验证具体物", sev:"hi", line:toks[order[0]],
