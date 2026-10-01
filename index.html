@@ -15,7 +15,8 @@
   --bg:#F7F6FC; --card:#FFFFFF; --ink:#191833; --muted:#6E6C8A; --line:rgba(25,24,51,.10); --soft:#EFEDF8;
   --hi:#C0562F; --hi-tint:#FBEDE7; --hi-ink:#8A3A1C;
   --md:#B9791C; --md-tint:#FBF3E4; --md-ink:#7A4F0E;
-  --ai:#3B78FF; --ai-tint:#E8F0FF; --ai-ink:#1E3F86;
+  --ai:#7A5AF0; --ai-tint:#EFEAFE; --ai-ink:#4B33A8;
+  --brand:#2F5AE8; --brand-tint:#E7EDFF; --brand-ink:#1B3AA0; --brand-on:#FFFFFF;
   --ok:#2E8B64; --ok-tint:#E4F3EC;
   --shadow:0 10px 34px rgba(60,52,140,.08);
   --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
@@ -24,13 +25,15 @@
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
   --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
   --hi-tint:#3C2114; --hi-ink:#F2A882; --md-tint:#3A2B12; --md-ink:#F0C070;
-  --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+  --ai-tint:#272050; --ai-ink:#CDBEFF;
+  --brand:#6B8AFF; --brand-tint:#1E2750; --brand-ink:#B6C6FF; --brand-on:#10111F; --ok-tint:#17342A;
   --shadow:0 10px 34px rgba(0,0,0,.35);
 }}
 :root[data-theme="dark"]{
   --bg:#14131F; --card:#1D1C2B; --ink:#F1F0FA; --muted:#A6A4C2; --line:rgba(241,240,250,.12); --soft:#23223A;
   --hi-tint:#3C2114; --hi-ink:#F2A882; --md-tint:#3A2B12; --md-ink:#F0C070;
-  --ai-tint:#182746; --ai-ink:#A9C4FF; --ok-tint:#17342A;
+  --ai-tint:#272050; --ai-ink:#CDBEFF;
+  --brand:#6B8AFF; --brand-tint:#1E2750; --brand-ink:#B6C6FF; --brand-on:#10111F; --ok-tint:#17342A;
   --shadow:0 10px 34px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
@@ -56,14 +59,18 @@ section+section{border-top:1px solid var(--line)}
 @media (max-width:680px){.brand .sub{display:none}}
 .btn{display:inline-block;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:9px 18px;box-shadow:var(--shadow);text-decoration:none;font-size:14.5px}
 .btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--brand);color:var(--brand-on);border-color:var(--brand)}
 .btn.lg{padding:13px 26px;font-size:16px;border-radius:13px}
 
 /* hero */
 .hero{padding-block:clamp(44px,8vw,104px) clamp(40px,6vw,80px)}
 .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(24px,4vw,56px);align-items:center}
 @media (max-width:940px){.hero-grid{grid-template-columns:1fr}}
-.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--md-tint) 62%);padding-inline:2px}
+.manifesto{display:flex;flex-direction:column;gap:3px;font-size:clamp(33px,5.4vw,58px);line-height:1.1;letter-spacing:.005em}
+.manifesto em{font-style:normal;background:linear-gradient(transparent 58%,var(--brand-tint) 58%);padding-inline:4px}
+.thesis{margin-top:24px;font-size:clamp(18px,2.1vw,23px);font-weight:600;line-height:1.5;color:var(--brand-ink)}
+.keep{white-space:nowrap}
+.hero .lede{margin-top:14px;font-size:16.5px}
 .cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
 
 /* 示意卡 */
@@ -148,14 +155,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
-  <div class="brand"><span>文档体检台</span><span class="sub">不以 AI 验 AI　拒绝幻觉膨胀　拒绝废话文档</span></div>
+  <div class="brand"><span>文档体检台</span><span class="sub">问题点 · 业务影响 · 该找谁确认</span></div>
   <a class="btn primary" href="prd-check.html">打开体检台</a>
 </div></div>
 
 <section class="hero"><div class="wrap hero-grid">
   <div>
-    <p class="eyebrow">不以 AI 验 AI　·　拒绝幻觉膨胀　·　拒绝废话文档</p>
-    <h1 style="margin-top:16px">危险的不是写错了，<br>是把<em>没定的事</em>，写成了定了的事。</h1>
+    <h1 class="manifesto"><span>不以 AI 验 AI</span><span>拒绝幻觉膨胀</span><span><em>拒绝废话文档</em></span></h1>
+    <p class="thesis">危险的不是写错了，<br>是把<span class="keep">没定的事</span>，写成了<span class="keep">定了的事</span>。</p>
     <p class="lede">一份方案里最要命的地方，往往长得最像规格：参数表左边给出精确默认值，右边小字写着「需业务确认」；数据源第一行标着「待定」，后面十一章的公式照样算得天衣无缝。读的人只看见公式，于是整条链路在一个不存在的输入上开工。</p>
     <div class="cta">
       <a class="btn primary lg" href="prd-check.html">粘一份文档试试</a>
