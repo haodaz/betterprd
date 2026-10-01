@@ -229,18 +229,20 @@ function analyzeDoc(text){
   }
   function sampleLines(arr, n){ return arr.slice(0, n).map(function(x){ return "L" + (x + 1) + "  " + excerpt(lines[x], 88); }).join("\n"); }
 
-  var RE_PENDING = /待定|待确认|待校准|待补充|待评估|待梳理|暂定|另行(确定|约定)|后续(补充|确认|完善)|视情况|有待|TBD|TODO/;
-  var RE_PATCH   = /修正说明|原稿.{0,6}(修正|有误|错误)|原文.{0,12}应为|勘误|错字|笔误|与原文不一致|本版(修正|更正)/;
-  var RE_GAP     = /待定|不可得|数据缺失|暂无|未接入|空白|无法获取|尚未(打通|接入|采购|授权)/;
-  var RE_DOWN    = /公式|计算|指标|权重|得分|评分|阈值|图表|绘制|输出表|归一化|回归|聚类/;
-  var RE_SRC     = /来源|依据|参考|引自|根据.{0,8}(调研|报告|论文|实测|基线)|见附录|出处|实测|基线|经验值|业界(常用|通行)/;
-  var RE_NUMRULE = /(阈值|权重|系数|并发|上限|下限|占比|倍数|窗口|迭代次数|超参)/;
-  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调|判定条件|判定标准|达标标准|准入条件|通过条件|过渡条件|硬门槛|一票否决|上线标准|完成的定义/;
+  var RE_PENDING = /待定|待确认|待校准|待补充|待评估|待梳理|暂定|另行(确定|约定)|后续(补充|确认|完善)|视情况|有待|\bTBD\b|\bTODO\b|\bTK\b|\bFIXME\b|placeholder|to be (determined|defined|confirmed|decided|finalized)|pending (confirmation|approval|decision|review)|not finalized/i;
+  var RE_PATCH   = /修正说明|原稿.{0,6}(修正|有误|错误)|原文.{0,12}应为|勘误|错字|笔误|与原文不一致|本版(修正|更正)|correction note|errata|\btypo\b|should (read|have read)|corrected in (this|the latest)|previously (stated|written|listed)|fixed in v\d/i;
+  var RE_GAP     = /待定|不可得|数据缺失|暂无|未接入|空白|无法获取|尚未(打通|接入|采购|授权)|\bN\/A\b|not available|unavailable|missing data|\bno data\b|not yet (integrated|connected|procured|licensed|available)|\bTBD\b|to be (determined|confirmed|sourced)|placeholder/i;
+  var RE_DOWN    = /公式|计算|指标|权重|得分|评分|阈值|图表|绘制|输出表|归一化|回归|聚类|formula|calculat|metric|weight|score|threshold|chart|plot|normali[sz]|regression|cluster|dashboard/i;
+  var RE_SRC     = /来源|依据|参考|引自|根据.{0,8}(调研|报告|论文|实测|基线)|见附录|出处|实测|基线|经验值|业界(常用|通行)|\bsource\b|according to|benchmark|measured|baseline|see appendix|derived from|based on (our|the) (test|experiment|data)|\[\d+\]/i;
+  var RE_NUMRULE = /(阈值|权重|系数|并发|上限|下限|占比|倍数|窗口|迭代次数|超参|threshold|weight|coefficient|concurrency|\bcap\b|\bfloor\b|ratio|multiplier|window|iterations|hyperparam|p9[59])/i;
+  var RE_ACCEPT  = /验收|正确性校验|回归测试|单元测试|核对口径|验收标准|Definition of Done|如何判定(做对|完成)|交付标准|联调|判定条件|判定标准|达标标准|准入条件|通过条件|过渡条件|硬门槛|一票否决|上线标准|完成的定义|acceptance criteri|definition of done|\bDoD\b|test plan|\bQA\b plan|rollback|sign-?off|success metric|how (we|you)'?ll know|verification step|exit criteri/i;
   var AUTOVERB = "识别|分析|判断|生成|计算|提取|调用|清洗|打标|归类|推荐|预测|对接|校验|评分|追溯|监控|判定|采集|结构化|匹配|推送|重评|预警|验证|诊断|比对|汇总|预填|审核|纠错|重算|归集";
   var RE_ACTOR   = new RegExp(
     "(系统|平台|AI|模型|程序|引擎|后台)[^。；！？\n]{0,14}(自动|智能|实时|持续)[^。；！？\n]{0,8}(" + AUTOVERB + ")" +
-    "|(系统|平台|AI|模型|引擎)\\s*(将|会|可|需|能|负责)?\\s*(" + AUTOVERB + ")");
-  var RE_COND    = /当|若|如果|一旦|触发|输入为|入参|前置条件|依赖于/;
+    "|(系统|平台|AI|模型|引擎)\\s*(将|会|可|需|能|负责)?\\s*(" + AUTOVERB + ")" +
+    "|(the\\s+)?(system|platform|AI|model|engine|pipeline|service)\\s+(will|can|shall|should|automatically)?\\s*(automatically|intelligently|seamlessly|in real[- ]?time)?\\s*(identif|analy[sz]|determin|generat|calculat|extract|invoke|clean|tag|classif|recommend|predict|monitor|validat|ingest|map|detect|summari[sz]|orchestrat|enrich|rank|dedup|pars|sync|surfac|score|flag|route)", "i");
+  var RE_COND    = /当|若|如果|一旦|触发|输入为|入参|前置条件|依赖于|\bif\b|\bwhen\b|\bonce\b|trigger|input is|precondition|depends on|on (failure|error|timeout)|fall ?back|retry/i;
+  var HOLLOW_EN = ["leverage","seamless","holistic","synergy","best-in-class","cutting-edge","state-of-the-art","world-class","end-to-end","empower","unlock the","streamline","turnkey","next-generation","paradigm shift","game-chang","mission-critical","frictionless","supercharge","robust and scalable","drive value","at scale"];
   var HOLLOW = ["赋能","抓手","闭环","打通","深度挖掘","智能分析","全面覆盖","有效提升","显著增强","一体化","全链路","精准画像","高效协同","数字化转型","重塑","助力","夯实","持续优化","先进的大模型","业界领先","降本增效","端到端"];
   var CODE_STOP = {"json":1,"csv":1,"yaml":1,"yml":1,"pdf":1,"html":1,"xml":1,"utf-8":1,"api":1,"url":1,"id":1,"http":1,"https":1,"md":1,"txt":1,"sql":1,"png":1,"jpg":1,"plaintext":1,"bash":1,"shell":1,"python":1,"javascript":1,"n/a":1};
 
@@ -250,7 +252,7 @@ function analyzeDoc(text){
     if (isTableRow(lines[i]) && isSep(lines[i+1] || "")){
       var head = cells(lines[i]);
       var ci = -1;
-      for (var h = 0; h < head.length; h++){ if (/确认|待定|是否需|需业务|需确定/.test(head[h])) ci = h; }
+      for (var h = 0; h < head.length; h++){ if (/确认|待定|是否需|需业务|需确定|needs?\s*(confirm|sign-?off|decision|approval)|to\s*confirm|confirmed\??|decided\??|pending\??/i.test(head[h])) ci = h; }
       var start = i, j = i + 2, rows = 0, yes = 0, firstYes = -1;
       while (j < lines.length && isTableRow(lines[j])){
         var c = cells(lines[j]); rows++;
@@ -258,7 +260,7 @@ function analyzeDoc(text){
         j++;
       }
       if (ci >= 0 && yes > 0){
-        add({ rule:"未决伪装", sev:"hi", line:start + 1,
+        add({ k:"tableSelfDeclared", p:{rows:rows, yes:yes}, rule:"未决伪装", sev:"hi", line:start + 1,
           title:"这张表 " + rows + " 行参数，" + yes + " 行自己标着「需确认」",
           ex: excerpt(lines[firstYes]),
           why:"同一张表在说两件相反的事：左边给了精确默认值，右边承认这个值没人定过。读的人只会记住左边。",
@@ -281,17 +283,20 @@ function analyzeDoc(text){
     if (!c2.length) continue;
     var ent = c2[0].replace(/[【】\[\]（）()*`·]/g, "").trim();
     ent = ent.replace(/(数据源|数据|来源|清单|列表|模块|指标|接口|口径)$/, "");
-    if (ent.length < 2 || ent.length > 10 || /^\d/.test(ent)) continue;
-    if (gapSeen[ent]) continue;
-    gapSeen[ent] = 1;
+    ent = ent.replace(/\s+(data|source|feed|dataset|table|module|metric|endpoint|db|database|service)$/i, "").trim();
+    if (ent.length < 2 || ent.length > 24 || /^\d/.test(ent)) continue;
+    if (/^[\u4e00-\u9fa5]/.test(ent) && ent.length > 10) continue;
+    var entKey = ent.toLowerCase();
+    if (gapSeen[entKey]) continue;
+    gapSeen[entKey] = 1;
     var hits = [];
     for (var k = 0; k < lines.length; k++){
       if (k === i) continue;
-      if (lines[k].indexOf(ent) >= 0 && RE_DOWN.test(lines[k])) hits.push(k + 1);
+      if (lines[k].toLowerCase().indexOf(entKey) >= 0 && RE_DOWN.test(lines[k])) hits.push(k + 1);
       if (hits.length > 60) break;
     }
     if (hits.length >= 2){
-      add({ rule:"悬空依赖", sev:"hi", line:i + 1,
+      add({ k:"danglingInput", p:{ent:ent, n:hits.length, head:hits.slice(0,6)}, rule:"悬空依赖", sev:"hi", line:i + 1,
         title:"「" + ent + "」这一环还是空的，下游已经有 " + hits.length + " 处在用它算",
         ex: excerpt(lines[i]),
         why:"第一环没落地，后面的公式、指标、图表却全写完了。这是最典型的因果链折叠：假装输入已经存在，中间状态就都能一气呵成写出来。",
@@ -314,7 +319,7 @@ function analyzeDoc(text){
     if (hasNum >= 2) ghost.push(i);
   }
   if (ghost.length){
-    add({ rule:"缺失却照算", sev:"hi", line:ghost[0] + 1,
+    add({ k:"missingButComputed", p:{n:ghost.length}, rule:"缺失却照算", sev:"hi", line:ghost[0] + 1,
       title:"有 " + ghost.length + " 行一边标着「数据缺失」，一边照样算出了结果",
       ex: sampleLines(ghost, 3),
       why:"这是整类问题里最要命的一种：缺失被如实标注了，但它没有阻断计算。缺失声明和结果数字并排躺在同一行里，而读报告的人只会看到那个数字。",
@@ -329,7 +334,7 @@ function analyzeDoc(text){
   var pend = [];
   for (i = 0; i < lines.length; i++){ if (RE_PENDING.test(lines[i]) && lines[i].trim().length > 4) pend.push(i); }
   if (pend.length){
-    add({ rule:"未决伪装", sev:"md", line:pend[0] + 1,
+    add({ k:"pendingScattered", p:{n:pend.length}, rule:"未决伪装", sev:"md", line:pend[0] + 1,
       title:"全文 " + pend.length + " 处「待定 / 待校准 / 暂定 / TBD」",
       ex: sampleLines(pend, 4),
       why:"未决项本身不是问题。问题是它们和已决内容用同一种字号、同一张表、同一个章节号排在一起，读的人分不出哪些是规格、哪些是愿望。",
@@ -344,7 +349,7 @@ function analyzeDoc(text){
   var patch = [];
   for (i = 0; i < lines.length; i++){ if (RE_PATCH.test(lines[i])) patch.push(i); }
   if (patch.length){
-    add({ rule:"补丁痕迹", sev:"md", line:patch[0] + 1,
+    add({ k:"patchMarks", p:{n:patch.length}, rule:"补丁痕迹", sev:"md", line:patch[0] + 1,
       title:"有 " + patch.length + " 处「修正说明 / 原文应为」式的补丁",
       ex: sampleLines(patch, 3),
       why:"需要成段打补丁，说明上一版是一次性整体生成、没人逐句校验就发出去了。补丁盖住的是被发现的那些，没被发现的还在原地。",
@@ -370,7 +375,7 @@ function analyzeDoc(text){
     while ((mu = ru.exec(lines[i])) !== null){ var u = mu[0]; if (!toks[u]){ toks[u] = i + 1; order.push(u); } }
   }
   if (order.length){
-    add({ rule:"未验证具体物", sev:"hi", line:toks[order[0]],
+    add({ k:"unverifiedArtifacts", p:{n:order.length}, rule:"未验证具体物", sev:"hi", line:toks[order[0]],
       title:"出现 " + order.length + " 个具体的包名 / 工具 / 接口地址，没有一个标注验证过",
       ex: order.slice(0, 10).map(function(t){ return "L" + toks[t] + "  " + t; }).join("\n"),
       why:"模型最擅长编的就是这类名字：仓库名、CLI 名、endpoint、带路径的 URL。它们看上去是文档里最硬的部分，实际是幻觉率最高的部分。",
@@ -391,7 +396,7 @@ function analyzeDoc(text){
     nums.push(i);
   }
   if (nums.length){
-    add({ rule:"无源数字", sev:"md", line:nums[0] + 1,
+    add({ k:"unsourcedNumbers", p:{n:nums.length}, rule:"无源数字", sev:"md", line:nums[0] + 1,
       title:nums.length + " 处阈值 / 权重 / 系数，附近找不到任何出处",
       ex: sampleLines(nums, 4),
       why:"精确的数字会制造「有人算过」的错觉。没写来源的阈值和权重，多半是生成时为了让段落显得完整填上去的占位值。",
@@ -407,11 +412,11 @@ function analyzeDoc(text){
   for (i = 0; i < lines.length; i++){
     if (!/\d{1,3}(\.\d+)?\s*%/.test(lines[i])) continue;
     if (near(i, RE_SRC, 3)) continue;
-    if (!/[\u4e00-\u9fa5]{4,}/.test(lines[i])) continue;
+    if (!/[\u4e00-\u9fa5]{4,}/.test(lines[i]) && !/[A-Za-z]{3,}(?:[^A-Za-z]+[A-Za-z]{2,}){2,}/.test(lines[i])) continue;
     pcts.push(i);
   }
   if (pcts.length){
-    add({ rule:"无源比例", sev:"md", line:pcts[0] + 1,
+    add({ k:"unsourcedPercent", p:{n:pcts.length}, rule:"无源比例", sev:"md", line:pcts[0] + 1,
       title:"有 " + pcts.length + " 处百分比结论，没写是怎么算出来的",
       ex: sampleLines(pcts, 4),
       why:"百分比是整份文档里最容易被单独摘出去引用的东西。它会被抄进汇报材料、写进 PPT 标题，而抄的人不会回头确认口径。",
@@ -427,7 +432,7 @@ function analyzeDoc(text){
   var disc = [];
   for (i = 0; i < lines.length; i++){ if (RE_DISCLOSE.test(lines[i])) disc.push(i); }
   if (disc.length){
-    add({ rule:"AI 痕迹", sev:"ai", line:disc[0] + 1,
+    add({ k:"aiDisclosed", p:{n:disc.length}, rule:"AI 痕迹", sev:"ai", line:disc[0] + 1,
       title:"文档自己声明了是 AI 生成的",
       ex: sampleLines(disc, 3),
       why:"这是最确凿的一种标记——不用猜，文档自己写了。很多人贴这段只是走合规流程，但它同时也在说：这份内容没有逐句经过人手。",
@@ -446,7 +451,7 @@ function analyzeDoc(text){
     condPromise.push(i);
   }
   if (condPromise.length){
-    add({ rule:"条件化承诺", sev:"hi", line:condPromise[0] + 1,
+    add({ k:"conditionalPromise", p:{n:condPromise.length}, rule:"条件化承诺", sev:"hi", line:condPromise[0] + 1,
       title:"有 " + condPromise.length + " 处一边写着「全自动 / 100%」，一边承认前提还没达成",
       ex: sampleLines(condPromise, 4),
       why:"「100% 自动，前提是数据源可接入」这种写法，把一个还没发生的条件和一个已经下的结论并排放在一起。读的人记住的是「100% 自动」，记不住后半句。",
@@ -460,7 +465,15 @@ function analyzeDoc(text){
   // ============ R6e 权重和校验 ============
   var wNums = [], wAt = [];
   for (i = 0; i < lines.length; i++){
-    var mw, rw = /(\d{1,3}(?:\.\d+)?)\s*%\s*(?:权重|占比)|(?:权重|占比)[^0-9\n]{0,8}(\d{1,3}(?:\.\d+)?)\s*%/g;
+    var allPct = lines[i].match(/\d{1,3}(?:\.\d+)?\s*%/g) || [];
+    if (/权重|占比|weight(?:ing)?s?\b/i.test(lines[i]) && allPct.length >= 3){
+      allPct.forEach(function(x){
+        var v0 = parseFloat(x);
+        if (!isNaN(v0)){ wNums.push(v0); wAt.push(i); }
+      });
+      continue;
+    }
+    var mw, rw = /(\d{1,3}(?:\.\d+)?)\s*%\s*(?:权重|占比|weight(?:ing)?)|(?:权重|占比|weight(?:ing)?)[^0-9\n]{0,10}(\d{1,3}(?:\.\d+)?)\s*%/gi;
     while ((mw = rw.exec(lines[i])) !== null){
       var v = parseFloat(mw[1] !== undefined ? mw[1] : mw[2]);
       if (!isNaN(v)){ wNums.push(v); wAt.push(i); }
@@ -469,7 +482,7 @@ function analyzeDoc(text){
   if (wNums.length >= 3){
     var sum = wNums.reduce(function(a, b){ return a + b; }, 0);
     if (Math.abs(sum - 100) > 0.5 && sum > 20 && sum < 300){
-      add({ rule:"权重不配平", sev:"hi", line:wAt[0] + 1,
+      add({ k:"weightsOff", p:{n:wNums.length, sum:(Math.round(sum*10)/10)}, rule:"权重不配平", sev:"hi", line:wAt[0] + 1,
         title:"声明为权重的百分比共 " + wNums.length + " 个，加起来是 " + (Math.round(sum * 10) / 10) + "%，不是 100%",
         ex: wNums.map(function(v, idx){ return "L" + (wAt[idx] + 1) + "  " + v + "%"; }).join("\n"),
         why:"这是纯算术，不需要懂业务也能判断。权重不配平意味着评分体系要么漏了一项，要么某一项被重复计了。",
@@ -482,13 +495,14 @@ function analyzeDoc(text){
   }
 
   // ============ R6f 自述数量与实际列举不符 ============
-  var CN = { "一":1,"二":2,"两":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,"十":10,"十一":11,"十二":12,"十三":13,"十四":14,"十五":15 };
+  var CN = { "一":1,"二":2,"两":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,"十":10,"十一":11,"十二":12,"十三":13,"十四":14,"十五":15,
+             "one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12 };
   var miscount = [];
   for (i = 0; i < lines.length; i++){
-    var mc, rc = /(\d{1,3}|[一二两三四五六七八九十]{1,3})\s*(项|个|条|类|步|批|大类|方面|维度)\s*[：:]/g;
+    var mc, rc = /(^|[^A-Za-z0-9.])(\d{1,3}|[一二两三四五六七八九十]{1,3}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s*(项|个|条|类|步|批|大类|方面|维度|items?|steps?|types?|categories|dimensions?|modules?|phases?|checks?)\s*[：:]/gi;
     while ((mc = rc.exec(lines[i])) !== null){
-      var raw = mc[1];
-      var declared = /^\d+$/.test(raw) ? parseInt(raw, 10) : CN[raw];
+      var raw = mc[2];
+      var declared = /^\d+$/.test(raw) ? parseInt(raw, 10) : CN[raw.toLowerCase()];
       if (!declared || declared < 2 || declared > 30) continue;
       var tail = lines[i].slice(mc.index + mc[0].length);
       tail = tail.replace(/（[^）]*）/g, "").replace(/\([^)]*\)/g, "");
@@ -496,12 +510,12 @@ function analyzeDoc(text){
       var parts = tail.split(/[、，,]/).map(function(x){ return x.trim(); }).filter(function(x){ return x.length >= 2; });
       if (parts.length < 2) continue;
       if (parts.length !== declared){
-        miscount.push({ ln:i, declared:declared, actual:parts.length, unit:mc[2] });
+        miscount.push({ ln:i, declared:declared, actual:parts.length, unit:mc[3] });
       }
     }
   }
   if (miscount.length){
-    add({ rule:"数量对不上", sev:"hi", line:miscount[0].ln + 1,
+    add({ k:"countMismatch", p:{n:miscount.length, declared:miscount[0].declared, actual:miscount[0].actual, unit:miscount[0].unit}, rule:"数量对不上", sev:"hi", line:miscount[0].ln + 1,
       title:"有 " + miscount.length + " 处「说是 N 个，实际列了 M 个」",
       ex: miscount.slice(0, 4).map(function(x){ return "L" + (x.ln + 1) + "  声称 " + x.declared + " " + x.unit + "，实际列出 " + x.actual + " 个\n      " + excerpt(lines[x.ln], 80); }).join("\n"),
       why:"这是纯算术，不需要懂业务也能判断。自己写的数和自己列的清单对不上，说明这段是分两次生成的，中间没人把两边对一遍。",
@@ -515,13 +529,13 @@ function analyzeDoc(text){
   // ============ R6g 性能 / 工期承诺无依据 ============
   var promises = [];
   for (i = 0; i < lines.length; i++){
-    if (!/(\d+\s*[-~至到]\s*\d+|\d+)\s*(秒|分钟|小时|天|周|个月|月)/.test(lines[i])) continue;
-    if (!/压缩|缩短|提升至|完成|响应|耗时|交付|上线|周期|工期|预计|可在|即可|控制在|不超过/.test(lines[i])) continue;
+    if (!/(\d+\s*[-~至到]\s*\d+|\d+)\s*(秒|分钟|小时|天|周|个月|月|seconds?|secs?|minutes?|mins?|hours?|days?|weeks?|months?|quarters?)/i.test(lines[i])) continue;
+    if (!/压缩|缩短|提升至|完成|响应|耗时|交付|上线|周期|工期|预计|可在|即可|控制在|不超过|compress|reduce|complete|deliver|launch|ship|rollout|within|timeline|\bETA\b|estimate|takes?\b|turnaround/i.test(lines[i])) continue;
     if (near(i, RE_SRC, 3)) continue;
     promises.push(i);
   }
   if (promises.length){
-    add({ rule:"无依据的工期", sev:"md", line:promises[0] + 1,
+    add({ k:"ungroundedTimeline", p:{n:promises.length}, rule:"无依据的工期", sev:"md", line:promises[0] + 1,
       title:"有 " + promises.length + " 处时间承诺，没写是怎么估出来的",
       ex: sampleLines(promises, 4),
       why:"时间数字是文档里最容易被当真的东西。它会被直接抄进排期表，而估它的人往往没有做过这件事。",
@@ -533,6 +547,7 @@ function analyzeDoc(text){
   }
 
   // ============ R6h 吹捧与夸张残留 ============
+  var HYPE_EN = ["extremely elegant","brilliant idea","absolutely","blazing fast","super fast","incredibly","revolutionary","game-changing","stunning","gorgeous","beautiful solution","world class","insanely","magical","effortlessly"];
   var HYPE = ["极其精妙","极为精妙","非常精妙","极致","炫酷","超级","完美","震撼","惊艳","无与伦比","革命性","颠覆性","史诗级","壮观","极度","绝佳","卓越","顶级","一流","极大提升","精准投递","深度赋能","强力","完胜","碾压"];
   var hype = [], hypeN = 0;
   for (i = 0; i < lines.length; i++){
@@ -541,11 +556,16 @@ function analyzeDoc(text){
       var at2 = -1;
       while ((at2 = lines[i].indexOf(HYPE[hw], at2 + 1)) >= 0) hn++;
     }
+    var lowY = lines[i].toLowerCase();
+    for (var hwe = 0; hwe < HYPE_EN.length; hwe++){
+      var a3 = -1;
+      while ((a3 = lowY.indexOf(HYPE_EN[hwe], a3 + 1)) >= 0) hn++;
+    }
     if (/您的.{0,10}(反馈|想法|思路|建议).{0,8}(精妙|正确|到位|清晰|棒)|说得(非常)?对|完全正确/.test(lines[i])) hn++;
     if (hn > 0){ hypeN += hn; if (hype.length < 30) hype.push(i); }
   }
   if (hypeN >= 3){
-    add({ rule:"吹捧残留", sev:"lo", line:hype[0] + 1,
+    add({ k:"hypeLeftovers", p:{n:hypeN}, rule:"吹捧残留", sev:"lo", line:hype[0] + 1,
       title:"出现 " + hypeN + " 处「极致 / 炫酷 / 极其精妙」一类夸张措辞",
       ex: sampleLines(hype, 4),
       why:"技术文档里出现这种措辞，通常不是作者在夸自己，而是模型在对着作者说话——这些句子本来是对话里的恭维，被原样留在了文档里。",
@@ -565,7 +585,7 @@ function analyzeDoc(text){
     auto.push(i);
   }
   if (auto.length >= 3){
-    add({ rule:"空心自动化", sev:"md", line:auto[0] + 1,
+    add({ k:"hollowAutomation", p:{n:auto.length}, rule:"空心自动化", sev:"md", line:auto[0] + 1,
       title:auto.length + " 处「系统自动 / AI 智能地」做某事，没写触发条件和输入输出",
       ex: sampleLines(auto, 4),
       why:"「利用大模型进行智能分析」这类句子，是因果链被折叠的接缝——所有不知道怎么实现的环节，都能用它一句带过。",
@@ -585,10 +605,15 @@ function analyzeDoc(text){
       var at = -1;
       while ((at = lines[i].indexOf(HOLLOW[w], at + 1)) >= 0) lineHits++;
     }
+    var lowH = lines[i].toLowerCase();
+    for (var we = 0; we < HOLLOW_EN.length; we++){
+      var ae = -1;
+      while ((ae = lowH.indexOf(HOLLOW_EN[we], ae + 1)) >= 0) lineHits++;
+    }
     if (lineHits > 0){ hollowCount += lineHits; if (hollowHits.length < 30) hollowHits.push(i); }
   }
   if (hollowCount >= 5){
-    add({ rule:"空心词", sev:"lo", line:hollowHits[0] + 1,
+    add({ k:"hollowWords", p:{n:hollowCount}, rule:"空心词", sev:"lo", line:hollowHits[0] + 1,
       title:"出现 " + hollowCount + " 处「赋能 / 闭环 / 深度挖掘」一类空心词",
       ex: sampleLines(hollowHits, 4),
       why:"这类词删掉之后句子信息量不变。密度高通常意味着文档在用体量冒充深度。",
@@ -603,7 +628,7 @@ function analyzeDoc(text){
   var acc = 0;
   for (i = 0; i < lines.length; i++){ if (RE_ACCEPT.test(lines[i])) acc++; }
   if (acc === 0 && lines.length > 60){
-    add({ rule:"无验收", sev:"hi", line:1,
+    add({ k:"noAcceptance", p:{}, rule:"无验收", sev:"hi", line:1,
       title:"全文没有一处说明「怎么判断做对了」",
       ex:"（全文未检索到：验收 / 验收标准 / 正确性校验 / 回归 / 核对口径 / 联调）",
       why:"没有验收标准的方案，交付方无法证明自己做完了，提出方也不必为结果负责。",
@@ -695,7 +720,7 @@ function analyzeDoc(text){
     if (uniq.length >= 2) clash.push({ name:nm, items:uniq });
   });
   if (clash.length){
-    add({ rule:"口径冲突", sev:"hi", line:clash[0].items[0].line,
+    add({ k:"clashSameName", p:{n:clash.length}, rule:"口径冲突", sev:"hi", line:clash[0].items[0].line,
       title:"有 " + clash.length + " 个同名参数，在不同地方给了不一样的值",
       ex: clash.slice(0, 6).map(function(c){
         return c.name + "：" + c.items.map(function(d){ return d.raw + "（L" + d.line + "）"; }).join("　vs　");
@@ -765,7 +790,7 @@ function analyzeDoc(text){
     if (groups.length >= 2) symClash.push({ sym:sy, groups:groups });
   });
   if (symClash.length){
-    add({ rule:"口径冲突", sev:"md", line:symClash[0].groups[0][0].line,
+    add({ k:"clashSymbol", p:{n:symClash.length}, rule:"口径冲突", sev:"md", line:symClash[0].groups[0][0].line,
       title:"有 " + symClash.length + " 个符号在不同章节被定义成了不同的量",
       ex: symClash.slice(0, 5).map(function(c){
         return c.sym + "：" + c.groups.slice(0, 4).map(function(g){ return g[0].desc + "（L" + g[0].line + "）"; }).join("　vs　");
@@ -795,7 +820,7 @@ function analyzeDoc(text){
     }
   }
   if (wsum.length){
-    add({ rule:"口径冲突", sev:"hi", line:wsum[0].line,
+    add({ k:"clashWeightSum", p:{n:wsum.length}, rule:"口径冲突", sev:"hi", line:wsum[0].line,
       title:"有 " + wsum.length + " 组权重加起来不等于 1（或 100%）",
       ex: wsum.slice(0, 5).map(function(w){
         return "L" + w.line + "  " + w.n + " 项" + w.kind + "权重，合计 " + (w.kind === "%" ? w.sum.toFixed(1) + "%" : w.sum.toFixed(4));
@@ -831,7 +856,7 @@ function analyzeDoc(text){
     });
   });
   if (unitClash.length){
-    add({ rule:"口径冲突", sev:"md", line:unitClash[0].at[unitClash[0].vals[0]],
+    add({ k:"clashUnit", p:{n:unitClash.length, kind:unitClash[0].kind}, rule:"口径冲突", sev:"md", line:unitClash[0].at[unitClash[0].vals[0]],
       title:"有 " + unitClash.length + " 个指标，在不同地方用了不同的" + unitClash[0].kind,
       ex: unitClash.slice(0, 6).map(function(u){
         return u.name + "（" + u.kind + "）：" + u.vals.map(function(v){ return v + "（L" + u.at[v] + "）"; }).join("　vs　");
@@ -894,7 +919,7 @@ function analyzeDoc(text){
   }
 
   if (repeated.length >= 3){
-    add({ rule:"AI 痕迹", sev:"ai", line:normFirst[repeated[0]] + 1,
+    add({ k:"aiTemplate", p:{n:repeated.length}, rule:"AI 痕迹", sev:"ai", line:normFirst[repeated[0]] + 1,
       title:"有 " + repeated.length + " 个章节标题在全文重复出现 4 次以上，是模板套出来的",
       ex: repeated.slice(0, 8).map(function(n){ return "×" + normCount[n] + "  " + n; }).join("\n"),
       why:"每一章都严格套同一套子章节骨架，包括本来没内容可写的那几节。手写几乎不会这么齐整——这是「填模板」留下的痕迹。",
@@ -905,7 +930,7 @@ function analyzeDoc(text){
       refs: repeated.slice(0, 10).map(function(n){ return normFirst[n] + 1; }) });
   }
   if (aiSections.length >= 1){
-    add({ rule:"AI 痕迹", sev:"ai", line:aiSections[0].ln + 1,
+    add({ k:"aiProse", p:{n:aiSections.length}, rule:"AI 痕迹", sev:"ai", line:aiSections[0].ln + 1,
       title:"有 " + aiSections.length + " 节的行文带明显的一次性生成特征",
       ex: aiSections.slice(0, 8).map(function(x){ return "L" + (x.ln + 1) + "  " + excerpt(x.title, 40) + "  （" + x.hit + "/" + x.n + " 行命中）"; }).join("\n"),
       why:"套话连接词、中英括注、粗体冒号列表、①②③ 这些特征集中出现。单个不说明什么，密集出现通常意味着这一段是模型一口气写出来、没人逐句过。",
