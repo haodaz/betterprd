@@ -56,7 +56,7 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
 .stat{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
 .stat.hi{border-top-color:var(--hi)}
 .stat b{display:block;font-size:26px;line-height:1.2;font-variant-numeric:tabular-nums}
-.stat span{font-size:12.5px;color:var(--muted)}
+.stat span{display:block;font-size:12.5px;color:var(--muted);text-wrap:balance}
 .verdict{margin-top:14px;background:var(--card);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--hi)}
 .verdict.clean{border-left-color:var(--ok)}
 .verdict b{display:block;margin-bottom:4px}
@@ -80,6 +80,27 @@ button{font-family:inherit;font-size:14px;cursor:pointer}
 .langsw button{border:none;background:transparent;color:var(--muted);padding:5px 12px;font-size:12.5px;font-family:inherit;cursor:pointer}
 .langsw button.on{background:var(--brand);color:var(--brand-on)}
 .hidden{display:none!important}
+/* ---- 手机 ---- */
+@media (max-width:640px){
+  .bar .wrap{min-height:52px;padding-block:6px;gap:8px}
+  .brand .sub{display:none}
+  .acts .btn.ghost:not(#btn-reset){display:none}
+  .btn{padding:7px 13px;font-size:13.5px}
+  .intake{padding-block:18px}
+  h1{font-size:21px}
+  .lede{font-size:14px}
+  .drop{padding:18px 14px}
+  .f{padding:8px 11px;font-size:12.5px}
+  .summary{grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .stat b{font-size:22px}
+  .stat span{font-size:11.5px}
+  .cc{padding:13px 14px}
+  .cc h3{font-size:15px}
+  .v{grid-template-columns:1fr;gap:4px;padding:8px 10px}
+  .v b{justify-self:start}
+  .blk{font-size:13px}
+  .note-block ul{padding-left:18px;font-size:13.5px}
+}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
@@ -246,6 +267,8 @@ function crossCheck(docs){
 var $ = function(s){ return document.querySelector(s); };
 var state = { docs: [], conflicts: [], lang:"zh" };
 (function(){
+  var q = (location.search.match(/[?&]lang=(zh|en)/) || [])[1];
+  if (q){ try { localStorage.setItem("bp_lang", q); } catch (e) {} }
   var saved = null;
   try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
   if (saved === "en" || saved === "zh") state.lang = saved;

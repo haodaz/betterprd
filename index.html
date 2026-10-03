@@ -133,7 +133,7 @@ svg{display:block;width:100%;height:auto}
 .stat{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
 .stat.hi{border-top-color:var(--hi)} .stat.md{border-top-color:var(--md)} .stat.ai{border-top-color:var(--ai)}
 .stat b{display:block;font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums}
-.stat span{font-size:13px;color:var(--muted)}
+.stat span{display:block;font-size:13px;color:var(--muted);text-wrap:balance}
 
 /* 两模式 */
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
@@ -158,6 +158,45 @@ svg{display:block;width:100%;height:auto}
 .end .cta{justify-content:center;margin-top:28px}
 footer{border-top:1px solid var(--line);padding-block:26px;font-size:13px;color:var(--muted)}
 footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+/* ---- 手机 ---- */
+@media (max-width:640px){
+  .bar .wrap{min-height:52px;padding-block:6px;gap:8px}
+  .brand .sub{display:none}
+  .acts .btn.ghost{display:none}
+  .btn{padding:7px 13px;font-size:13.5px}
+  .manifesto{font-size:clamp(28px,8.6vw,34px);line-height:1.12}
+  .manifesto em{padding-inline:2px}
+  .thesis{font-size:18px;max-width:none}
+  .thesis br{display:none}
+  .hero{padding-block:30px 28px}
+  .hero .lede{font-size:15.5px}
+  .lede{font-size:15.5px}
+  .cta{gap:10px}
+  .cta .btn.lg{padding:11px 18px;font-size:15px}
+  section{padding-block:44px}
+  h2{font-size:23px}
+  .punch{font-size:16.5px}
+  .asym .num{font-size:38px}
+  figure{margin-top:22px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  figure svg{min-width:720px}
+  figcaption{text-align:left;font-size:12.5px}
+  figcaption::before{content:"← 左右滑动看全图　";color:var(--muted)}
+  html[lang="en"] figcaption::before{content:"← swipe to see the whole chain　"}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:14px}
+  .stat b{font-size:24px}
+  .stat span{font-size:12px}
+  .vs > div{padding:18px}
+  .vs .quote{font-size:12.5px}
+  .mode{padding:18px}
+  .mode h3{font-size:17px}
+  .demo-body{padding:12px}
+  .cc{padding:12px 13px}
+  .cc h3{font-size:14px}
+  .cols ul{font-size:14.5px}
+  .end h2{font-size:22px}
+  footer .wrap{flex-direction:column;gap:6px}
+}
 </style></head><body>
 
 <div class="bar"><div class="wrap">
@@ -202,7 +241,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 </div><div class="l-en">
   <div>
     <h1 class="manifesto"><span>No AI judging AI</span><span>No hallucinated bulk</span><span><em>No filler docs</em></span></h1>
-    <p class="thesis">The danger isn't being wrong.<br>It's typesetting <span class="keep">what isn't decided</span> as <span class="keep">what is</span>.</p>
+    <p class="thesis">The danger isn't being wrong. <br>It's typesetting <span class="keep">what isn't decided</span> as <span class="keep">what is</span>.</p>
     <p class="lede">The most dangerous part of a spec is usually the part that looks most like a spec. A parameter table gives a precise default on the left and admits in small type on the right that nobody has signed off. A data-source list says "TBD" on row one, and eleven chapters of formulas downstream compute perfectly anyway. Readers see the formulas, and the whole chain gets built on an input that doesn't exist.</p>
     <div class="cta">
       <a class="btn primary lg" href="prd-check.html">Paste a document</a>
@@ -673,6 +712,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 </div></footer>
 <script>
 (function(){
+  var q = (location.search.match(/[?&]lang=(zh|en)/) || [])[1];
+  if (q){ try { localStorage.setItem("bp_lang", q); } catch (e) {} }
   var saved = null;
   try { saved = localStorage.getItem("bp_lang"); } catch (e) {}
   var lang = (saved === "en" || saved === "zh") ? saved
