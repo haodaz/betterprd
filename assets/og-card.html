@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+body{background:#2F5AE8;color:#fff;font-family:"PingFang SC","Hiragino Sans GB","Helvetica Neue",Helvetica,Arial,"Noto Sans SC",sans-serif;-webkit-font-smoothing:antialiased;position:relative}
+.bg{position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 85% 110%, rgba(255,255,255,.14), transparent 60%),
+  radial-gradient(600px 400px at -5% -10%, rgba(0,0,0,.18), transparent 60%)}
+.wrap{position:absolute;inset:0;padding:70px 84px;display:flex;flex-direction:column;justify-content:space-between}
+.tag{font-size:22px;letter-spacing:.14em;text-transform:uppercase;opacity:.82;font-weight:500}
+h1{margin:0;font-weight:700;line-height:1.08;letter-spacing:-.012em;display:flex;flex-direction:column;gap:6px}
+h1 span{display:block}
+h1 em{font-style:normal;background:rgba(255,255,255,.22);padding:0 14px;border-radius:14px;display:inline-block}
+.foot{display:flex;justify-content:space-between;align-items:flex-end;font-size:24px;opacity:.9}
+.foot b{font-weight:600;font-size:28px;opacity:1}
+.foot span{opacity:.85}
+html[lang="en"] h1{font-size:92px}
+html[lang="zh"] h1{font-size:98px;letter-spacing:.02em}
+.l-zh,.l-en{display:contents}
+html[lang="en"] .l-zh{display:none} html[lang="zh"] .l-en{display:none}
+</style></head><body><div class="bg"></div>
+<div class="wrap">
+  <div class="tag"><span class="l-en">betterprd.com · a linter for AI-written specs</span><span class="l-zh">betterprd.com · 文档体检台</span></div>
+  <h1>
+    <span class="l-en"><span>No AI judging AI</span></span><span class="l-zh"><span>不以 AI 验 AI</span></span>
+    <span class="l-en"><span>No hallucinated bulk</span></span><span class="l-zh"><span>拒绝幻觉膨胀</span></span>
+    <span class="l-en"><span><em>No filler docs</em></span></span><span class="l-zh"><span><em>拒绝废话文档</em></span></span>
+  </h1>
+  <div class="foot">
+    <b><span class="l-en">Regex only. Runs in your browser.</span><span class="l-zh">纯正则，浏览器里跑。</span></b>
+    <span><span class="l-en">Nothing uploaded · no model called</span><span class="l-zh">不上传 · 不调模型</span></span>
+  </div>
+</div>
+<script>document.documentElement.lang=(location.search.match(/lang=(zh|en)/)||[,"en"])[1];</script>
+</body></html>
