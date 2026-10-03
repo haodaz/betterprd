@@ -72,6 +72,15 @@ html:not([lang="en"]) .l-en{display:none}
 .langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-right:4px}
 .langsw button{border:none;background:transparent;color:var(--muted);padding:5px 12px;font-size:12.5px;font-family:inherit;cursor:pointer}
 .langsw button.on{background:var(--brand);color:var(--brand-on)}
+.acts-row{border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 55%,var(--bg))}
+.acts-row .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-block:14px}
+.act{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px 15px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s}
+.act:hover{border-color:var(--brand);transform:translateY(-1px)}
+.act svg{width:26px;height:26px;fill:none;stroke:var(--brand);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.act b{font-size:15px;font-weight:600;line-height:1.3}
+.act small{font-size:12.5px;color:var(--muted);line-height:1.4;text-wrap:balance}
+.m-short{display:none}
+.btn .short{display:none}
 .manifesto{display:flex;flex-direction:column;gap:3px;font-size:clamp(33px,5.4vw,58px);line-height:1.1;letter-spacing:.005em}
 .manifesto em{font-style:normal;background:linear-gradient(transparent 58%,var(--brand-tint) 58%);padding-inline:4px}
 .thesis{margin-top:24px;font-size:clamp(18px,2.1vw,23px);font-weight:600;line-height:1.5;color:var(--brand-ink)}
@@ -160,10 +169,25 @@ footer{border-top:1px solid var(--line);padding-block:26px;font-size:13px;color:
 footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 /* ---- 手机 ---- */
 @media (max-width:640px){
-  .bar .wrap{min-height:52px;padding-block:6px;gap:8px}
+  .bar .wrap{min-height:50px;padding-block:5px;gap:8px;flex-wrap:nowrap}
+  .brand{font-size:14px;min-width:0;flex:0 1 auto}
+  .brand > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .brand .sub{display:none}
+  .bar .acts{flex-wrap:nowrap;gap:6px;flex-shrink:0}
+  .btn .full{display:none} .btn .short{display:inline}
   .acts .btn.ghost{display:none}
-  .btn{padding:7px 13px;font-size:13.5px}
+  .langsw button{padding:4px 9px;font-size:12px}
+  .btn{padding:7px 10px;font-size:13px}
+  .acts-row .wrap{gap:8px;padding-block:10px}
+  .act{padding:10px 8px;gap:5px;align-items:center;text-align:center}
+  .act svg{width:22px;height:22px}
+  .act b{font-size:12.5px}
+  .act small{display:none}
+  .m-short{display:block} .m-long{display:none}
+  .hero .lede{margin-top:12px}
+  .cta{margin-top:20px;flex-wrap:nowrap}
+  .cta .btn.lg{flex:1;text-align:center;padding:11px 8px;font-size:14px;white-space:nowrap}
+  .demo .cc.ai{display:none}
   .manifesto{font-size:clamp(28px,8.6vw,34px);line-height:1.12}
   .manifesto em{padding-inline:2px}
   .thesis{font-size:18px;max-width:none}
@@ -206,16 +230,35 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
   </div>
   <div class="acts">
     <div class="langsw" id="langsw"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
-    <span class="l-zh"><a class="btn ghost" href="linter-for-ai-specs.html">文章</a><a class="btn ghost" href="cross-check.html">一套文档对照</a><a class="btn primary" href="prd-check.html">打开体检台</a></span>
-    <span class="l-en"><a class="btn ghost" href="linter-for-ai-specs.html">Write-up</a><a class="btn ghost" href="cross-check.html">Compare a doc set</a><a class="btn primary" href="prd-check.html">Open the checker</a></span>
+    <span class="l-zh"><a class="btn ghost" href="linter-for-ai-specs.html">文章</a><a class="btn ghost" href="cross-check.html">一套文档对照</a><a class="btn primary" href="prd-check.html"><span class="full">打开体检台</span><span class="short">体检</span></a></span>
+    <span class="l-en"><a class="btn ghost" href="linter-for-ai-specs.html">Write-up</a><a class="btn ghost" href="cross-check.html">Compare a doc set</a><a class="btn primary" href="prd-check.html"><span class="full">Open the checker</span><span class="short">Try it</span></a></span>
   </div>
 </div></div>
+
+<nav class="acts-row"><div class="wrap">
+  <a class="act" href="prd-check.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M9.5 14.5l2 2 3.5-4"/></svg>
+    <b><span class="l-zh">打开体检台</span><span class="l-en">Open the checker</span></b>
+    <small><span class="l-zh">粘一份文档，十秒出问题清单</span><span class="l-en">Paste a doc, get the questions</span></small>
+  </a>
+  <a class="act" href="cross-check.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v16H4z"/><path d="M13 4h7v16h-7z"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2"/><path d="M11 12h2"/></svg>
+    <b><span class="l-zh">一套文档对照</span><span class="l-en">Compare a doc set</span></b>
+    <small><span class="l-zh">同一个名目，两份文档两个数</span><span class="l-en">Same name, different numbers</span></small>
+  </a>
+  <a class="act" href="https://github.com/haodaz/betterprd">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-4 5 4 5"/><path d="M16 7l4 5-4 5"/><path d="M13.5 5l-3 14"/></svg>
+    <b><span class="l-zh">GitHub 源码</span><span class="l-en">Source on GitHub</span></b>
+    <small><span class="l-zh">一个 HTML 文件，自己搜 fetch</span><span class="l-en">One HTML file. Search it for fetch.</span></small>
+  </a>
+</div></nav>
 
 <section class="hero"><div class="wrap hero-grid"><div class="l-zh">
   <div>
     <h1 class="manifesto"><span>不以 AI 验 AI</span><span>拒绝幻觉膨胀</span><span><em>拒绝废话文档</em></span></h1>
     <p class="thesis">危险的不是写错了，<br>是把<span class="keep">没定的事</span>，写成了<span class="keep">定了的事</span>。</p>
-    <p class="lede">一份方案里最要命的地方，往往长得最像规格：参数表左边给出精确默认值，右边小字写着「需业务确认」；数据源第一行标着「待定」，后面十一章的公式照样算得天衣无缝。读的人只看见公式，于是整条链路在一个不存在的输入上开工。</p>
+    <p class="lede m-short">参数表左边是精确默认值，右边小字写着「需确认」——读的人只记得左边。</p>
+    <p class="lede m-long">一份方案里最要命的地方，往往长得最像规格：参数表左边给出精确默认值，右边小字写着「需业务确认」；数据源第一行标着「待定」，后面十一章的公式照样算得天衣无缝。读的人只看见公式，于是整条链路在一个不存在的输入上开工。</p>
     <div class="cta">
       <a class="btn primary lg" href="prd-check.html">粘一份文档试试</a>
       <a class="btn lg" href="#limits">它查不了什么</a>
@@ -242,7 +285,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
   <div>
     <h1 class="manifesto"><span>No AI judging AI</span><span>No hallucinated bulk</span><span><em>No filler docs</em></span></h1>
     <p class="thesis">The danger isn't being wrong. <br>It's typesetting <span class="keep">what isn't decided</span> as <span class="keep">what is</span>.</p>
-    <p class="lede">The most dangerous part of a spec is usually the part that looks most like a spec. A parameter table gives a precise default on the left and admits in small type on the right that nobody has signed off. A data-source list says "TBD" on row one, and eleven chapters of formulas downstream compute perfectly anyway. Readers see the formulas, and the whole chain gets built on an input that doesn't exist.</p>
+    <p class="lede m-short">A precise default on the left, "needs sign-off" in small type on the right. Readers only remember the left.</p>
+    <p class="lede m-long">The most dangerous part of a spec is usually the part that looks most like a spec. A parameter table gives a precise default on the left and admits in small type on the right that nobody has signed off. A data-source list says "TBD" on row one, and eleven chapters of formulas downstream compute perfectly anyway. Readers see the formulas, and the whole chain gets built on an input that doesn't exist.</p>
     <div class="cta">
       <a class="btn primary lg" href="prd-check.html">Paste a document</a>
       <a class="btn lg" href="#limits">What it can't check</a>
